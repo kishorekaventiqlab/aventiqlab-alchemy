@@ -1,21 +1,21 @@
 # Video Script — "Watching an Expert Diagnose a GPU Saturation Incident"
 
-Artifact: [`art-inference-under-load-video`](../artifacts/art-inference-under-load-video.yaml) · Experience: [`exp-inference-under-load`](../experience.yaml) · Target duration: **8:00** (30fps, 14,400 frames)
+Artifact: [`art-inference-under-load-video`](../artifacts/art-inference-under-load-video.yaml) · Experience: [`exp-inference-under-load`](../experience.yaml) · Duration: **4:07** (30fps, 7,410 frames) — timed to the actual generated voiceover, not a fixed target
 
-This is the finished narration script and shot list — word-for-word narration, timed to the second, with on-screen action notes. It is the source of truth the `video-studio` Remotion composition (`InferenceUnderLoad`) is built from. If you edit the video, edit this file first, then update `video-studio/src/data/inferenceUnderLoadScript.ts` to match.
+This is the finished narration script and shot list — word-for-word narration, timed to the second, with on-screen action notes. It is the source of truth the `video-studio` Remotion composition (`InferenceUnderLoad`) is built from. If you edit the video: edit this file's narration text, regenerate the voiceover with `video-studio/scripts/generate-audio.ps1`, then update the `start`/`duration` values in `video-studio/src/data/inferenceUnderLoadScript.ts` to match each beat's new audio length (see Production notes below for why durations are audio-driven, not hand-picked).
 
 Format per beat: **[start–end] ON SCREEN / NARRATION**
 
 ---
 
-## Beat 1 — Cold open (0:00–0:20)
+## Beat 1 — Cold open (0:00–0:06)
 **ON SCREEN:** Title card. "Watching an Expert Diagnose a GPU Saturation Incident." Sub-line: "A different service. A similar problem. Watch how the investigation actually happens."
 
-**NARRATION:** *(no character speaking yet — title card only, silent per Phase 0 constraint: no synthesized voice track, captions carry the narration)*
+**NARRATION:** *(no voiceover on the title card — it's on screen just long enough to read before Beat 2's narration starts)*
 
 ---
 
-## Beat 2 — Early symptoms (0:20–1:50)
+## Beat 2 — Early symptoms (0:06–0:37)
 **ON SCREEN:** A Grafana-style dashboard mockup for a *different* service — "doc-search-summarizer" — showing three stacked panels: p50/p99 latency (p99 climbing), GPU utilization (rising toward 90%), request queue depth (climbing). A PagerDuty-style banner appears: "P2 — Latency SLO burn rate elevated."
 
 **CAPTION (narration text on screen):**
@@ -23,7 +23,7 @@ Format per beat: **[start–end] ON SCREEN / NARRATION**
 
 ---
 
-## Beat 3 — Check GPU utilization first, and explain why (1:50–3:20)
+## Beat 3 — Check GPU utilization first, and explain why (0:37–1:19)
 **ON SCREEN:** Dashboard zooms into the GPU utilization panel. A cursor hovers over the rising line. A second, smaller panel appears beside it: GPU memory utilization (flat, not climbing).
 
 **CAPTION:**
@@ -31,7 +31,7 @@ Format per beat: **[start–end] ON SCREEN / NARRATION**
 
 ---
 
-## Beat 4 — Ruling out a network explanation (3:20–4:30)
+## Beat 4 — Ruling out a network explanation (1:19–1:53)
 **ON SCREEN:** Switch to an ingress/load-balancer dashboard mockup: request rate (flat, no spike), 5xx error rate (flat, near zero), ingress latency contribution (flat, near zero).
 
 **CAPTION:**
@@ -39,7 +39,7 @@ Format per beat: **[start–end] ON SCREEN / NARRATION**
 
 ---
 
-## Beat 5 — Confirming queue depth trend (4:30–5:40)
+## Beat 5 — Confirming queue depth trend (1:53–2:23)
 **ON SCREEN:** Back to the queue-depth panel, now with a wider time window showing the full climb — not just the current spike, but the last 20 minutes, still trending up with no sign of leveling off.
 
 **CAPTION:**
@@ -47,7 +47,7 @@ Format per beat: **[start–end] ON SCREEN / NARRATION**
 
 ---
 
-## Beat 6 — kubectl check: KEDA replica status (5:40–6:20)
+## Beat 6 — kubectl check: KEDA replica status (2:23–2:54)
 **ON SCREEN:** Terminal mockup. Typed command: `kubectl get scaledobject doc-search-summarizer -n inference`. Output shows `READY: True`, `ACTIVE: True`, current replicas at `maxReplicaCount: 12/12`.
 
 **CAPTION:**
@@ -55,7 +55,7 @@ Format per beat: **[start–end] ON SCREEN / NARRATION**
 
 ---
 
-## Beat 7 — Choosing the mitigation, and saying the tradeoff out loud (6:20–7:40)
+## Beat 7 — Choosing the mitigation, and saying the tradeoff out loud (2:54–3:44)
 **ON SCREEN:** Terminal mockup. A rate-limit config file opens (`gateway-rate-limits.yaml`), a diff is applied adding a `free-tier: 40% reduction` rule. Command: `kubectl apply -f gateway-rate-limits.yaml`. Dashboard cuts back in briefly: queue depth line starts to flatten.
 
 **CAPTION:**
@@ -63,7 +63,7 @@ Format per beat: **[start–end] ON SCREEN / NARRATION**
 
 ---
 
-## Beat 8 — Outro / recap (7:40–8:00)
+## Beat 8 — Outro / recap (3:44–4:07)
 **ON SCREEN:** Recap card, three lines appearing in sequence:
 1. "Checked GPU utilization + memory first — compute-bound, not memory-bound."
 2. "Ruled out network using the ingress dashboard before assuming GPU."
@@ -75,6 +75,8 @@ Format per beat: **[start–end] ON SCREEN / NARRATION**
 ---
 
 ## Production notes
-- No synthesized voice track: per repo-wide constraint (no TTS), narration is delivered as on-screen caption text (see `CaptionBar` component), timed per beat above.
+- **Voiceover:** generated locally with Windows' built-in SAPI text-to-speech (`Microsoft David Desktop`, en-US) via `video-studio/scripts/generate-audio.ps1` — no cloud TTS service, no API key, no internet dependency. It's a synthetic voice, not a human recording; on-screen captions still carry the same text so the video works with sound off.
+- **Why the durations look oddly specific (31s, 42s, 34s...):** each beat's duration is the actual measured length of its generated audio clip plus a ~3s buffer, not a hand-picked round number. Run `generate-audio.ps1` again after editing narration text, read the new duration it prints for each beat, and update that beat's `duration` in `inferenceUnderLoadScript.ts` to match — otherwise the visual will run on after the voice stops (or cut off before it finishes).
+- Generated `.wav` files live in `video-studio/public/audio/` and are gitignored (regenerate them from the script rather than committing the binaries — same treatment as the rendered `.mp4`).
 - All dashboards, terminals, and PagerDuty banners are original mockups built as React components in `video-studio/` — no real screenshots, no real customer data.
 - Service name "doc-search-summarizer" is fictional and deliberately *different* from the learner's own `exp-inference-under-load` scenario (a summarization feature) — this is what makes it a *model of reasoning*, not a walkthrough of the learner's exact incident, per the artifact's stated purpose.

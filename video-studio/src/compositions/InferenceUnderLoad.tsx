@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, Sequence } from 'remotion';
+import { AbsoluteFill, Audio, Sequence, staticFile } from 'remotion';
 import { theme } from '../components/theme';
 import { TitleCard } from '../components/TitleCard';
 import { DashboardMock } from '../components/DashboardMock';
@@ -18,6 +18,12 @@ export const InferenceUnderLoad: React.FC = () => {
         return (
           <Sequence key={i} from={from} durationInFrames={durationInFrames}>
             <AbsoluteFill>
+              {'audioFile' in beat && beat.audioFile && (
+                // Half-second lead-in so the visual establishes before speech starts.
+                <Sequence from={15}>
+                  <Audio src={staticFile(`audio/${beat.audioFile}`)} />
+                </Sequence>
+              )}
               {beat.type === 'title' && (
                 <TitleCard title={beat.title} subtitle={beat.subtitle} />
               )}

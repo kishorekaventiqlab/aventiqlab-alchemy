@@ -24,6 +24,7 @@ export type Beat =
       title: string;
       subtitle: string;
       caption?: string;
+      audioFile?: string;
     }
   | {
       type: 'dashboard';
@@ -33,6 +34,7 @@ export type Beat =
       serviceName: string;
       alert?: string;
       panels: DashboardPanel[];
+      audioFile?: string;
     }
   | {
       type: 'terminal';
@@ -40,6 +42,7 @@ export type Beat =
       duration: number;
       caption: string;
       lines: TerminalLine[];
+      audioFile?: string;
     }
   | {
       type: 'recap';
@@ -47,20 +50,22 @@ export type Beat =
       duration: number;
       caption: string;
       items: string[];
+      audioFile?: string;
     };
 
 export const inferenceUnderLoadScript: Beat[] = [
   {
     type: 'title',
     start: 0,
-    duration: 20,
+    duration: 6,
     title: 'Watching an Expert Diagnose a GPU Saturation Incident',
     subtitle: 'A different service. A similar problem. Watch how the investigation actually happens.',
   },
   {
     type: 'dashboard',
-    start: 20,
-    duration: 90,
+    start: 6,
+    duration: 31,
+    audioFile: 'beat2.wav',
     serviceName: 'doc-search-summarizer',
     alert: 'P2 — Latency SLO burn rate elevated',
     caption:
@@ -73,8 +78,9 @@ export const inferenceUnderLoadScript: Beat[] = [
   },
   {
     type: 'dashboard',
-    start: 110,
-    duration: 90,
+    start: 37,
+    duration: 42,
+    audioFile: 'beat3.wav',
     serviceName: 'doc-search-summarizer',
     caption:
       "First check: GPU utilization, not queue depth, not latency. Here's why — GPU utilization tells you if the compute itself is the bottleneck. It's climbing toward 90%, and GPU memory is flat. That combination matters: if memory were also climbing, I'd suspect a batch-size or memory-leak problem. Flat memory plus rising utilization points at compute saturation — the GPU is doing as much work as it can, and it's running out of headroom.",
@@ -85,8 +91,9 @@ export const inferenceUnderLoadScript: Beat[] = [
   },
   {
     type: 'dashboard',
-    start: 200,
-    duration: 70,
+    start: 79,
+    duration: 34,
+    audioFile: 'beat4.wav',
     serviceName: 'ingress / load balancer',
     caption:
       "Rising latency could also mean a network problem — a bad ingress config, a DNS issue, a load balancer having a bad day. Quick check of the ingress dashboard: request rate is flat, not spiking. Error rate is flat. Ingress-layer latency contribution is basically zero. That rules out the network as the cause. It's not what's sending the traffic — it's what's receiving it.",
@@ -98,8 +105,9 @@ export const inferenceUnderLoadScript: Beat[] = [
   },
   {
     type: 'dashboard',
-    start: 270,
-    duration: 70,
+    start: 113,
+    duration: 30,
+    audioFile: 'beat5.wav',
     serviceName: 'doc-search-summarizer',
     caption:
       "One more check before deciding anything: is queue depth still climbing, or has it started to level off on its own? Widening the window — it's been climbing steadily for the last twenty minutes with no plateau. That matters. If it had leveled off, this might resolve itself. It hasn't. This needs an active decision, not a wait-and-see.",
@@ -114,8 +122,9 @@ export const inferenceUnderLoadScript: Beat[] = [
   },
   {
     type: 'terminal',
-    start: 340,
-    duration: 40,
+    start: 143,
+    duration: 31,
+    audioFile: 'beat6.wav',
     caption:
       "Checking whether autoscaling is even still working — kubectl get scaledobject. It's active, and it's already at its configured maximum: twelve out of twelve replicas. KEDA is doing its job. It's just already maxed out. That's a different problem than 'autoscaling is broken' — it's 'autoscaling is working, and the ceiling is too low for right now.'",
     lines: [
@@ -129,8 +138,9 @@ export const inferenceUnderLoadScript: Beat[] = [
   },
   {
     type: 'terminal',
-    start: 380,
-    duration: 80,
+    start: 174,
+    duration: 50,
+    audioFile: 'beat7.wav',
     caption:
       "With the max replica ceiling already hit, scaling further isn't an option right now — that's a capacity conversation for after the incident. What I can do immediately is reduce demand. This service has a free tier and a paid tier. I'm applying a rate limit that cuts free-tier request volume by 40% for the next hour. That's the tradeoff, said out loud: free-tier users see more '429 - try again shortly' responses for a while, in exchange for paid-tier latency staying inside SLA. It's not free. It's a choice, and I'm making it deliberately, not by default.",
     lines: [
@@ -145,8 +155,9 @@ export const inferenceUnderLoadScript: Beat[] = [
   },
   {
     type: 'recap',
-    start: 460,
-    duration: 20,
+    start: 224,
+    duration: 23,
+    audioFile: 'beat8.wav',
     caption:
       'Three things worth taking with you: check the signal that actually tells you where the bottleneck is, rule out the tempting alternative explanation before committing, and when you mitigate, say the tradeoff out loud — don’t just apply a fix and hope nobody asks what it cost.',
     items: [
@@ -157,5 +168,5 @@ export const inferenceUnderLoadScript: Beat[] = [
   },
 ];
 
-export const TOTAL_DURATION_SECONDS = 480;
+export const TOTAL_DURATION_SECONDS = 247;
 export const TOTAL_DURATION_FRAMES = TOTAL_DURATION_SECONDS * FPS;

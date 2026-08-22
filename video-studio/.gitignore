@@ -2,3 +2,4 @@ node_modules/
 out/
 .remotion/
 *.mp4
+public/audio/*.wav
