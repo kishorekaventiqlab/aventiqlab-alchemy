@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill-evaluator.schema.json",
+  "title": "Skill Evaluator Specification",
+  "description": "The source-of-truth structure for a skill evaluator. This is NOT a traditional quiz and does NOT implement conversational AI - it defines the scenario, question paths, misconceptions, and scoring model that a future ASTRA conversation would eventually execute.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "experience_ref", "skills_evaluated", "scenario", "opening_question",
+    "expected_reasoning_areas", "follow_up_question_paths", "misconception_indicators",
+    "strong_answer_indicators", "weak_answer_indicators", "evidence_criteria",
+    "scoring_dimensions", "proficiency_levels", "pass_conditions", "escalation_rules"
+  ],
+  "properties": {
+    "id": { "$ref": "./common/vocab.schema.json#/$defs/se_id" },
+    "experience_ref": { "$ref": "./common/vocab.schema.json#/$defs/exp_id" },
+    "skills_evaluated": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/cap_id" },
+      "minItems": 1
+    },
+    "scenario": { "type": "string" },
+    "opening_question": { "type": "string" },
+    "expected_reasoning_areas": { "type": "array", "items": { "type": "string" } },
+    "follow_up_question_paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["trigger", "follow_up_question", "targets_reasoning_area"],
+        "properties": {
+          "trigger": { "type": "string" },
+          "follow_up_question": { "type": "string" },
+          "targets_reasoning_area": { "type": "string" }
+        }
+      }
+    },
+    "misconception_indicators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["misconception", "likely_root_cause", "corrective_follow_up"],
+        "properties": {
+          "misconception": { "type": "string" },
+          "likely_root_cause": { "type": "string" },
+          "corrective_follow_up": { "type": "string" }
+        }
+      }
+    },
+    "strong_answer_indicators": { "type": "array", "items": { "type": "string" } },
+    "weak_answer_indicators": { "type": "array", "items": { "type": "string" } },
+    "evidence_criteria": { "type": "array", "items": { "type": "string" } },
+    "scoring_dimensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["dimension", "description", "weight_percent"],
+        "properties": {
+          "dimension": { "$ref": "./common/vocab.schema.json#/$defs/evaluation_dimension" },
+          "description": { "type": "string" },
+          "weight_percent": { "type": "integer", "minimum": 1, "maximum": 100 }
+        }
+      }
+    },
+    "proficiency_levels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["level", "description", "criteria"],
+        "properties": {
+          "level": { "$ref": "./common/vocab.schema.json#/$defs/proficiency_level" },
+          "description": { "type": "string" },
+          "criteria": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "pass_conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_level", "required_dimensions"],
+      "properties": {
+        "minimum_level": { "$ref": "./common/vocab.schema.json#/$defs/proficiency_level" },
+        "required_dimensions": {
+          "type": "array",
+          "items": { "$ref": "./common/vocab.schema.json#/$defs/evaluation_dimension" }
+        }
+      }
+    },
+    "escalation_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["condition", "action"],
+        "properties": {
+          "condition": { "type": "string" },
+          "action": { "type": "string" }
+        }
+      }
+    }
+  }
+}

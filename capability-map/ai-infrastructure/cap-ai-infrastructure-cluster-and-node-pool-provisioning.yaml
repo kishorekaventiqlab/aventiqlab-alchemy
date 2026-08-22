@@ -1,0 +1,59 @@
+id: cap-ai-infrastructure-cluster-and-node-pool-provisioning
+name: Cluster & GPU Node Pool Provisioning
+domain: ai-infrastructure
+description: >
+  Provisioning and operating Kubernetes clusters and GPU-enabled node pools that AI/ML
+  workloads run on, including instance-type tradeoffs and scaling-group headroom.
+skills:
+  - id: skl-ai-infra-node-pool-01
+    name: Instance-type tradeoff fluency
+    verb: KNOW
+    statement: >
+      Knows the tradeoffs between GPU node pool instance types (e.g. g5, p4d) for cost,
+      memory, and throughput.
+    evidence:
+      - Correctly recommends an instance type given a stated workload profile.
+  - id: skl-ai-infra-node-pool-02
+    name: GPU node pool provisioning
+    verb: BUILD
+    statement: >
+      Can provision a GPU-enabled node pool with correct device plugin and
+      taints/tolerations via IaC.
+    evidence:
+      - Stood up a working GPU node pool where GPU pods scheduled correctly on first attempt.
+  - id: skl-ai-infra-node-pool-03
+    name: Headroom monitoring
+    verb: OPERATE
+    statement: >
+      Can monitor node pool utilization and scaling-group headroom against quota limits.
+    evidence:
+      - Correctly flagged an approaching quota ceiling before it caused a scheduling failure.
+  - id: skl-ai-infra-node-pool-04
+    name: Pending-pod diagnosis
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose pods stuck in Pending due to node pool capacity, taints, or device
+      plugin failures.
+    evidence:
+      - Resolved a Pending-pod incident traced to one of these causes.
+  - id: skl-ai-infra-node-pool-05
+    name: Node pool strategy design
+    verb: DESIGN
+    statement: >
+      Can design a node pool strategy (on-demand vs. spot, single vs. multi instance-type)
+      for a GPU inference workload.
+    evidence:
+      - Authored a node pool strategy adopted for production.
+common_tools:
+  - Terraform / eksctl
+  - NVIDIA device plugin
+  - Karpenter
+  - AWS ASG / GCP MIG
+beginner_indicators:
+  - Provisions a node pool by copying an existing template without adjusting instance type.
+intermediate_indicators:
+  - Independently operates node pool capacity and headroom monitoring.
+advanced_indicators:
+  - Diagnoses complex Pending-pod incidents across taints, device plugins, and capacity.
+expert_architect_indicators:
+  - Designs org-wide node pool and instance-type strategy across multiple clusters.

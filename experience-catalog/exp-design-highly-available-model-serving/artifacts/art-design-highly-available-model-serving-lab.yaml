@@ -1,0 +1,29 @@
+id: art-design-highly-available-model-serving-lab
+type: source_code_lab
+title: Build the Two-AZ Failover Configuration
+experience_ref: exp-design-highly-available-model-serving
+outcome_refs:
+  - out-design-highly-available-model-serving-01
+  - out-design-highly-available-model-serving-02
+capability_refs:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Untimed DESIGN/BUILD practice: provision the second AZ's node pool and configure
+  load-balancer failover with no time pressure - this is where it's first built correctly.
+content_summary: >
+  A starter repo with a single-AZ deployment, a stub Terraform module for a second AZ's
+  GPU node pool, and a load balancer configuration missing its failover health checks.
+  The learner completes the two-AZ design.
+estimated_duration_minutes: 120
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-design-highly-available-model-serving
+  tasks:
+    - Provision the second AZ's GPU node pool with confirmed capacity.
+    - Configure load-balancer health checks and failover between the two AZs.
+    - Plan a zero-downtime migration path from single-AZ to the new architecture.
+  environment_requirements:
+    - Sandbox multi-AZ EKS cluster
+    - Terraform CLI
+    - Load balancer / ingress controller supporting health-check failover
+  hints_available: true

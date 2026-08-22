@@ -1,0 +1,17 @@
+id: art-build-autoscaling-inference-platform-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Build an Autoscaling Inference Platform
+experience_ref: exp-build-autoscaling-inference-platform
+outcome_refs:
+  - out-build-autoscaling-inference-platform-01
+  - out-build-autoscaling-inference-platform-02
+capability_refs:
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Open-ended evaluation of whether the signal-selection reasoning transfers to a
+  differently-shaped traffic pattern - not recall (Quiz) or hands-on execution
+  (Lab). Source-of-truth structure only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-build-autoscaling-inference-platform

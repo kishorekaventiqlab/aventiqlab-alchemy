@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1alpha1
+kind: RateLimitPolicy
+metadata:
+  name: free-tier-shed
+  namespace: inference
+spec:
+  targetRef:
+    kind: HTTPRoute
+    name: doc-search-summarizer-route
+  rules:
+    - selector:
+        headers:
+          - name: x-customer-tier
+            value: paid-tier
+      # Paid tier is protected by the p99 SLA - do not rate-limit it here.
+      action: allow
+
+    - selector:
+        headers:
+          - name: x-customer-tier
+            value: free-tier
+      # TODO: reduce free-tier request volume by 40% for the next hour.
+      # This is the mitigation from Beat 7 of the reference video - state the
+      # action, the reduction percentage, and how long it applies.
+      action: # TODO
+      reduction_percent: # TODO
+      duration: # TODO

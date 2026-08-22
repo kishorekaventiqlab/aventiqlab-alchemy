@@ -1,0 +1,25 @@
+id: art-reduce-ai-platform-cost-material
+type: material
+title: "Reserved Capacity and Cost Consolidation: Reference"
+experience_ref: exp-reduce-ai-platform-cost
+outcome_refs:
+  - out-reduce-ai-platform-cost-01
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on reserved-capacity economics and
+  consolidation-without-reliability-impact, as pure reference facts - not a narrated
+  cost review (Video) or a built cost model (Lab).
+content_summary: >
+  A reference document covering how reserved/committed capacity pricing works, how to
+  identify stable-baseline workloads that qualify for it, and how to consolidate
+  underutilized node pools without touching reliability commitments.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - Reserved/committed capacity pricing mechanics
+    - Identifying stable-baseline workloads
+    - Consolidating node pools without reducing reliability commitments

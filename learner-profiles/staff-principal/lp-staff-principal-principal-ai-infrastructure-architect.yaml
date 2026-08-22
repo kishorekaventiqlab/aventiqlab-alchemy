@@ -1,0 +1,77 @@
+id: lp-staff-principal-principal-ai-infrastructure-architect
+title: Principal AI Infrastructure Architect
+experience_band: staff-principal
+target_roles:
+  - Principal Engineer
+  - Principal AI Infrastructure Architect
+typical_background: >
+  Company-wide technical authority for AI infrastructure; sets multi-year technical
+  direction and is still willing to personally prototype a novel approach before
+  mandating it as a standard.
+existing_knowledge:
+  - Everything in lp-10yr-staff-ai-platform-engineer
+  - Company-wide capacity, cost, and reliability tradeoffs across many platform teams
+  - How to translate multi-year technical direction into a roadmap other staff engineers execute against
+existing_skills:
+  - Prototypes a novel multi-tenant AI infrastructure architecture before it becomes a standard
+  - Defines the company-wide reliability bar applied across AI services
+  - Substantiates company-wide direction with cross-team cost and capacity projections
+technology_exposure:
+  - technology: Kubernetes
+    exposure_level: Architect
+  - technology: GPU infrastructure
+    exposure_level: Architect
+  - technology: Model serving runtimes
+    exposure_level: Expert
+  - technology: Platform architecture
+    exposure_level: Architect
+production_experience:
+  has_production_experience: true
+  description: >
+    Escalation point of last resort for company-wide AI infrastructure decisions;
+    involvement in any single service's operations is rare and deliberate.
+  scale_indicators:
+    - Technical direction set by this role spans every AI/ML platform team in the company
+    - Decisions are evaluated on multi-year, cross-team consequences
+learning_needs:
+  - Staying current enough on emerging techniques (e.g. new serving runtimes) to prototype credibly
+  - Company-wide communication and influence without direct authority over every team
+build_expectations:
+  - statement: >
+      Designs and, where needed, personally prototypes a novel multi-tenant AI
+      infrastructure architecture before it becomes an org-wide standard.
+    verbs: [DESIGN, BUILD]
+    capability_refs:
+      - cap-platform-architecture-tradeoff-driven-system-design
+      - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+operational_expectations:
+  - statement: >
+      Defines the operational reliability bar (SLOs, incident response standards)
+      applied company-wide across AI services.
+    verbs: [DESIGN]
+    capability_refs: [cap-ai-reliability-sre-incident-response-for-inference]
+troubleshooting_expectations:
+  - statement: >
+      Diagnoses systemic weaknesses spanning multiple platform teams and traces them to
+      organizational or architectural root causes.
+    verbs: [TROUBLESHOOT]
+    capability_refs: [cap-platform-architecture-tradeoff-driven-system-design]
+architecture_expectations:
+  - statement: >
+      Sets multi-year technical direction and architecture standards for AI
+      infrastructure company-wide.
+    verbs: [DESIGN]
+    capability_refs: [cap-platform-architecture-tradeoff-driven-system-design]
+proof_expectations:
+  - statement: >
+      Substantiates company-wide architecture direction with cross-team cost and
+      capacity projections.
+    verbs: [PROVE]
+    capability_refs: [cap-platform-architecture-tradeoff-driven-system-design]
+prerequisites: [lp-10yr-staff-ai-platform-engineer]
+expected_independence: Sets Org Direction
+expected_engineering_judgment: >
+  Company-wide technical authority - decisions are judged on multi-year, cross-team
+  consequences; still willing to personally prototype (BUILD) a novel approach before
+  mandating it, which distinguishes this band's judgment from lp-10yr's abstraction-only
+  stance.

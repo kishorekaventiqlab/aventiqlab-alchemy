@@ -1,0 +1,17 @@
+id: art-design-highly-available-model-serving-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Design Highly Available Model Serving
+experience_ref: exp-design-highly-available-model-serving
+outcome_refs:
+  - out-design-highly-available-model-serving-01
+  - out-design-highly-available-model-serving-02
+capability_refs:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Open-ended evaluation of whether the capacity-scoped design reasoning transfers when
+  BOTH confirmed AZs individually lack enough capacity to absorb full traffic alone -
+  not recall (Quiz) or hands-on execution (Lab). Source-of-truth structure only.
+estimated_duration_minutes: 15
+type_specific:
+  evaluator_ref: se-design-highly-available-model-serving

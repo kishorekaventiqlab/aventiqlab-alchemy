@@ -1,0 +1,31 @@
+id: art-inference-under-load-lab
+type: source_code_lab
+title: Build the Mitigation and Overflow-Capacity Configuration
+experience_ref: exp-inference-under-load
+outcome_refs:
+  - out-inference-under-load-02
+  - out-inference-under-load-03
+capability_refs:
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-model-serving-autoscaling-policy-design
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Untimed BUILD practice: construct the actual KEDA scaling policy, request-shedding
+  config, and an overflow-tier IaC sketch with no time pressure - this is
+  where they are first built correctly.
+content_summary: >
+  A starter repo with a partially configured KEDA ScaledObject, an inference gateway
+  missing its rate-limiting/shedding configuration, and a stub Terraform module for a
+  second GPU node pool. The learner completes all three.
+estimated_duration_minutes: 90
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-inference-under-load
+  tasks:
+    - Complete the KEDA ScaledObject to scale on a queue-depth custom metric.
+    - Implement priority-tier request shedding on the inference gateway.
+    - Sketch a Terraform module for a GPU overflow node pool in a second instance family.
+  environment_requirements:
+    - kind or a sandbox EKS cluster
+    - Terraform CLI
+    - kubectl
+  hints_available: true

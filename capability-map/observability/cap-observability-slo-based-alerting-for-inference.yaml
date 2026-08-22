@@ -1,0 +1,60 @@
+id: cap-observability-slo-based-alerting-for-inference
+name: SLO-Based Alerting for Inference
+domain: observability
+description: >
+  Instrumenting inference services and designing SLO-based alerting that balances
+  detection speed against alert noise.
+skills:
+  - id: skl-observability-slo-alerting-01
+    name: SLI/SLO/error-budget fluency
+    verb: KNOW
+    statement: >
+      Knows the difference between SLI, SLO, and error budget, and how they apply to an
+      inference service.
+    evidence:
+      - Correctly defines all three and gives a concrete SLI example for an inference endpoint.
+  - id: skl-observability-slo-alerting-02
+    name: Service instrumentation
+    verb: BUILD
+    statement: >
+      Can instrument an inference service with latency, throughput, and GPU utilization
+      metrics exported to Prometheus.
+    evidence:
+      - Shipped a working /metrics endpoint consumed by a live Prometheus scrape.
+  - id: skl-observability-slo-alerting-03
+    name: Correlated dashboarding
+    verb: OPERATE
+    statement: >
+      Can build and read a Grafana dashboard correlating request latency, queue depth,
+      and GPU utilization.
+    evidence:
+      - Used a self-built correlated dashboard to diagnose a live incident.
+  - id: skl-observability-slo-alerting-04
+    name: Burn-rate triage
+    verb: TROUBLESHOOT
+    statement: >
+      Can distinguish a genuine SLO-burning incident from noisy/flapping alerts using
+      error-budget burn rate.
+    evidence:
+      - Correctly triaged an alert as non-actionable using burn-rate analysis.
+  - id: skl-observability-slo-alerting-05
+    name: Alerting threshold design
+    verb: DESIGN
+    statement: >
+      Can design SLO-based alerting thresholds that balance noise against detection speed
+      for a latency-sensitive service.
+    evidence:
+      - Authored an alerting policy doc adopted for a production service.
+common_tools:
+  - Prometheus
+  - Grafana
+  - PagerDuty
+  - OpenTelemetry
+beginner_indicators:
+  - Sets up basic dashboards but alerting thresholds are copied from another service without adjustment.
+intermediate_indicators:
+  - Independently instruments and monitors a production inference service.
+advanced_indicators:
+  - Triages ambiguous alerts using burn-rate analysis and leads incident detection improvements.
+expert_architect_indicators:
+  - Sets org-wide SLO and alerting standards across multiple AI services.

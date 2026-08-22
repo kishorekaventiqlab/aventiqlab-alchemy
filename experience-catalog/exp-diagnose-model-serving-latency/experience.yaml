@@ -1,0 +1,62 @@
+id: exp-diagnose-model-serving-latency
+title: Diagnose Model-Serving Latency
+target_learner_profiles: [lp-5yr-ai-platform-engineer, lp-7yr-mlops-lead]
+target_capabilities:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-observability-slo-based-alerting-for-inference
+prerequisites: [exp-deploy-inference-service]
+scenario: >
+  A model-serving deployment's p99 latency has crept up by 40% over two weeks with no
+  corresponding change in traffic volume.
+business_context: >
+  No incident has fired yet since p50 latency is unaffected, but a key customer has
+  started noticing occasional slow responses.
+technical_environment:
+  platform: Amazon EKS
+  infrastructure_summary: >
+    A steady-traffic model-serving deployment behind a fixed replica count, with no
+    recent configuration changes on record.
+  key_services: [Amazon EKS, Triton Inference Server, Prometheus, Grafana]
+starting_state: >
+  p50 latency is flat and within SLA. p99 latency has risen gradually over two weeks. No
+  deploys or config changes are recorded in that window. Replica count and traffic
+  volume are both flat.
+learner_mission: >
+  Determine why p99 latency is degrading gradually with no obvious trigger, and
+  recommend next steps.
+expected_investigation:
+  - Check for a change in request payload characteristics (e.g. longer input sequences) rather than infrastructure.
+  - Check cold-start frequency and node churn for a possible correlation.
+  - Check whether a specific request pattern or customer is disproportionately represented in the slow tail.
+expected_decisions:
+  - decision_point: Is the cause infrastructure or workload-shape drift?
+    options_considered:
+      - "Correct: investigate whether the input data itself has drifted (e.g. longer average sequence length) before assuming an infrastructure cause."
+      - "Plausible but wrong: immediately restart pods or add replicas, assuming a resource leak, without checking for a workload-shape explanation first."
+    sound_reasoning: >
+      A gradual, traffic-independent p99 rise with flat p50 is more consistent with a
+      slow-tail workload-shape change than a classic resource-exhaustion pattern.
+build_activities:
+  - Add or refine tracing/logging to break down latency by request characteristic.
+operational_activities:
+  - Communicate findings to the customer-facing team once a cause is identified.
+failure_modes:
+  - Restarting the service repeatedly without addressing the underlying cause, providing only temporary relief.
+  - Concluding "it's just noise" without actually investigating the tail.
+constraints:
+  - No incident has formally fired, so the investigation must be done without disrupting the stable p50 latency for other customers.
+  - Limited budget for new tracing infrastructure - must reuse existing tooling where possible.
+trade_offs:
+  - tension: Depth of investigation vs. speed of a customer-facing response
+    choice_a: Fully root-cause the tail latency before responding to the customer, at the cost of a slower initial response.
+    choice_b: Give the customer a preliminary update now and continue investigating in parallel.
+success_conditions:
+  - A specific, evidence-backed hypothesis for the p99 drift is identified.
+  - A next step (fix or further investigation) is recommended.
+evidence_of_competence:
+  - The specific correlation or pattern found in the slow-tail requests.
+  - A written summary distinguishing this from a simple resource-exhaustion narrative.
+progression_archetype: advanced-troubleshoot
+outcome_refs:
+  - out-diagnose-model-serving-latency-01
+  - out-diagnose-model-serving-latency-02

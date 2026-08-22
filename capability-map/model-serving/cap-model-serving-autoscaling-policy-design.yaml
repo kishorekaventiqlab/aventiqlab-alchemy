@@ -1,0 +1,70 @@
+id: cap-model-serving-autoscaling-policy-design
+name: Model Serving Autoscaling Policy Design
+domain: model-serving
+description: >
+  Configuring, operating, and designing autoscaling and batching policy for model-serving
+  runtimes to hit a latency SLA under a fixed GPU capacity ceiling. Load-bearing capability
+  for the reference experience exp-inference-under-load.
+skills:
+  - id: skl-model-serving-autoscaling-01
+    name: Serving runtime fluency
+    verb: KNOW
+    statement: >
+      Knows the major model-serving runtimes (Triton, vLLM, TorchServe, KServe) and their
+      scaling-relevant characteristics (batching support, cold-start cost, dynamic batching).
+    evidence:
+      - Correctly compares two serving runtimes' scaling characteristics.
+  - id: skl-model-serving-autoscaling-02
+    name: Latency-targeted batching configuration
+    verb: BUILD
+    statement: >
+      Can configure dynamic batching and concurrency limits on a serving runtime for a
+      target latency SLA.
+    evidence:
+      - Tuned a serving config to hit a stated p99 target under load test.
+  - id: skl-model-serving-autoscaling-03
+    name: Early-warning monitoring
+    verb: OPERATE
+    statement: >
+      Can monitor request queue depth, batch size, and replica saturation for a live
+      model-serving deployment.
+    evidence:
+      - Correctly identified queue-depth growth as an early warning signal before a
+        latency SLA breach.
+  - id: skl-model-serving-autoscaling-04
+    name: Latency-degradation diagnosis
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose whether serving latency degradation is caused by queueing, GPU
+      saturation, or cold starts.
+    evidence:
+      - Root-caused a latency regression to one of these three causes with dashboard evidence.
+  - id: skl-model-serving-autoscaling-05
+    name: Quota-aware autoscaling policy design
+    verb: DESIGN
+    statement: >
+      Can design an autoscaling policy for a model-serving deployment that accounts for
+      cold-start cost and a fixed GPU quota ceiling.
+    evidence:
+      - Authored an autoscaling policy that was implemented and held up under a load test.
+  - id: skl-model-serving-autoscaling-06
+    name: SLA compliance proof
+    verb: PROVE
+    statement: >
+      Can demonstrate via load test that a serving configuration meets a stated latency
+      SLA under a specified traffic profile.
+    evidence:
+      - Produced a load-test report showing SLA compliance at the target request rate.
+common_tools:
+  - Triton Inference Server
+  - vLLM
+  - k6 / Locust (load testing)
+  - Prometheus + Grafana
+beginner_indicators:
+  - Can deploy a serving runtime with default settings but does not tune batching.
+intermediate_indicators:
+  - Independently operates a serving deployment and tunes it to a stated latency target.
+advanced_indicators:
+  - Diagnoses complex latency regressions across queueing, GPU, and cold-start causes.
+expert_architect_indicators:
+  - Designs serving/autoscaling policy standards applied across multiple model-serving deployments.

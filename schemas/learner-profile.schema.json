@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "learner-profile.schema.json",
+  "title": "Learner Profile",
+  "description": "Describes who a learner is at a given experience band: what they already know/can do, and what they are expected to know, understand, build, operate, troubleshoot, design, explain, and prove. Years of experience alone is never sufficient - the expectation fields below are what actually differentiate bands.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "title", "experience_band", "target_roles", "typical_background",
+    "existing_knowledge", "existing_skills", "technology_exposure", "production_experience",
+    "learning_needs", "build_expectations", "operational_expectations", "troubleshooting_expectations",
+    "architecture_expectations", "proof_expectations", "prerequisites",
+    "expected_independence", "expected_engineering_judgment"
+  ],
+  "properties": {
+    "id": { "$ref": "./common/vocab.schema.json#/$defs/lp_id" },
+    "title": { "type": "string" },
+    "experience_band": { "$ref": "./common/vocab.schema.json#/$defs/experience_band" },
+    "target_roles": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "typical_background": { "type": "string" },
+    "existing_knowledge": { "type": "array", "items": { "type": "string" } },
+    "existing_skills": { "type": "array", "items": { "type": "string" } },
+    "technology_exposure": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["technology", "exposure_level"],
+        "properties": {
+          "technology": { "type": "string" },
+          "exposure_level": { "$ref": "./common/vocab.schema.json#/$defs/proficiency_level" }
+        }
+      }
+    },
+    "production_experience": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["has_production_experience", "description", "scale_indicators"],
+      "properties": {
+        "has_production_experience": { "type": "boolean" },
+        "description": { "type": "string" },
+        "scale_indicators": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "learning_needs": { "type": "array", "items": { "type": "string" } },
+    "build_expectations": { "$ref": "#/$defs/expectation_list" },
+    "operational_expectations": { "$ref": "#/$defs/expectation_list" },
+    "troubleshooting_expectations": { "$ref": "#/$defs/expectation_list" },
+    "architecture_expectations": { "$ref": "#/$defs/expectation_list" },
+    "proof_expectations": { "$ref": "#/$defs/expectation_list" },
+    "prerequisites": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/lp_id" }
+    },
+    "expected_independence": { "$ref": "./common/vocab.schema.json#/$defs/independence_level" },
+    "expected_engineering_judgment": { "type": "string" }
+  },
+  "$defs": {
+    "expectation_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["statement", "verbs", "capability_refs"],
+        "properties": {
+          "statement": { "type": "string" },
+          "verbs": {
+            "type": "array",
+            "items": { "$ref": "./common/vocab.schema.json#/$defs/capability_verb" },
+            "minItems": 1
+          },
+          "capability_refs": {
+            "type": "array",
+            "items": { "$ref": "./common/vocab.schema.json#/$defs/cap_id" }
+          }
+        }
+      }
+    }
+  }
+}

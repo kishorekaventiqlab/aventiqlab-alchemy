@@ -1,0 +1,28 @@
+id: art-reduce-ai-platform-cost-lab
+type: source_code_lab
+title: Build the Cost-Reduction Model
+experience_ref: exp-reduce-ai-platform-cost
+outcome_refs:
+  - out-reduce-ai-platform-cost-01
+  - out-reduce-ai-platform-cost-02
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Untimed DESIGN/PROVE practice: build the actual cost model and reliability-impact
+  checklist with no time pressure - this is where it's first built correctly.
+content_summary: >
+  A starter repo with a sample Cost and Usage Report dataset and a reliability
+  commitments list. The learner builds a cost model identifying reserved-capacity and
+  consolidation candidates, checked against reliability commitments.
+estimated_duration_minutes: 90
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-reduce-ai-platform-cost
+  tasks:
+    - Break down the sample cost dataset by service and reservation type.
+    - Identify reserved-capacity and consolidation candidates reaching the 20% target.
+    - Check each candidate action against the reliability commitments list.
+  environment_requirements:
+    - Provided Cost and Usage Report dataset
+    - Spreadsheet or notebook environment for cost modeling
+  hints_available: true

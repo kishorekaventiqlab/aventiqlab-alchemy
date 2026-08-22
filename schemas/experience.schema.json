@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "experience.schema.json",
+  "title": "Experience",
+  "description": "A realistic engineering situation the learner is responsible for - not a chapter to read. Every experience has a starting state, a mission, expected investigation and decisions, and explicit success/failure conditions. outcome_refs may be empty for a blueprint-only catalog entry; it is populated only once an experience is fully specified with learning outcomes and artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "title", "target_learner_profiles", "target_capabilities", "prerequisites",
+    "scenario", "business_context", "technical_environment", "starting_state",
+    "learner_mission", "expected_investigation", "expected_decisions",
+    "build_activities", "operational_activities", "failure_modes", "constraints",
+    "trade_offs", "success_conditions", "evidence_of_competence",
+    "progression_archetype", "outcome_refs"
+  ],
+  "properties": {
+    "id": { "$ref": "./common/vocab.schema.json#/$defs/exp_id" },
+    "title": { "type": "string" },
+    "target_learner_profiles": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/lp_id" },
+      "minItems": 1
+    },
+    "target_capabilities": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/cap_id" }
+    },
+    "future_capability_domains": {
+      "type": "array",
+      "description": "Free-text domain slugs this experience will eventually also reference once those stub domains are authored. Not id-validated - intentionally honest about current gaps rather than inventing unresolvable references.",
+      "items": { "type": "string" }
+    },
+    "prerequisites": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/exp_id" }
+    },
+    "scenario": { "type": "string" },
+    "business_context": { "type": "string" },
+    "technical_environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "infrastructure_summary", "key_services"],
+      "properties": {
+        "platform": { "type": "string" },
+        "infrastructure_summary": { "type": "string" },
+        "key_services": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "starting_state": { "type": "string" },
+    "learner_mission": { "type": "string" },
+    "expected_investigation": { "type": "array", "items": { "type": "string" } },
+    "expected_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["decision_point", "options_considered", "sound_reasoning"],
+        "properties": {
+          "decision_point": { "type": "string" },
+          "options_considered": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "sound_reasoning": { "type": "string" }
+        }
+      }
+    },
+    "build_activities": { "type": "array", "items": { "type": "string" } },
+    "operational_activities": { "type": "array", "items": { "type": "string" } },
+    "failure_modes": { "type": "array", "items": { "type": "string" } },
+    "constraints": { "type": "array", "items": { "type": "string" } },
+    "trade_offs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tension", "choice_a", "choice_b"],
+        "properties": {
+          "tension": { "type": "string" },
+          "choice_a": { "type": "string" },
+          "choice_b": { "type": "string" }
+        }
+      }
+    },
+    "success_conditions": { "type": "array", "items": { "type": "string" } },
+    "evidence_of_competence": { "type": "array", "items": { "type": "string" } },
+    "progression_archetype": { "$ref": "./common/vocab.schema.json#/$defs/progression_archetype" },
+    "outcome_refs": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/out_id" }
+    }
+  }
+}

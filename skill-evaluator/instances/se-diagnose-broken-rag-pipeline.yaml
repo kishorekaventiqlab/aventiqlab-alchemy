@@ -1,0 +1,71 @@
+id: se-diagnose-broken-rag-pipeline
+experience_ref: exp-diagnose-broken-rag-pipeline
+skills_evaluated:
+  - cap-llmops-prompt-and-eval-pipelines
+scenario: >
+  A variant case: eval scores dropped, but there was no recent re-index, prompt change,
+  or model change at all. The obvious reference-experience suspect doesn't exist here.
+opening_question: >
+  This time there's no re-index, no prompt change, no model change - nothing obvious
+  changed. Eval scores still dropped. Where do you even start?
+expected_reasoning_areas:
+  - Not assuming the cause must be one of the previously-seen categories (re-index, prompt, model)
+  - Considering external causes: upstream document source changes, eval dataset drift, or the underlying knowledge itself becoming stale
+  - Still applying the retrieval-vs-generation split even without an obvious trigger event
+follow_up_question_paths:
+  - trigger: Learner is stuck because none of the reference-experience causes apply.
+    follow_up_question: What could change retrieval or generation quality besides a re-index, prompt change, or model change?
+    targets_reasoning_area: Considering external causes
+  - trigger: Learner suggests the eval pipeline itself might be the problem.
+    follow_up_question: How would you test whether the eval pipeline changed versus the underlying system changing?
+    targets_reasoning_area: Still applying the retrieval-vs-generation split even without an obvious trigger event
+misconception_indicators:
+  - misconception: Believes a quality regression must always have one of the three previously-seen trigger types.
+    likely_root_cause: Over-anchored on the reference experience's specific trigger categories rather than the general retrieval-vs-generation diagnostic framework.
+    corrective_follow_up: What's the underlying question you're actually trying to answer, regardless of what triggered it?
+strong_answer_indicators:
+  - Proposes at least one cause outside the three reference categories (e.g. source document changes, eval set drift).
+  - Still applies the retrieval-vs-generation split as the organizing framework.
+weak_answer_indicators:
+  - Gets stuck because none of the familiar trigger categories apply.
+  - Abandons the retrieval-vs-generation framework entirely instead of adapting it.
+evidence_criteria:
+  - Names a specific plausible external cause.
+  - States how they'd test it.
+scoring_dimensions:
+  - dimension: REASONING
+    description: Generalizes the diagnostic framework beyond the specific triggers seen before.
+    weight_percent: 40
+  - dimension: TROUBLESHOOTING
+    description: Proposes a genuinely new avenue of investigation appropriate to the missing-trigger case.
+    weight_percent: 35
+  - dimension: APPLICATION
+    description: Still applies the retrieval-vs-generation split as an organizing principle.
+    weight_percent: 25
+proficiency_levels:
+  - level: Beginner
+    description: Remains stuck even after prompting, unable to propose an alternative cause.
+    criteria:
+      - Does not propose an alternative cause even with a follow-up.
+  - level: Intermediate
+    description: Proposes an alternative cause only after prompting.
+    criteria:
+      - Names a plausible cause after the follow-up.
+  - level: Advanced
+    description: Independently proposes a plausible cause outside the three familiar trigger types.
+    criteria:
+      - Names a specific external cause unprompted.
+  - level: Expert
+    description: As Advanced, and proposes a specific test for the new hypothesis.
+    criteria:
+      - Proposes a concrete verification step for the new cause.
+  - level: Architect
+    description: As Expert, and articulates the underlying diagnostic framework as trigger-independent.
+    criteria:
+      - Explicitly states the retrieval-vs-generation framework applies regardless of what triggered the regression.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, TROUBLESHOOTING]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to state the trigger-independent version of their diagnostic framework (Architect-level probe).

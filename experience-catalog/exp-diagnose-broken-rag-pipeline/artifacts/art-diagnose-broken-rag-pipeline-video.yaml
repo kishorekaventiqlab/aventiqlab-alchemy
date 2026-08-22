@@ -1,0 +1,26 @@
+id: art-diagnose-broken-rag-pipeline-video
+type: video
+title: Watching a RAG Regression Get Isolated to Retrieval
+experience_ref: exp-diagnose-broken-rag-pipeline
+outcome_refs:
+  - out-diagnose-broken-rag-pipeline-01
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+purpose: >
+  Models an engineer's reasoning process on a different RAG quality regression, narrated
+  out loud - the HOW of checking retrieval before touching the prompt, not the facts
+  (Material) or the learner's own exact corpus (Lab).
+content_summary: >
+  A screencast of an engineer investigating a different assistant's quality regression,
+  narrating why they inspect retrieved context before adjusting the prompt template.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on an eval-pipeline score drop with a recent re-index in the timeline.
+    - Narrate resisting the instinct to tune the prompt first.
+    - Narrate comparing retrieved chunks for a sample failing query.
+    - Narrate identifying the specific chunking change that caused the regression.
+  on_screen_demonstrations:
+    - Eval pipeline dashboard
+    - Comparing retrieved chunks side by side

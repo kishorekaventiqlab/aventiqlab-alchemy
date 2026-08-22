@@ -1,0 +1,17 @@
+id: art-design-internal-ai-platform-for-teams-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Design an Internal AI Platform for Multiple Teams
+experience_ref: exp-design-internal-ai-platform-for-teams
+outcome_refs:
+  - out-design-internal-ai-platform-for-teams-01
+  - out-design-internal-ai-platform-for-teams-02
+capability_refs:
+  - cap-platform-architecture-tradeoff-driven-system-design
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Open-ended evaluation of whether the validated-needs and voluntary-adoption reasoning
+  transfers when the pilot team's feedback is negative - not recall (Quiz) or
+  hands-on execution (Lab). Source-of-truth structure only.
+estimated_duration_minutes: 15
+type_specific:
+  evaluator_ref: se-design-internal-ai-platform-for-teams

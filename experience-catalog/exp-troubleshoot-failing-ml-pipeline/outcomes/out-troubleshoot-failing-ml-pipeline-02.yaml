@@ -1,0 +1,21 @@
+id: out-troubleshoot-failing-ml-pipeline-02
+experience_ref: exp-troubleshoot-failing-ml-pipeline
+learner_summary: >
+  Apply a targeted fix and add a validation step that would catch this class of failure
+  earlier next time, rather than only patching the symptom.
+learner_profile_refs: [lp-5yr-ai-platform-engineer, lp-7yr-mlops-lead]
+action:
+  verb: BUILD
+  statement: >
+    Apply a targeted fix for the confirmed root cause and add a data validation step
+    that would catch this failure class earlier in the future.
+context: >
+  Given a confirmed root cause for the pipeline failure,
+expected_result: >
+  the learner applies a fix addressing the actual root cause (not just a symptom like a
+  timeout bump) and adds a validation/schema-check step ahead of the evaluation stage.
+related_capabilities:
+  - cap-mlops-pipeline-orchestration
+evidence_expectations: >
+  Confirmation of a successful pipeline run after the fix, plus the added validation
+  step's configuration.

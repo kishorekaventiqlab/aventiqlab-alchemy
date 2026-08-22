@@ -1,0 +1,26 @@
+id: art-diagnose-model-serving-latency-video
+type: video
+title: Watching a Slow-Tail Latency Drift Get Diagnosed
+experience_ref: exp-diagnose-model-serving-latency
+outcome_refs:
+  - out-diagnose-model-serving-latency-01
+capability_refs:
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Models an engineer's reasoning process on a different gradual-latency-drift incident,
+  narrated out loud - the HOW of checking workload shape before infrastructure, not the
+  facts (Material) or the learner's own exact service (Lab).
+content_summary: >
+  A screencast of an engineer investigating a different service's gradual p99 drift,
+  narrating why they check request-characteristic data before restarting anything.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a p99 latency chart drifting upward with flat p50.
+    - Narrate why a restart-first instinct is resisted here.
+    - Narrate pulling request-length distribution data over the drift window.
+    - Narrate finding the correlation and forming a hypothesis.
+  on_screen_demonstrations:
+    - Latency percentile dashboard
+    - Querying request-characteristic data

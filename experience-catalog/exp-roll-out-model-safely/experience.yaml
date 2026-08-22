@@ -1,0 +1,64 @@
+id: exp-roll-out-model-safely
+title: Roll Out a New Model Safely
+target_learner_profiles: [lp-5yr-ai-platform-engineer]
+target_capabilities:
+  - cap-mlops-pipeline-orchestration
+  - cap-observability-slo-based-alerting-for-inference
+future_capability_domains: [ci-cd]
+prerequisites: [exp-deploy-inference-service]
+scenario: >
+  A new version of a production model has passed offline evaluation and is ready to
+  replace the currently-serving version.
+business_context: >
+  The previous model rollout six months ago caused a silent quality regression that took
+  two days to notice because there was no online quality signal, only infrastructure
+  health checks.
+technical_environment:
+  platform: Amazon EKS
+  infrastructure_summary: >
+    A single production model-serving deployment with no existing canary or
+    shadow-traffic mechanism.
+  key_services: [Amazon EKS, Triton Inference Server, Model registry, Prometheus]
+starting_state: >
+  The new model version is registered and passed offline evaluation. Only the old
+  version is currently serving live traffic. No canary/shadow infrastructure exists yet.
+learner_mission: >
+  Roll out the new model version in a way that would have caught the previous silent
+  quality regression, without a full outage risk if something is wrong.
+expected_investigation:
+  - Check what online quality signals (if any) currently exist versus what would be needed to detect a regression like the previous one.
+  - Check what traffic-splitting mechanisms are already available in the ingress/service mesh layer.
+expected_decisions:
+  - decision_point: How to roll out with a real quality safety net?
+    options_considered:
+      - "Correct: roll out via a canary with a defined online quality signal and automatic rollback trigger."
+      - "Plausible but wrong: do a full instant cutover relying only on infrastructure health checks, repeating the previous incident's exact gap."
+    sound_reasoning: >
+      Infrastructure health checks alone do not catch a silent quality regression - the
+      previous incident is direct evidence that an online quality signal is required,
+      not just uptime checks.
+build_activities:
+  - Configure a canary/traffic-split rollout mechanism.
+  - Define and instrument an online quality signal appropriate for this model.
+operational_activities:
+  - Monitor the canary against the quality signal and infrastructure health during rollout.
+failure_modes:
+  - Repeating the previous incident by relying only on infrastructure health checks.
+  - Defining a quality signal that is too slow to compute to actually gate the rollout in a reasonable time.
+constraints:
+  - Must not repeat the previous silent-regression incident.
+  - Rollout must complete within a defined maintenance window.
+trade_offs:
+  - tension: Rollout thoroughness vs. speed
+    choice_a: A longer, more gradual canary with a robust quality signal, at the cost of a longer rollout window.
+    choice_b: A faster rollout with a lighter-weight quality check, accepting somewhat higher residual risk.
+success_conditions:
+  - The new model is rolled out with an online quality signal actively gating progression.
+  - A rollback path exists and is exercised or explicitly verified.
+evidence_of_competence:
+  - The quality signal definition and its threshold.
+  - Evidence the canary was actually gated by that signal, not just time-based.
+progression_archetype: intermediate-operate
+outcome_refs:
+  - out-roll-out-model-safely-01
+  - out-roll-out-model-safely-02

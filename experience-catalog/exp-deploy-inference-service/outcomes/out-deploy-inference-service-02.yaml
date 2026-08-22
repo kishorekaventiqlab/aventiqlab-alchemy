@@ -1,0 +1,23 @@
+id: out-deploy-inference-service-02
+experience_ref: exp-deploy-inference-service
+learner_summary: >
+  Demonstrate that the deployed service is genuinely reachable and returns a valid
+  inference response, not just that the pod reports Running.
+learner_profile_refs: [lp-3yr-cloud-platform-engineer]
+action:
+  verb: PROVE
+  statement: >
+    Produce evidence that a newly deployed inference service is actually serving valid
+    responses, not merely reporting a healthy pod status.
+context: >
+  Given a newly deployed inference service whose pod reports Running and whose readiness
+  probe is passing,
+expected_result: >
+  the learner produces a passing health-check result plus one successful end-to-end
+  inference request/response pair as evidence the service genuinely works, distinguishing
+  this from "the pod is up" alone.
+related_capabilities:
+  - cap-foundations-ai-ml-platform-engineering-baseline
+evidence_expectations: >
+  A logged health-check response and a real inference request/response pair captured
+  from the deployed endpoint.

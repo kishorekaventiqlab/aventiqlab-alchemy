@@ -1,0 +1,19 @@
+id: art-diagnose-broken-rag-pipeline-quiz
+type: quiz
+title: Retrieval vs. Generation Facts Check
+experience_ref: exp-diagnose-broken-rag-pipeline
+outcome_refs:
+  - out-diagnose-broken-rag-pipeline-01
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test live diagnostic judgment - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions on chunking/embedding effects on retrieval and how to isolate retrieval
+  from generation as a failure source.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

@@ -1,0 +1,18 @@
+id: art-design-highly-available-model-serving-quiz
+type: quiz
+title: Multi-AZ Capacity Facts Check
+experience_ref: exp-design-highly-available-model-serving
+outcome_refs:
+  - out-design-highly-available-model-serving-01
+capability_refs:
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test design judgment or live failover behavior - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions on per-AZ GPU capacity confirmation and load-balancer failover mechanics.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

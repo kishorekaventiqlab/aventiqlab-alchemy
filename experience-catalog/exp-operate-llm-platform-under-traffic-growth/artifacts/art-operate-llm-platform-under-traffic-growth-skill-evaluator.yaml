@@ -1,0 +1,18 @@
+id: art-operate-llm-platform-under-traffic-growth-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Operate an LLM Platform Under Traffic Growth
+experience_ref: exp-operate-llm-platform-under-traffic-growth
+outcome_refs:
+  - out-operate-llm-platform-under-traffic-growth-01
+  - out-operate-llm-platform-under-traffic-growth-02
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+  - cap-kubernetes-workload-scaling-for-inference
+purpose: >
+  Open-ended evaluation of whether the cost-diagnosis and routing reasoning transfers
+  when the self-hosted model has less headroom than in the reference case -
+  not recall (Quiz) or hands-on execution (Lab). Source-of-truth structure
+  only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-operate-llm-platform-under-traffic-growth

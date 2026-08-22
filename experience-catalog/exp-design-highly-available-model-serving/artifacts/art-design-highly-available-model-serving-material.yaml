@@ -1,0 +1,25 @@
+id: art-design-highly-available-model-serving-material
+type: material
+title: "Multi-AZ GPU Capacity and Failover Design: Reference"
+experience_ref: exp-design-highly-available-model-serving
+outcome_refs:
+  - out-design-highly-available-model-serving-01
+capability_refs:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on confirming per-AZ GPU capacity and
+  load-balancer failover mechanics, as pure reference facts - not a narrated design
+  review (Video) or a built failover config (Lab).
+content_summary: >
+  A reference document covering how to confirm actual GPU instance-type availability
+  per AZ (not just regional availability), and load-balancer health-check-based failover
+  mechanics.
+estimated_duration_minutes: 20
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 20
+  key_sections:
+    - Confirming per-AZ GPU instance-type availability and quota
+    - Load-balancer health-check-based failover mechanics
+    - Why designing around unconfirmed capacity produces an unimplementable plan

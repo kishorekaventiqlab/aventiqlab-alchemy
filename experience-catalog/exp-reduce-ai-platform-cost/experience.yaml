@@ -1,0 +1,66 @@
+id: exp-reduce-ai-platform-cost
+title: Reduce AI Platform Infrastructure Cost
+target_learner_profiles: [lp-7yr-mlops-lead, lp-10yr-staff-ai-platform-engineer]
+target_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+future_capability_domains: [cost-engineering]
+prerequisites: [exp-optimize-gpu-utilization]
+scenario: >
+  Leadership has set a target to reduce AI platform infrastructure spend by 20% this
+  quarter without a corresponding reduction in service reliability.
+business_context: >
+  GPU infrastructure is the largest line item in the platform budget; the mandate is
+  explicit that reliability commitments to product teams cannot be renegotiated as part
+  of this effort.
+technical_environment:
+  platform: Amazon EKS, multiple GPU node pools across several services
+  infrastructure_summary: >
+    Several inference services run on dedicated and shared GPU node pools with varying
+    utilization and reservation types (on-demand vs. reserved).
+  key_services: [Amazon EKS, Cost and Usage Reports, Reserved Instances / Savings Plans, Multiple GPU node pools]
+starting_state: >
+  A cost breakdown shows GPU spend split across several services with uneven
+  utilization; some node pools run mostly on-demand instances despite stable,
+  predictable baseline load.
+learner_mission: >
+  Identify and propose a concrete set of cost-reduction actions that hit the 20% target
+  without weakening any existing reliability commitment.
+expected_investigation:
+  - Break down spend by service and by reservation type (on-demand vs. reserved/committed).
+  - Identify which services have stable enough baseline load to justify reserved capacity commitments.
+  - Identify any node pools with persistently low utilization as consolidation candidates.
+expected_decisions:
+  - decision_point: Where should the 20% reduction come from?
+    options_considered:
+      - "Correct: a mix of reserved-capacity commitments for predictable baseline load plus consolidation of low-utilization node pools, both of which don't touch reliability commitments."
+      - "Plausible but wrong: propose reducing replica counts or safety margins on latency-sensitive services to cut cost directly, which risks violating the reliability mandate."
+    sound_reasoning: >
+      The mandate explicitly rules out weakening reliability, so cost actions need to
+      come from purchasing strategy and consolidation, not from cutting operational
+      headroom on committed services.
+build_activities:
+  - Model the savings from converting stable-baseline on-demand usage to reserved/committed capacity.
+  - Propose a consolidation plan for underutilized node pools.
+operational_activities:
+  - Track realized savings against the 20% target after changes are implemented.
+failure_modes:
+  - Proposing cuts that technically hit the cost target but violate the explicit reliability mandate.
+  - Consolidating a node pool without verifying it doesn't share a hidden dependency with another team's service.
+constraints:
+  - Cannot reduce reliability commitments to any product team.
+  - Reserved capacity commitments require a minimum term, so must be sized carefully against actual stable baseline load.
+trade_offs:
+  - tension: Reserved-capacity savings vs. flexibility
+    choice_a: Commit to reserved capacity for maximum savings, reducing flexibility to change instance types or shrink further later.
+    choice_b: Stay more on-demand for flexibility, accepting a smaller cost reduction relative to the 20% target.
+success_conditions:
+  - A cost-reduction plan is proposed that plausibly reaches the 20% target.
+  - No proposed action reduces an existing reliability commitment.
+evidence_of_competence:
+  - The cost model showing where the 20% comes from.
+  - An explicit statement of why each action doesn't touch reliability commitments.
+progression_archetype: expert-optimize
+outcome_refs:
+  - out-reduce-ai-platform-cost-01
+  - out-reduce-ai-platform-cost-02

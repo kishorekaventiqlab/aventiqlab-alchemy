@@ -1,0 +1,27 @@
+id: art-deploy-inference-service-material
+type: material
+title: "Deploying GPU Workloads on Kubernetes: Reference"
+experience_ref: exp-deploy-inference-service
+outcome_refs:
+  - out-deploy-inference-service-01
+  - out-deploy-inference-service-02
+capability_refs:
+  - cap-foundations-ai-ml-platform-engineering-baseline
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Builds the pre-requisite KNOW/UNDERSTAND foundation (node selectors/tolerations,
+  device plugin basics, what "healthy" actually means for an inference service) as pure
+  reference facts. It does not narrate a scenario - that is the Video's job - and it
+  carries no time pressure - that is the Lab's job.
+content_summary: >
+  A reference document covering: how taints/tolerations and node selectors work for
+  GPU-scheduled pods; what the NVIDIA device plugin does; and why a Running pod status
+  is not sufficient evidence a service is actually healthy.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - Taints, tolerations, and node selectors for GPU scheduling
+    - What the NVIDIA device plugin does and how to tell it's working
+    - "Why 'Running' isn't 'healthy': readiness probes vs. real inference checks"

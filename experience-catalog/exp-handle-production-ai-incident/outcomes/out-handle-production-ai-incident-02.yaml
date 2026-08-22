@@ -1,0 +1,22 @@
+id: out-handle-production-ai-incident-02
+experience_ref: exp-handle-production-ai-incident
+learner_summary: >
+  Mitigate customer impact on both services and deliver timely stakeholder status
+  updates throughout the incident, even while the root cause is still uncertain.
+learner_profile_refs: [lp-7yr-mlops-lead]
+action:
+  verb: OPERATE
+  statement: >
+    Mitigate customer impact on both affected services and deliver stakeholder status
+    updates at defined intervals throughout the incident.
+context: >
+  Given an active incident affecting two customer-facing services with an uncertain root cause,
+expected_result: >
+  the learner applies a mitigation that reduces customer impact on both services and
+  delivers status updates that communicate the working hypothesis with appropriate
+  caveats rather than waiting for full certainty.
+related_capabilities:
+  - cap-ai-reliability-sre-incident-response-for-inference
+  - cap-observability-slo-based-alerting-for-inference
+evidence_expectations: >
+  A timeline of stakeholder communications during the incident and the mitigation applied.

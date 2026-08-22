@@ -1,0 +1,27 @@
+id: art-handle-production-ai-incident-video
+type: video
+title: Watching an Incident Commander Link Two Alerts
+experience_ref: exp-handle-production-ai-incident
+outcome_refs:
+  - out-handle-production-ai-incident-01
+capability_refs:
+  - cap-ai-reliability-sre-incident-response-for-inference
+purpose: >
+  Models an incident commander's reasoning on a different multi-service incident,
+  narrated out loud - the HOW of checking shared infrastructure first, not the facts
+  (Material) or the learner's own exact incident.
+content_summary: >
+  A screencast of an incident commander handling two closely-timed alerts on a
+  different pair of infrastructure-sharing services, narrating why they check the
+  shared components before splitting the investigation.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on two alerts firing two minutes apart on services sharing infrastructure.
+    - Narrate resisting the instinct to split into two separate investigation threads immediately.
+    - Narrate checking the shared node pool and registry for a common event.
+    - Narrate confirming (or ruling out) a shared root cause and delivering a status update.
+  on_screen_demonstrations:
+    - PagerDuty incident timeline
+    - Checking shared infrastructure component logs

@@ -1,0 +1,74 @@
+id: se-roll-out-model-safely
+experience_ref: exp-roll-out-model-safely
+skills_evaluated:
+  - cap-mlops-pipeline-orchestration
+  - cap-observability-slo-based-alerting-for-inference
+scenario: >
+  A variant model has no obvious single quality metric like accuracy - it's a
+  generative feature where "quality" is subjective - and the team is unsure what an
+  online quality signal could even be for a rollout gate.
+opening_question: >
+  This model doesn't have a clean accuracy number the way the last one did. Does that
+  mean you can't build a quality gate for its rollout? What would you actually do?
+expected_reasoning_areas:
+  - Recognizing that a proxy signal (e.g. user engagement, explicit feedback, a sampled human/automated rubric score) can substitute for a direct accuracy metric
+  - Weighing the tradeoff between a fast, noisy proxy and a slow, precise one
+  - Not concluding "no clean metric exists" therefore "skip the quality gate"
+follow_up_question_paths:
+  - trigger: Learner concludes no quality gate is possible without a clean metric.
+    follow_up_question: What's something indirect you could measure that would still catch a bad rollout, even if it's not perfectly precise?
+    targets_reasoning_area: Recognizing that a proxy signal can substitute for a direct accuracy metric
+  - trigger: Learner proposes a slow, thorough evaluation (e.g. full human review) as the online signal.
+    follow_up_question: Is that fast enough to actually gate a live rollout, or is it something else?
+    targets_reasoning_area: Weighing the tradeoff between a fast, noisy proxy and a slow, precise one
+misconception_indicators:
+  - misconception: Believes an online quality gate requires the same precision as an offline evaluation metric.
+    likely_root_cause: Hasn't separated "precise enough to publish a leaderboard score" from "fast and directionally right enough to catch a bad rollout."
+    corrective_follow_up: What's the actual bar a rollout gate signal needs to clear - perfect precision, or just catching an obviously bad version quickly?
+strong_answer_indicators:
+  - Proposes a specific, fast proxy signal rather than declaring the problem unsolvable.
+  - Explicitly reasons about the speed/precision tradeoff.
+weak_answer_indicators:
+  - Concludes a quality gate isn't possible without a clean accuracy metric.
+  - Proposes a signal too slow to actually gate a live rollout.
+evidence_criteria:
+  - Names a specific proxy signal, not just "some kind of feedback."
+  - States why the chosen signal is fast enough to be useful during rollout.
+scoring_dimensions:
+  - dimension: REASONING
+    description: Quality of reasoning about proxy signals when no clean metric exists.
+    weight_percent: 35
+  - dimension: TRADE_OFF_ANALYSIS
+    description: Explicit reasoning about the speed/precision tradeoff of the chosen signal.
+    weight_percent: 35
+  - dimension: APPLICATION
+    description: Transfers the quality-gating principle to a genuinely different kind of model.
+    weight_percent: 30
+proficiency_levels:
+  - level: Beginner
+    description: Concludes no gate is possible even after prompting.
+    criteria:
+      - Does not propose a proxy signal even with a follow-up.
+  - level: Intermediate
+    description: Proposes a proxy signal only after prompting, without addressing speed.
+    criteria:
+      - Names a proxy signal after the first follow-up.
+  - level: Advanced
+    description: Independently proposes a proxy signal and reasons about its speed/precision tradeoff.
+    criteria:
+      - Proposes a specific proxy signal unprompted.
+      - Addresses the speed/precision tradeoff unprompted.
+  - level: Expert
+    description: As Advanced, and proposes a concrete threshold or triggering rule for the proxy signal.
+    criteria:
+      - Proposes a specific, actionable threshold or rule.
+  - level: Architect
+    description: As Expert, and generalizes a framework for defining quality gates on subjective/generative features going forward.
+    criteria:
+      - Articulates a reusable approach for future subjective-quality features, not just this one.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, TRADE_OFF_ANALYSIS]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to generalize the approach for future subjective-quality features (Architect-level probe).

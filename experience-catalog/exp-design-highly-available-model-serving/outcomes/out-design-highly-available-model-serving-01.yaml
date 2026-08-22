@@ -1,0 +1,25 @@
+id: out-design-highly-available-model-serving-01
+experience_ref: exp-design-highly-available-model-serving
+learner_summary: >
+  Design a two-AZ active-active model-serving architecture scoped to confirmed GPU
+  capacity, rather than designing around an unconfirmed third AZ.
+learner_profile_refs:
+  - lp-10yr-staff-ai-platform-engineer
+  - lp-staff-principal-principal-ai-infrastructure-architect
+action:
+  verb: DESIGN
+  statement: >
+    Design a highly-available model-serving architecture scoped to AZs with confirmed
+    GPU capacity, with load-balancer-level failover between them.
+context: >
+  Given GPU capacity for the required instance type confirmed in two of three AZs and a
+  mandate to survive a single AZ outage,
+expected_result: >
+  the learner designs active-active serving across the two confirmed AZs with
+  load-balancer failover, explicitly rejecting a three-AZ design that depends on
+  unconfirmed capacity.
+related_capabilities:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-platform-architecture-tradeoff-driven-system-design
+evidence_expectations: >
+  The capacity-confirmation evidence for each AZ used in the design.

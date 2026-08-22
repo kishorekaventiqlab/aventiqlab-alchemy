@@ -1,0 +1,25 @@
+id: out-inference-under-load-03
+experience_ref: exp-inference-under-load
+learner_summary: >
+  Propose a longer-term capacity or architecture fix with an explicit named tradeoff.
+learner_profile_refs:
+  - lp-5yr-ai-platform-engineer
+  - lp-7yr-mlops-lead
+action:
+  verb: DESIGN
+  statement: >
+    Propose a longer-term capacity or architecture fix with an explicit named tradeoff.
+context: >
+  Given the recurring risk of GPU-quota-bound traffic spikes for this inference platform,
+expected_result: >
+  the learner proposes a specific longer-term fix (e.g. a GPU overflow pool or a
+  documented shedding policy) and names what it costs - money, complexity, or
+  degraded-experience risk - rather than giving an unqualified "add more capacity"
+  recommendation.
+related_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+  - cap-platform-architecture-tradeoff-driven-system-design
+evidence_expectations: >
+  A written proposal naming the specific tradeoff (what it costs vs. what it fixes), not
+  just the recommended fix itself.

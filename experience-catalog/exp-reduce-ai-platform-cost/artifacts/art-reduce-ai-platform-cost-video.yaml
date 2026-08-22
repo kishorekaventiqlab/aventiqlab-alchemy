@@ -1,0 +1,27 @@
+id: art-reduce-ai-platform-cost-video
+type: video
+title: Watching a Cost-Reduction Plan Get Built
+experience_ref: exp-reduce-ai-platform-cost
+outcome_refs:
+  - out-reduce-ai-platform-cost-01
+capability_refs:
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Models an engineer's reasoning building a cost-reduction plan for a different
+  platform, narrated out loud - the HOW of checking reliability impact for each
+  proposed action, not the facts (Material) or the learner's own cost model (Lab).
+content_summary: >
+  A screencast of an engineer building a cost-reduction plan for a different set of
+  services, narrating why each candidate action is checked against reliability
+  commitments before being included.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a cost breakdown by service and reservation type.
+    - Narrate identifying stable-baseline candidates for reserved capacity.
+    - Narrate checking each candidate action against reliability commitments.
+    - Narrate assembling the plan and confirming it plausibly hits the target.
+  on_screen_demonstrations:
+    - Cost and Usage Report breakdown
+    - Reserved-capacity savings calculator

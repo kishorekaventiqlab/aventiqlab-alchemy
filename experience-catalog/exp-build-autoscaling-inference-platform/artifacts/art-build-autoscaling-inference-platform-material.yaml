@@ -1,0 +1,25 @@
+id: art-build-autoscaling-inference-platform-material
+type: material
+title: "Choosing an Autoscaling Signal for GPU Workloads: Reference"
+experience_ref: exp-build-autoscaling-inference-platform
+outcome_refs:
+  - out-build-autoscaling-inference-platform-01
+capability_refs:
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on why CPU-based HPA is a poor fit for GPU-bound
+  inference and what KEDA scalers are available instead, as pure reference facts - no
+  scenario narrative (Video) or hands-on build (Lab).
+content_summary: >
+  A reference document comparing CPU-based HPA against KEDA custom-metric scaling for
+  GPU workloads, and explaining why queue depth is usually a better demand signal than
+  CPU utilization for a GPU-bound service.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - Why CPU utilization is a poor proxy for GPU-bound demand
+    - KEDA scalers and how they differ from HPA
+    - Matching node pool headroom to a configured max replica count

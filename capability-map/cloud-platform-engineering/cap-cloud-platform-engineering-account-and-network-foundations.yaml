@@ -1,0 +1,59 @@
+id: cap-cloud-platform-engineering-account-and-network-foundations
+name: Cloud Account & Network Foundations
+domain: cloud-platform-engineering
+description: >
+  Provisioning and operating the account, VPC, and IAM foundations that every other
+  AI/ML platform capability is built on top of.
+skills:
+  - id: skl-cloud-platform-account-network-01
+    name: Core primitive fluency
+    verb: KNOW
+    statement: >
+      Knows core cloud account/network primitives (VPC, subnet, security group, IAM role,
+      service quota).
+    evidence:
+      - Correctly diagrams a VPC layout including public/private subnets and routing.
+  - id: skl-cloud-platform-account-network-02
+    name: Templated network provisioning
+    verb: BUILD
+    statement: >
+      Can provision a VPC with public/private subnets and an EKS-ready network topology
+      from an existing IaC module.
+    evidence:
+      - Has stood up a working cluster network using a provided Terraform module without escalation.
+  - id: skl-cloud-platform-account-network-03
+    name: Routine account operations
+    verb: OPERATE
+    statement: >
+      Can rotate credentials, adjust security group rules, and request service quota
+      increases for an existing account.
+    evidence:
+      - Has performed a quota increase request and confirmed it took effect.
+  - id: skl-cloud-platform-account-network-04
+    name: Connectivity troubleshooting
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose connectivity failures caused by misconfigured routing, security groups,
+      or DNS.
+    evidence:
+      - Resolved at least one cross-subnet connectivity incident using VPC flow logs.
+  - id: skl-cloud-platform-account-network-05
+    name: Multi-account topology design
+    verb: DESIGN
+    statement: >
+      Can design a multi-account or multi-VPC network topology balancing isolation, cost,
+      and operational overhead.
+    evidence:
+      - Authored an account/network topology design doc that was adopted.
+common_tools:
+  - Terraform
+  - AWS VPC / IAM / Organizations (or GCP/Azure equivalents)
+  - VPC flow logs
+beginner_indicators:
+  - Can follow an existing IaC module to stand up a network but cannot debug it when it fails.
+intermediate_indicators:
+  - Independently provisions and operates account/network resources for a single service.
+advanced_indicators:
+  - Diagnoses cross-cutting connectivity incidents across multiple accounts or VPCs.
+expert_architect_indicators:
+  - Designs org-wide multi-account network topology and sets isolation/cost standards.

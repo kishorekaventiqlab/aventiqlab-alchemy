@@ -1,0 +1,24 @@
+id: out-design-highly-available-model-serving-02
+experience_ref: exp-design-highly-available-model-serving
+learner_summary: >
+  Prove the failover mechanism actually works by testing it, and migrate to the new
+  architecture without a customer-visible outage.
+learner_profile_refs:
+  - lp-10yr-staff-ai-platform-engineer
+  - lp-staff-principal-principal-ai-infrastructure-architect
+action:
+  verb: PROVE
+  statement: >
+    Demonstrate via a simulated AZ failure that the failover mechanism works, and
+    confirm the migration itself caused no customer-visible outage.
+context: >
+  Given the two-AZ active-active design implemented in a test environment,
+expected_result: >
+  the learner simulates one AZ's node pool becoming unavailable and confirms traffic
+  fails over correctly, and confirms the migration to the new architecture itself didn't
+  cause an outage.
+related_capabilities:
+  - cap-model-serving-autoscaling-policy-design
+evidence_expectations: >
+  Results of a simulated AZ-failure failover test and confirmation of a
+  zero-customer-impact migration.

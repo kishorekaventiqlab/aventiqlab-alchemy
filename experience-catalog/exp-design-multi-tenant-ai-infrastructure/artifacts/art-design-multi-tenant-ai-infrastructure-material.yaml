@@ -1,0 +1,25 @@
+id: art-design-multi-tenant-ai-infrastructure-material
+type: material
+title: "Multi-Tenant Kubernetes Isolation Models: Reference"
+experience_ref: exp-design-multi-tenant-ai-infrastructure
+outcome_refs:
+  - out-design-multi-tenant-ai-infrastructure-01
+capability_refs:
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on namespace-based multi-tenancy mechanisms and
+  distinguishing genuine compliance isolation needs from generic noisy-neighbor concerns,
+  as pure reference facts - not a narrated design review (Video) or a built quota policy (Lab).
+content_summary: >
+  A reference document covering ResourceQuotas, priority classes, and namespace-based
+  multi-tenancy, and a framework for distinguishing a genuine compliance isolation
+  requirement from a generic noisy-neighbor concern.
+estimated_duration_minutes: 20
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 20
+  key_sections:
+    - ResourceQuotas and priority classes for shared-tenant capacity control
+    - Namespace-based multi-tenancy mechanics
+    - "Genuine compliance isolation vs. generic noisy-neighbor concerns: a framework"

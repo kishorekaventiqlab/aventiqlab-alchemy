@@ -1,0 +1,19 @@
+id: art-roll-out-model-safely-quiz
+type: quiz
+title: Canary Rollout Facts Check
+experience_ref: exp-roll-out-model-safely
+outcome_refs:
+  - out-roll-out-model-safely-01
+capability_refs:
+  - cap-mlops-pipeline-orchestration
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test judgment under a live regression - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions on canary mechanics, why health checks miss quality regressions, and what
+  makes a quality signal "fast enough" to gate a rollout.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

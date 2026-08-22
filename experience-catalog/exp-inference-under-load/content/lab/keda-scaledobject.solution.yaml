@@ -1,0 +1,16 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: doc-search-summarizer
+  namespace: inference
+spec:
+  scaleTargetRef:
+    name: doc-search-summarizer
+  minReplicaCount: 2
+  maxReplicaCount: 12
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-server.monitoring.svc:80
+        query: 'inference_gateway_queue_depth{service="doc-search-summarizer"}'
+        threshold: "5"

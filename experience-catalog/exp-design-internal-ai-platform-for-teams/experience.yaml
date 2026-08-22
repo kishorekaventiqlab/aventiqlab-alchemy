@@ -1,0 +1,71 @@
+id: exp-design-internal-ai-platform-for-teams
+title: Design an Internal AI Platform for Multiple Engineering Teams
+target_learner_profiles: [lp-staff-principal-principal-ai-infrastructure-architect]
+target_capabilities:
+  - cap-platform-architecture-tradeoff-driven-system-design
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+future_capability_domains: [ai-platform-engineering]
+prerequisites: [exp-design-multi-tenant-ai-infrastructure]
+scenario: >
+  Five engineering teams are each independently building their own ad hoc GPU
+  infrastructure and deployment tooling for AI features, leading to duplicated effort
+  and inconsistent reliability practices.
+business_context: >
+  Leadership wants a self-service internal AI platform that lets teams deploy AI
+  features without each team reinventing infrastructure, while preserving enough team
+  autonomy that adoption isn't seen as a mandate that slows teams down.
+technical_environment:
+  platform: Amazon EKS, multiple independently-managed GPU node pools across five teams
+  infrastructure_summary: >
+    Each of the five teams has its own GPU node pool, deployment scripts, and monitoring
+    setup, built independently over the past year with no shared standards.
+  key_services:
+    - Amazon EKS
+    - Internal developer platform tooling
+    - Shared observability stack (proposed)
+    - Self-service deployment templates (proposed)
+starting_state: >
+  Five teams each run independent GPU infrastructure and tooling with no shared
+  standards. No self-service platform exists yet. Some teams have significantly more
+  mature reliability practices than others.
+learner_mission: >
+  Design an internal AI platform strategy that consolidates the duplicated
+  infrastructure effort and raises the reliability bar company-wide, while remaining
+  something teams will actually choose to adopt rather than resist.
+expected_investigation:
+  - Interview or survey a sample of the five teams to distinguish which parts of their current tooling they value versus which parts are pure duplicated toil.
+  - Identify the team with the most mature reliability practices as a potential basis for the shared standard.
+expected_decisions:
+  - decision_point: Mandate adoption or design for voluntary adoption?
+    options_considered:
+      - "Correct: design the platform's default path to be clearly better than what any team could build alone (self-service, faster, more reliable out of the box), making adoption the easy choice rather than requiring a mandate."
+      - "Plausible but wrong: mandate migration to the new platform on a fixed timeline regardless of whether the platform is actually ready or better than what teams already have, risking resistance and forced migrations to an immature platform."
+    sound_reasoning: >
+      A platform that teams are forced onto before it's genuinely better than their
+      existing setup creates resentment and workarounds; making adoption the obviously
+      better choice produces more durable, voluntary adoption.
+build_activities:
+  - Design self-service deployment templates based on the most mature existing team's practices.
+  - Design a shared observability stack that all five teams can adopt incrementally.
+operational_activities:
+  - Pilot the platform with one team before rolling out company-wide.
+failure_modes:
+  - Building a platform based on assumptions about what teams need rather than validated input from the teams themselves.
+  - Mandating migration before the platform is actually better than teams' existing tooling, causing resistance.
+constraints:
+  - Cannot mandate a disruptive migration on a fixed timeline without validating the platform first.
+  - Must preserve enough team autonomy that the platform doesn't read as a top-down mandate that slows teams down.
+trade_offs:
+  - tension: Standardization vs. team autonomy
+    choice_a: A more opinionated, standardized platform that maximizes consistency and reliability, at some cost to teams' flexibility to deviate for their specific needs.
+    choice_b: A more flexible, less opinionated platform that preserves team autonomy, at some cost to consistency and the reliability bar it can guarantee.
+success_conditions:
+  - A platform design is proposed that is validated against at least one real team's actual needs, not assumptions.
+  - At least one team pilots the platform voluntarily before a company-wide rollout is planned.
+evidence_of_competence:
+  - Evidence from team interviews/surveys informing the design.
+  - Pilot results from the first adopting team.
+progression_archetype: architect-design
+outcome_refs:
+  - out-design-internal-ai-platform-for-teams-01
+  - out-design-internal-ai-platform-for-teams-02

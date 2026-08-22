@@ -1,0 +1,27 @@
+id: art-optimize-gpu-utilization-video
+type: video
+title: Watching a Utilization Optimization Get Scoped
+experience_ref: exp-optimize-gpu-utilization
+outcome_refs:
+  - out-optimize-gpu-utilization-01
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+purpose: >
+  Models an engineer's reasoning process scoping a consolidation change on a different
+  node pool, narrated out loud - the HOW of excluding the sensitive service, not the
+  facts (Material) or the learner's own node pool (Lab).
+content_summary: >
+  A screencast of an engineer scoping a utilization improvement on a different shared
+  GPU node pool, narrating why they explicitly exclude the latency-sensitive service
+  from consolidation.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a utilization dashboard showing low off-peak, high peak-hour usage.
+    - Narrate classifying each service by latency sensitivity.
+    - Narrate scoping the consolidation to exclude the sensitive service.
+    - Narrate a quick before/after comparison plan.
+  on_screen_demonstrations:
+    - Utilization-by-service dashboard
+    - Node pool bin-packing configuration

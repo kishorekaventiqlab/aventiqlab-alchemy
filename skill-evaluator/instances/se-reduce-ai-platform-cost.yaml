@@ -1,0 +1,75 @@
+id: se-reduce-ai-platform-cost
+experience_ref: exp-reduce-ai-platform-cost
+skills_evaluated:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+scenario: >
+  A variant mandate: leadership now wants 35% reduction instead of 20%, and the
+  reserved-capacity plus consolidation actions that reached 20% comfortably no longer
+  reach 35% without touching something reliability-adjacent.
+opening_question: >
+  The target just moved from 20% to 35%, and your safe actions don't get you there
+  anymore. Do you propose touching a reliability commitment, or is there another option?
+expected_reasoning_areas:
+  - Not defaulting to violating the reliability mandate just because the safe actions are insufficient
+  - Considering options outside the original two levers (e.g. renegotiating commitments, phased timeline, partial target achievement with a stated gap)
+  - Communicating honestly that the new target may not be fully reachable without new tradeoffs, rather than forcing a number
+follow_up_question_paths:
+  - trigger: Learner proposes touching a reliability commitment to hit 35%.
+    follow_up_question: The mandate was explicit that reliability commitments can't move - what would you say instead if your safe actions only get you to, say, 25%?
+    targets_reasoning_area: Not defaulting to violating the reliability mandate just because the safe actions are insufficient
+  - trigger: Learner has no idea what to propose beyond the original two levers.
+    follow_up_question: Are reserved capacity and consolidation the only two levers that exist, or just the two that were sufficient last time?
+    targets_reasoning_area: Considering options outside the original two levers
+misconception_indicators:
+  - misconception: Treats the cost target as a hard number that must be hit regardless of other constraints.
+    likely_root_cause: Doesn't weigh the target against the explicit reliability constraint as co-equal requirements.
+    corrective_follow_up: Which constraint was stated as non-negotiable - the target or the reliability commitment?
+strong_answer_indicators:
+  - Refuses to propose an action that violates the reliability mandate, even under pressure to hit a bigger number.
+  - Proposes at least one option beyond the original two levers.
+  - Is willing to communicate a gap honestly rather than force the number.
+weak_answer_indicators:
+  - Proposes touching a reliability commitment to close the gap.
+  - Has no ideas beyond the original two levers and stalls.
+evidence_criteria:
+  - States explicitly that the reliability mandate still holds at the new target.
+  - Names at least one new option or an honest gap statement.
+scoring_dimensions:
+  - dimension: ENGINEERING_JUDGMENT
+    description: Holds the reliability constraint even under pressure to hit a larger cost target.
+    weight_percent: 40
+  - dimension: REASONING
+    description: Generates options beyond the two levers that worked at the smaller target.
+    weight_percent: 35
+  - dimension: COMMUNICATION
+    description: Communicates honestly about what is and isn't achievable given the constraints.
+    weight_percent: 25
+proficiency_levels:
+  - level: Beginner
+    description: Proposes touching the reliability commitment to hit the number, even after prompting.
+    criteria:
+      - Does not reconsider after the follow-up.
+  - level: Intermediate
+    description: Backs off the reliability-violating proposal after prompting but has no alternative.
+    criteria:
+      - Agrees not to touch reliability after the follow-up but proposes nothing further.
+  - level: Advanced
+    description: Independently holds the reliability constraint and proposes at least one new option.
+    criteria:
+      - States the reliability constraint holds unprompted.
+      - Proposes a new lever unprompted.
+  - level: Expert
+    description: As Advanced, and is explicit about communicating any resulting gap to the target honestly.
+    criteria:
+      - States a plan for communicating a possible shortfall rather than forcing the number.
+  - level: Architect
+    description: As Expert, and reframes the situation as a negotiation between two organizational priorities rather than a pure optimization problem.
+    criteria:
+      - Articulates the tension as a leadership-level tradeoff decision, not just an engineering optimization.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [ENGINEERING_JUDGMENT, REASONING]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to reframe the situation for a leadership audience (Architect-level probe).

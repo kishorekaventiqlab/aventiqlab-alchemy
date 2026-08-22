@@ -1,0 +1,27 @@
+id: art-handle-production-ai-incident-lab
+type: source_code_lab
+title: Investigate a Simulated Two-Alert Incident
+experience_ref: exp-handle-production-ai-incident
+outcome_refs:
+  - out-handle-production-ai-incident-01
+  - out-handle-production-ai-incident-02
+capability_refs:
+  - cap-ai-reliability-sre-incident-response-for-inference
+purpose: >
+  Untimed BUILD/TROUBLESHOOT practice: work through a captured incident log bundle at
+  your own pace - this is
+  where the method is first practiced correctly.
+content_summary: >
+  A starter repo with a captured log bundle (alerts, shared infrastructure logs, deploy
+  history) from a simulated two-service incident. The learner determines whether the
+  alerts are linked and drafts a stakeholder update.
+estimated_duration_minutes: 60
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-handle-production-ai-incident
+  tasks:
+    - Check the shared infrastructure logs for a common event around the alert timestamps.
+    - Determine whether the two alerts share a root cause.
+    - Draft a stakeholder status update reflecting the current confidence level.
+  environment_requirements:
+    - Provided log bundle (static files, no live cluster required)
+  hints_available: true

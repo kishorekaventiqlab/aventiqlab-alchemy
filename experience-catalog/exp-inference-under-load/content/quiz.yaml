@@ -1,0 +1,171 @@
+# Real quiz content for art-inference-under-load-quiz.yaml (question_count: 10,
+# question_types: [multiple-choice, scenario-judgment], passing_threshold_percent: 80).
+# Checks the KNOW/UNDERSTAND content from content/material.md before the learner
+# is trusted with the Lab.
+artifact_ref: art-inference-under-load-quiz
+passing_threshold_percent: 80
+questions:
+  - id: q1
+    type: multiple-choice
+    material_section: "GPU utilization signals"
+    prompt: >
+      A service reports GPU (compute) utilization at 95% while GPU memory utilization
+      stays flat. What does this combination most likely indicate?
+    options:
+      a: A memory leak
+      b: A compute-bound workload
+      c: A network bottleneck
+      d: An autoscaler misconfiguration
+    correct: b
+    explanation: >
+      Rising compute utilization with flat memory is the classic compute-saturation
+      signature - the GPU is doing as much arithmetic as it can, and memory headroom
+      isn't the constraint.
+
+  - id: q2
+    type: multiple-choice
+    material_section: "GPU utilization signals"
+    prompt: >
+      Which combination of signals best distinguishes a compute-bound GPU workload from
+      a memory-bound one?
+    options:
+      a: Request rate alone
+      b: GPU utilization alone
+      c: GPU utilization together with GPU memory utilization
+      d: p50 latency alone
+    correct: c
+    explanation: >
+      Utilization alone is ambiguous - pairing it with memory utilization is what lets
+      you distinguish compute-bound from memory-bound.
+
+  - id: q3
+    type: scenario-judgment
+    material_section: "GPU utilization signals"
+    prompt: >
+      A service shows GPU memory utilization climbing steadily hour over hour with no
+      corresponding growth in traffic. What's the most likely explanation?
+    options:
+      a: Organic traffic-driven compute saturation
+      b: A memory leak
+      c: A batching misconfiguration
+      d: Network latency
+    correct: b
+    explanation: >
+      A memory curve that ratchets upward with no traffic growth is a leak signature,
+      not a load story - a different investigation than a traffic-driven capacity issue.
+
+  - id: q4
+    type: multiple-choice
+    material_section: "Kubernetes autoscaling primitives"
+    prompt: >
+      Which autoscaling primitive scales node-level cluster capacity rather than pod
+      replica count?
+    options:
+      a: HPA
+      b: KEDA
+      c: VPA
+      d: Cluster Autoscaler / Karpenter
+    correct: d
+    explanation: >
+      HPA, KEDA, and VPA all operate at the pod/replica level. Cluster Autoscaler and
+      Karpenter are the layer that adds or removes nodes.
+
+  - id: q5
+    type: scenario-judgment
+    material_section: "Kubernetes autoscaling primitives"
+    prompt: >
+      A CPU-based HPA is configured on a GPU-bound inference deployment. Under GPU
+      saturation, what will most likely happen?
+    options:
+      a: HPA scales up correctly, since CPU tracks GPU load closely
+      b: HPA does not scale, because CPU utilization stays low even though the GPU is saturated
+      c: HPA automatically switches to a GPU-based metric
+      d: HPA scales the deployment down
+    correct: b
+    explanation: >
+      CPU utilization on an inference pod is often nearly flat regardless of GPU load,
+      since the CPU is mostly orchestrating requests, not doing the compute - a
+      CPU-based HPA is a poor proxy for GPU-bound demand.
+
+  - id: q6
+    type: scenario-judgment
+    material_section: "Kubernetes autoscaling primitives"
+    prompt: >
+      KEDA is correctly configured on a queue-depth metric and reports ACTIVE: true, but
+      replica count stays capped during a traffic spike. What's the most likely cause?
+    options:
+      a: KEDA itself is broken
+      b: maxReplicaCount has already been reached
+      c: The Prometheus metric adapter is down
+      d: The Deployment manifest is invalid
+    correct: b
+    explanation: >
+      An active, correctly-configured KEDA scaler that has reached its configured
+      maximum looks like "autoscaling is broken" but is a different (and differently
+      fixed) problem than a genuine misconfiguration.
+
+  - id: q7
+    type: multiple-choice
+    material_section: "GPU service quotas"
+    prompt: >
+      During an active incident, an engineer proposes "request a GPU quota increase" as
+      the immediate mitigation. What's the problem with this proposal?
+    options:
+      a: Quota increases are free but always instantly approved
+      b: Quota increases are not instant and can't resolve an active incident within the SLA window
+      c: Quota increases require deleting existing capacity first
+      d: There is no problem - it's a valid immediate fix
+    correct: b
+    explanation: >
+      Quota increase approval can take anywhere from minutes to multiple business days -
+      it is not an available lever within a live incident's timeframe.
+
+  - id: q8
+    type: multiple-choice
+    material_section: "GPU service quotas"
+    prompt: >
+      Within a fixed GPU quota ceiling during an active incident, which of the following
+      is a legitimate immediate mitigation lever?
+    options:
+      a: Requesting an emergency quota increase
+      b: Waiting for the quota to reset automatically
+      c: Reducing demand via request shedding or rate limiting
+      d: Restarting the node pool
+    correct: c
+    explanation: >
+      Reducing demand (or reducing per-request cost) are the two levers that actually
+      act within a fixed quota ceiling - the material's Section 3 names both explicitly.
+
+  - id: q9
+    type: multiple-choice
+    material_section: "Dynamic batching"
+    prompt: >
+      Increasing the dynamic batching window on a model-serving runtime will most likely:
+    options:
+      a: Decrease throughput and decrease latency
+      b: Increase throughput and increase latency for early-arriving requests
+      c: Have no effect on throughput or latency
+      d: Decrease GPU utilization
+    correct: b
+    explanation: >
+      A longer batching window lets more requests accumulate into one batch, raising
+      throughput, but the first request in the batch waits longer - that's the
+      throughput/latency tradeoff.
+
+  - id: q10
+    type: scenario-judgment
+    material_section: "Dynamic batching"
+    prompt: >
+      A service has a strict p99 latency SLA and currently has spare throughput headroom
+      (GPU utilization is well below its ceiling). Which batching adjustment best fits
+      this situation?
+    options:
+      a: Increase batch size/window to maximize throughput
+      b: Decrease batch size/window to protect latency
+      c: Batching configuration is irrelevant to latency here
+      d: Switch from batching to VPA
+    correct: b
+    explanation: >
+      With throughput headroom to spare and a strict latency SLA at risk, the tradeoff
+      should be tuned toward latency - a smaller batch/window costs some throughput
+      efficiency but protects the SLA that's actually under pressure.

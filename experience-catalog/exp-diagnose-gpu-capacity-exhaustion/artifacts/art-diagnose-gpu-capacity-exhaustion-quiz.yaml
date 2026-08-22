@@ -1,0 +1,19 @@
+id: art-diagnose-gpu-capacity-exhaustion-quiz
+type: quiz
+title: Capacity Diagnosis Facts Check
+experience_ref: exp-diagnose-gpu-capacity-exhaustion
+outcome_refs:
+  - out-diagnose-gpu-capacity-exhaustion-01
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test live diagnostic speed or communication - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions on reading Cluster Autoscaler failure reasons and distinguishing
+  quota-ceiling from configuration causes.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

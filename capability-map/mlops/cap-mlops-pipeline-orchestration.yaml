@@ -1,0 +1,61 @@
+id: cap-mlops-pipeline-orchestration
+name: ML Pipeline Orchestration
+domain: mlops
+description: >
+  Building, operating, and troubleshooting multi-step ML pipelines (ingest, train,
+  evaluate, register, deploy) using an orchestration tool.
+skills:
+  - id: skl-mlops-pipeline-orchestration-01
+    name: Pipeline stage fluency
+    verb: KNOW
+    statement: >
+      Knows the stages of an ML pipeline (ingest, train, evaluate, register, deploy) and
+      common orchestration tools (Airflow, Kubeflow, Argo Workflows).
+    evidence:
+      - Correctly maps a given pipeline diagram to these stages.
+  - id: skl-mlops-pipeline-orchestration-02
+    name: Multi-step pipeline construction
+    verb: BUILD
+    statement: >
+      Can build a multi-step training/evaluation pipeline with an orchestration tool,
+      including failure retries.
+    evidence:
+      - Shipped a working pipeline that ran end-to-end including a retried step.
+  - id: skl-mlops-pipeline-orchestration-03
+    name: Partial-failure recovery
+    verb: OPERATE
+    statement: >
+      Can monitor pipeline run health and re-trigger failed steps without a full
+      pipeline re-run.
+    evidence:
+      - Recovered a failed pipeline run without a full re-run.
+  - id: skl-mlops-pipeline-orchestration-04
+    name: Drift-vs-infra diagnosis
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose a pipeline failure caused by data schema drift versus an
+      infrastructure fault.
+    evidence:
+      - Correctly distinguished these two causes for a real failed run.
+  - id: skl-mlops-pipeline-orchestration-05
+    name: Incident communication
+    verb: EXPLAIN
+    statement: >
+      Can explain a pipeline's failure and recovery to a non-pipeline-owner stakeholder.
+    evidence:
+      - Delivered a clear incident summary understood by a non-specialist.
+common_tools:
+  - Airflow
+  - Kubeflow Pipelines
+  - Argo Workflows
+  - MLflow (model registry)
+beginner_indicators:
+  - Runs an existing pipeline but cannot modify its structure.
+intermediate_indicators:
+  - Independently builds and operates a multi-step pipeline including retries.
+advanced_indicators:
+  - Diagnoses drift-vs-infrastructure failures and leads pipeline incident response.
+expert_architect_indicators:
+  - Sets org-wide pipeline orchestration standards and reusable pipeline templates. Note per
+    the experience-capability matrix, this capability is typically delegated rather than
+    personally deepened at the most senior bands.

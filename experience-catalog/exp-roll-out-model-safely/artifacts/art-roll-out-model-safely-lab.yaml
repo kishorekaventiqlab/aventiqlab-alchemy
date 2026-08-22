@@ -1,0 +1,29 @@
+id: art-roll-out-model-safely-lab
+type: source_code_lab
+title: Build the Canary Rollout and Quality Gate
+experience_ref: exp-roll-out-model-safely
+outcome_refs:
+  - out-roll-out-model-safely-01
+  - out-roll-out-model-safely-02
+capability_refs:
+  - cap-mlops-pipeline-orchestration
+  - cap-observability-slo-based-alerting-for-inference
+purpose: >
+  Untimed BUILD practice: construct the canary/traffic-split mechanism and the quality
+  signal with no time pressure - this is where it's first built correctly.
+content_summary: >
+  A starter repo with a single-version production deployment, a new model version ready
+  to roll out, and a stub online-quality-signal instrumentation point. The learner
+  completes the canary mechanism and the quality gate.
+estimated_duration_minutes: 90
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-roll-out-model-safely
+  tasks:
+    - Configure a traffic-split/canary mechanism between the old and new model versions.
+    - Instrument and threshold an online quality signal.
+    - Wire the quality signal to gate rollout progression automatically.
+  environment_requirements:
+    - Sandbox EKS cluster with a service mesh or ingress supporting traffic splitting
+    - Prometheus
+    - kubectl
+  hints_available: true

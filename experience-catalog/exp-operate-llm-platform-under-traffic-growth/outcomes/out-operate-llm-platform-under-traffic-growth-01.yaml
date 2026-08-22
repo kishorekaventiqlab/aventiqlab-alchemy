@@ -1,0 +1,20 @@
+id: out-operate-llm-platform-under-traffic-growth-01
+experience_ref: exp-operate-llm-platform-under-traffic-growth
+learner_summary: >
+  Diagnose whether growing third-party LLM API cost is driven by request volume or by
+  growing context length per request.
+learner_profile_refs: [lp-5yr-ai-platform-engineer, lp-7yr-mlops-lead]
+action:
+  verb: TROUBLESHOOT
+  statement: >
+    Diagnose the actual driver of rising third-party LLM API cost using usage data,
+    rather than assuming volume growth is the sole cause.
+context: >
+  Given weekly usage growing 20% week-over-week and API cost growing faster than that,
+expected_result: >
+  the learner separates the volume-driven and context-length-driven components of cost
+  growth using the platform's usage data, and states which is the larger contributor.
+related_capabilities:
+  - cap-llmops-prompt-and-eval-pipelines
+evidence_expectations: >
+  A breakdown of cost growth attributing it to volume vs. context length with supporting numbers.

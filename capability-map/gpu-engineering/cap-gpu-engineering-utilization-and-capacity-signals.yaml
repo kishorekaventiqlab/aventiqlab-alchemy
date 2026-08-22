@@ -1,0 +1,62 @@
+id: cap-gpu-engineering-utilization-and-capacity-signals
+name: GPU Utilization & Capacity Signals
+domain: gpu-engineering
+description: >
+  Reading and reasoning about GPU utilization, memory, and batching signals to determine
+  whether an inference workload is compute-bound, memory-bound, or capacity/quota-bound -
+  and designing a capacity strategy under a fixed quota ceiling. Load-bearing capability
+  for the reference experience exp-inference-under-load.
+skills:
+  - id: skl-gpu-engineering-utilization-01
+    name: Utilization-signal literacy
+    verb: KNOW
+    statement: >
+      Knows the difference between GPU utilization, memory utilization, and SM occupancy,
+      and what each does and does not indicate.
+    evidence:
+      - Correctly explains why a high GPU-utilization percentage does not necessarily mean
+        the workload is compute-bound.
+  - id: skl-gpu-engineering-utilization-02
+    name: Batching tradeoff reasoning
+    verb: UNDERSTAND
+    statement: >
+      Understands batching's effect on GPU throughput and latency tradeoffs for inference workloads.
+    evidence:
+      - Explains why increasing batch size raises throughput but can raise p99 latency.
+  - id: skl-gpu-engineering-utilization-03
+    name: Bottleneck classification
+    verb: OPERATE
+    statement: >
+      Can read GPU utilization, memory, and queue-depth dashboards to determine whether a
+      service is compute-bound, memory-bound, or queue-bound.
+    evidence:
+      - Correctly classified a live incident as compute-bound using at least two corroborating signals.
+  - id: skl-gpu-engineering-utilization-04
+    name: Capacity-vs-scheduling diagnosis
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose GPU capacity exhaustion versus a scheduling/quota ceiling as the root
+      cause of degraded inference performance.
+    evidence:
+      - Distinguished "more GPUs available but not scheduled" from "GPU quota ceiling
+        reached" in a live incident.
+  - id: skl-gpu-engineering-utilization-05
+    name: Quota-constrained capacity strategy
+    verb: DESIGN
+    statement: >
+      Can propose a GPU capacity strategy (overflow pool, request shedding, model
+      right-sizing) under a fixed quota ceiling.
+    evidence:
+      - Authored a capacity strategy proposal with a named tradeoff that was reviewed and accepted.
+common_tools:
+  - nvidia-smi / DCGM exporter
+  - Prometheus + Grafana GPU dashboards
+  - Triton / vLLM metrics endpoints
+beginner_indicators:
+  - Reads GPU utilization as a single number without distinguishing compute vs. memory bound.
+intermediate_indicators:
+  - Independently operates GPU dashboards to confirm workload state day-to-day.
+advanced_indicators:
+  - Diagnoses complex capacity-vs-scheduling incidents and leads the response.
+expert_architect_indicators:
+  - Designs org-wide GPU capacity strategy and quota policy across multiple services.

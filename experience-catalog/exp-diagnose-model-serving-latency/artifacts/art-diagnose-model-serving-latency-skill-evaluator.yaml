@@ -1,0 +1,18 @@
+id: art-diagnose-model-serving-latency-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Diagnose Model-Serving Latency
+experience_ref: exp-diagnose-model-serving-latency
+outcome_refs:
+  - out-diagnose-model-serving-latency-01
+  - out-diagnose-model-serving-latency-02
+capability_refs:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-observability-slo-based-alerting-for-inference
+purpose: >
+  Open-ended evaluation of whether the workload-shape-drift diagnostic approach
+  transfers when the drift correlates with something other than sequence
+  length - not recall (Quiz) or hands-on execution (Lab). Source-of-truth
+  structure only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-diagnose-model-serving-latency

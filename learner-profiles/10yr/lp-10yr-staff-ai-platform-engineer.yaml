@@ -1,0 +1,74 @@
+id: lp-10yr-staff-ai-platform-engineer
+title: Staff AI Platform Engineer
+experience_band: 10yr
+target_roles:
+  - Staff Engineer
+  - Staff AI Platform Engineer
+typical_background: >
+  Ten-plus years; sets org-wide platform standards and defines reusable abstractions
+  rather than personally implementing each service's configuration.
+existing_knowledge:
+  - Everything in lp-7yr-mlops-lead
+  - Cross-team platform abstraction design
+  - Organizational cost and reliability standard-setting
+existing_skills:
+  - Defines node-pool and scaling-policy abstractions adopted across multiple teams
+  - Sets SLO and alerting standards applied org-wide
+  - Diagnoses systemic architectural weaknesses from recurring incident patterns across services
+technology_exposure:
+  - technology: Kubernetes
+    exposure_level: Expert
+  - technology: GPU infrastructure
+    exposure_level: Expert
+  - technology: Model serving runtimes
+    exposure_level: Expert
+  - technology: Platform architecture
+    exposure_level: Advanced
+production_experience:
+  has_production_experience: true
+  description: >
+    No longer the primary on-call responder day-to-day; is escalated to for
+    architecture-level tradeoffs and for incidents that reveal a systemic weakness.
+  scale_indicators:
+    - Standards set by this engineer are applied across multiple platform teams
+    - Escalation point for incidents that recur across more than one service
+learning_needs:
+  - Deepening quantitative substantiation of architecture recommendations (cost/capacity models)
+  - Company-wide, not just team-wide, tradeoff communication
+build_expectations:
+  - statement: >
+      Defines reusable node-pool and scaling-policy abstractions adopted across multiple
+      teams rather than personally implementing each service's configuration.
+    verbs: [DESIGN]
+    capability_refs:
+      - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+      - cap-kubernetes-workload-scaling-for-inference
+operational_expectations:
+  - statement: >
+      Sets SLO-based alerting standards applied org-wide across multiple AI services.
+    verbs: [DESIGN]
+    capability_refs: [cap-observability-slo-based-alerting-for-inference]
+troubleshooting_expectations:
+  - statement: >
+      Diagnoses systemic architectural weaknesses from recurring incident patterns
+      across multiple services.
+    verbs: [TROUBLESHOOT]
+    capability_refs: [cap-platform-architecture-tradeoff-driven-system-design]
+architecture_expectations:
+  - statement: >
+      Designs a multi-team node-pool and platform strategy balancing isolation, cost,
+      and shared operability.
+    verbs: [DESIGN]
+    capability_refs: [cap-platform-architecture-tradeoff-driven-system-design]
+proof_expectations:
+  - statement: >
+      Substantiates a platform architecture recommendation with a cost model or capacity
+      projection reviewed by other teams.
+    verbs: [PROVE]
+    capability_refs: [cap-platform-architecture-tradeoff-driven-system-design]
+prerequisites: [lp-7yr-mlops-lead]
+expected_independence: Sets Org Direction
+expected_engineering_judgment: >
+  Sets standards other engineers build against rather than making individual service
+  decisions; judged on whether the abstraction holds up across teams, not on hands-on
+  execution speed.

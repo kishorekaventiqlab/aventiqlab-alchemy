@@ -1,0 +1,63 @@
+id: cap-platform-architecture-tradeoff-driven-system-design
+name: Tradeoff-Driven Platform Architecture
+domain: platform-architecture
+description: >
+  Making and defending cross-constraint architecture tradeoff decisions for AI/ML
+  platforms - cost, latency, reliability, and operability weighed against each other,
+  substantiated with quantitative evidence.
+skills:
+  - id: skl-platform-architecture-tradeoff-01
+    name: Tradeoff reasoning
+    verb: UNDERSTAND
+    statement: >
+      Understands the cost/latency/reliability/operability tradeoffs inherent in AI
+      platform architecture decisions.
+    evidence:
+      - Articulates at least two competing tradeoffs for a given architecture decision.
+  - id: skl-platform-architecture-tradeoff-02
+    name: Multi-tenant platform design
+    verb: DESIGN
+    statement: >
+      Can design a multi-team or multi-tenant AI platform architecture balancing
+      isolation, cost, and shared operability.
+    evidence:
+      - Authored a platform architecture design adopted at the org level.
+  - id: skl-platform-architecture-tradeoff-03
+    name: Architecture defense
+    verb: EXPLAIN
+    statement: >
+      Can present and defend an architecture decision, including its tradeoffs, to a
+      technical leadership audience.
+    evidence:
+      - Presented an architecture decision record that was approved after review.
+  - id: skl-platform-architecture-tradeoff-04
+    name: Quantitative substantiation
+    verb: PROVE
+    statement: >
+      Can substantiate an architecture recommendation with quantitative evidence (cost
+      model, load test, capacity projection).
+    evidence:
+      - An architecture recommendation was backed by a specific quantitative artifact
+        (cost model or load test) that informed the decision.
+  - id: skl-platform-architecture-tradeoff-05
+    name: Systemic weakness diagnosis
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose systemic architectural weaknesses from recurring incident patterns
+      across multiple services.
+    evidence:
+      - Identified a recurring incident pattern and traced it to a specific architectural root cause.
+common_tools:
+  - Architecture decision records (ADRs)
+  - Cost modeling spreadsheets/tools
+  - Load testing tools (k6/Locust)
+beginner_indicators:
+  - Recognizes that tradeoffs exist but cannot yet weigh them without guidance.
+intermediate_indicators:
+  - Weighs tradeoffs for a single-service design decision independently.
+advanced_indicators:
+  - Diagnoses systemic architectural weaknesses across multiple services from incident patterns.
+  - Per the experience-capability matrix, this is deliberately the last capability to
+    mature - meaningful architecture judgment typically only emerges from the 7-year band onward.
+expert_architect_indicators:
+  - Designs and defends multi-team platform architecture and sets long-term technical direction.

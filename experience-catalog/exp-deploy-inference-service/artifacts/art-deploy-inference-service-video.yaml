@@ -1,0 +1,29 @@
+id: art-deploy-inference-service-video
+type: video
+title: Watching a Chart Get Adapted for GPU Scheduling
+experience_ref: exp-deploy-inference-service
+outcome_refs:
+  - out-deploy-inference-service-01
+capability_refs:
+  - cap-foundations-ai-ml-platform-engineering-baseline
+purpose: >
+  Models an engineer's reasoning process, narrated out loud, adapting a different
+  CPU-service chart for a different GPU workload - showing HOW to check for the right
+  things before deploying, not just the facts (Material) and not the learner's own
+  exact starter chart (Lab).
+content_summary: >
+  A screencast walkthrough of an engineer adapting a CPU Helm chart for a GPU workload
+  on a different service, narrating how they check the node pool's taints before writing
+  the toleration, and how they verify scheduling succeeded before moving on.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a CPU-service Helm chart and a target GPU node pool.
+    - Narrate checking `kubectl describe node` for the node pool's taints before writing anything.
+    - Narrate adding the matching toleration and node selector to the chart.
+    - Narrate confirming the pod scheduled (not Pending) after deploying.
+  on_screen_demonstrations:
+    - kubectl describe node showing taints
+    - Editing a Helm values file
+    - kubectl get pods showing successful scheduling

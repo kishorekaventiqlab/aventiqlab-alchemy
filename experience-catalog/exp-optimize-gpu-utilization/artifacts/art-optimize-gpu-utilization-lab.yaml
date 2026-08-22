@@ -1,0 +1,28 @@
+id: art-optimize-gpu-utilization-lab
+type: source_code_lab
+title: Build the Consolidation Change
+experience_ref: exp-optimize-gpu-utilization
+outcome_refs:
+  - out-optimize-gpu-utilization-01
+  - out-optimize-gpu-utilization-02
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Untimed BUILD/DESIGN practice: classify workloads and implement the consolidation
+  change with no time pressure - this is where it's first built correctly.
+content_summary: >
+  A starter repo with multiple simulated services on a shared node pool, historical
+  utilization data, and a bin-packing configuration stub. The learner classifies
+  workloads and implements a scoped consolidation.
+estimated_duration_minutes: 90
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-optimize-gpu-utilization
+  tasks:
+    - Classify each service by off-peak tolerance and latency sensitivity using the provided data.
+    - Implement a consolidation configuration that excludes the latency-sensitive service.
+    - Simulate a day-night cycle and measure utilization and peak-hour latency.
+  environment_requirements:
+    - Provided historical utilization dataset
+    - Sandbox cluster or simulation environment
+  hints_available: true

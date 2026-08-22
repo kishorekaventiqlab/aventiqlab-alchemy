@@ -1,0 +1,21 @@
+id: art-inference-under-load-quiz
+type: quiz
+title: GPU Capacity & Autoscaling Signals Check
+experience_ref: exp-inference-under-load
+outcome_refs:
+  - out-inference-under-load-01
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-kubernetes-workload-scaling-for-inference
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content, confirming
+  recall and comprehension before the learner is trusted with the Lab.
+  Does not test judgment or reasoning - that is the Skill Evaluator's job.
+content_summary: >
+  10 questions covering GPU utilization signal interpretation, autoscaling primitive
+  trigger signals, and quota-ceiling facts, drawn directly from the Material's key sections.
+estimated_duration_minutes: 10
+type_specific:
+  question_count: 10
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

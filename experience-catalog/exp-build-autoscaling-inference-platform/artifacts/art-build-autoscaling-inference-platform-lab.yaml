@@ -1,0 +1,29 @@
+id: art-build-autoscaling-inference-platform-lab
+type: source_code_lab
+title: Build and Load-Test the Autoscaling Configuration
+experience_ref: exp-build-autoscaling-inference-platform
+outcome_refs:
+  - out-build-autoscaling-inference-platform-01
+  - out-build-autoscaling-inference-platform-02
+capability_refs:
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Untimed BUILD practice: configure the KEDA ScaledObject and run the load test with no
+  time pressure - this is
+  where it's first built correctly.
+content_summary: >
+  A starter repo with the fixed-replica deployment from exp-deploy-inference-service, an
+  incomplete KEDA manifest, and a load-testing script that simulates a 5x demand swing.
+estimated_duration_minutes: 75
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-build-autoscaling-inference-platform
+  tasks:
+    - Complete the KEDA ScaledObject on a queue-depth metric.
+    - Set a max replica count consistent with the node pool's actual headroom.
+    - Run the provided load-testing script and capture the replica-count timeline.
+  environment_requirements:
+    - kind or a sandbox EKS cluster with KEDA installed
+    - k6 or similar load-testing tool
+    - kubectl
+  hints_available: true

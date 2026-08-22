@@ -1,0 +1,61 @@
+id: cap-kubernetes-workload-scaling-for-inference
+name: Kubernetes Workload Scaling for Inference
+domain: kubernetes
+description: >
+  Configuring, operating, and troubleshooting Kubernetes-native scaling mechanisms
+  (HPA, VPA, KEDA, cluster/node autoscaling) for latency-sensitive inference workloads.
+skills:
+  - id: skl-kubernetes-scaling-01
+    name: Scaling primitive fluency
+    verb: KNOW
+    statement: >
+      Knows Kubernetes scaling primitives (HPA, VPA, KEDA, Cluster Autoscaler/Karpenter)
+      and what signal each reacts to.
+    evidence:
+      - Correctly maps each primitive to the signal it consumes without confusing HPA and KEDA scope.
+  - id: skl-kubernetes-scaling-02
+    name: Custom-metric scaling configuration
+    verb: BUILD
+    statement: >
+      Can configure a KEDA ScaledObject to scale an inference deployment on a custom
+      queue-depth metric.
+    evidence:
+      - Shipped a working KEDA config that scaled a deployment on a non-CPU metric.
+  - id: skl-kubernetes-scaling-03
+    name: Autoscaling status verification
+    verb: OPERATE
+    statement: >
+      Can read HPA/KEDA status and current replica counts to confirm autoscaling is
+      behaving as configured.
+    evidence:
+      - Correctly distinguished "scaling is configured but not firing" from "scaling is
+        firing but capacity-bound" in a live cluster.
+  - id: skl-kubernetes-scaling-04
+    name: Stalled-scaling diagnosis
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose why a workload is not scaling despite an autoscaler being configured
+      (metric adapter lag, ceiling hit, PDB blocking, node capacity).
+    evidence:
+      - Root-caused at least one stalled-scaling incident to one of these causes with supporting evidence.
+  - id: skl-kubernetes-scaling-05
+    name: Scaling strategy design
+    verb: DESIGN
+    statement: >
+      Can design a scaling strategy across HPA/KEDA and cluster-level autoscaling for a
+      latency-sensitive inference workload.
+    evidence:
+      - Authored a scaling strategy doc adopted for a production inference service.
+common_tools:
+  - kubectl
+  - KEDA
+  - Karpenter / Cluster Autoscaler
+  - Prometheus Adapter
+beginner_indicators:
+  - Can deploy and troubleshoot basic workloads with copy-pasted scaling manifests.
+intermediate_indicators:
+  - Can independently operate production workloads' scaling configuration.
+advanced_indicators:
+  - Can diagnose complex cluster scaling behavior and lead incidents involving stalled scaling.
+expert_architect_indicators:
+  - Designs platform-wide scaling strategy and organizational standards for inference workloads.

@@ -1,0 +1,60 @@
+id: cap-llmops-prompt-and-eval-pipelines
+name: LLM Prompt & Eval Pipelines
+domain: llmops
+description: >
+  Adapting LLMs to a task (prompting, fine-tuning, RAG) and building automated
+  evaluation pipelines to detect quality and cost drift over time.
+skills:
+  - id: skl-llmops-prompt-eval-01
+    name: Adaptation-approach fluency
+    verb: KNOW
+    statement: >
+      Knows the difference between prompt engineering, fine-tuning, and RAG as
+      approaches to adapting an LLM to a task.
+    evidence:
+      - Correctly recommends one of the three given a stated constraint (e.g. no training budget).
+  - id: skl-llmops-prompt-eval-02
+    name: Automated eval pipeline construction
+    verb: BUILD
+    statement: >
+      Can build an automated eval pipeline that scores LLM outputs against a rubric or
+      reference set.
+    evidence:
+      - Shipped an eval pipeline producing a repeatable score across two model versions.
+  - id: skl-llmops-prompt-eval-03
+    name: Quality/cost drift monitoring
+    verb: OPERATE
+    statement: >
+      Can monitor LLM output quality drift and cost per request over time.
+    evidence:
+      - Identified a quality or cost regression using tracked metrics before a stakeholder complaint.
+  - id: skl-llmops-prompt-eval-04
+    name: RAG failure-layer diagnosis
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose degraded RAG answer quality as a retrieval problem versus a
+      generation problem.
+    evidence:
+      - Root-caused a RAG quality regression to retrieval or generation with supporting evidence.
+  - id: skl-llmops-prompt-eval-05
+    name: Eval strategy design
+    verb: DESIGN
+    statement: >
+      Can design an eval strategy (offline eval set + online quality signals) for a new
+      LLM-backed feature.
+    evidence:
+      - Authored an eval strategy adopted before a feature's production launch.
+common_tools:
+  - LangChain / LlamaIndex (RAG orchestration)
+  - Vector databases (e.g. pgvector, Pinecone)
+  - Eval frameworks (e.g. Ragas, promptfoo)
+beginner_indicators:
+  - Writes prompts ad hoc without a repeatable eval process.
+intermediate_indicators:
+  - Independently runs an eval pipeline and interprets its scores.
+advanced_indicators:
+  - Diagnoses retrieval-vs-generation quality regressions in a live RAG system.
+expert_architect_indicators:
+  - Designs eval strategy standards applied across multiple LLM-backed features. LLMOps
+    is an emergent domain, so per the experience-capability matrix even senior bands
+    climb this capability more slowly than more mature domains.

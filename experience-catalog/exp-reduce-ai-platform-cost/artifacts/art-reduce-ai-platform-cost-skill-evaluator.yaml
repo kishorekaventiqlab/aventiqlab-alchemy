@@ -1,0 +1,17 @@
+id: art-reduce-ai-platform-cost-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Reduce AI Platform Infrastructure Cost
+experience_ref: exp-reduce-ai-platform-cost
+outcome_refs:
+  - out-reduce-ai-platform-cost-01
+  - out-reduce-ai-platform-cost-02
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Open-ended evaluation of whether the reliability-safe cost reasoning transfers when
+  the target is 35% instead of 20%, requiring harder tradeoffs - not recall
+  (Quiz) or hands-on execution (Lab). Source-of-truth structure only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-reduce-ai-platform-cost

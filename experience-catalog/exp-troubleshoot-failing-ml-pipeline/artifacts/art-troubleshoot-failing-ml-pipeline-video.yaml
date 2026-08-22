@@ -1,0 +1,27 @@
+id: art-troubleshoot-failing-ml-pipeline-video
+type: video
+title: Watching a Pipeline Failure Get Diagnosed
+experience_ref: exp-troubleshoot-failing-ml-pipeline
+outcome_refs:
+  - out-troubleshoot-failing-ml-pipeline-01
+capability_refs:
+  - cap-mlops-pipeline-orchestration
+purpose: >
+  Models an engineer's reasoning process on a different pipeline failure, narrated out
+  loud - the HOW of checking data before infrastructure, not the facts (Material) or the
+  learner's own exact pipeline (Lab).
+content_summary: >
+  A screencast of an engineer diagnosing a different pipeline's repeated evaluation-step
+  failure, narrating why they compare data statistics across runs before touching
+  resource allocation.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a pipeline run log showing repeated evaluation-step failures.
+    - Narrate resisting the instinct to immediately bump resource allocation.
+    - Narrate comparing data schema/statistics between failing and successful runs.
+    - Narrate finding the specific data-side difference.
+  on_screen_demonstrations:
+    - Pipeline run logs in Kubeflow
+    - Data statistics comparison query

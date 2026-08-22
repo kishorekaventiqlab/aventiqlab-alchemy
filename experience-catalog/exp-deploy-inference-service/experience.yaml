@@ -1,0 +1,64 @@
+id: exp-deploy-inference-service
+title: Deploy an AI Inference Service
+target_learner_profiles: [lp-3yr-cloud-platform-engineer]
+target_capabilities:
+  - cap-foundations-ai-ml-platform-engineering-baseline
+  - cap-cloud-platform-engineering-account-and-network-foundations
+  - cap-model-serving-autoscaling-policy-design
+future_capability_domains: [container-platforms]
+prerequisites: []
+scenario: >
+  You are a Cloud Platform Engineer asked to stand up the first production deployment of
+  a new sentiment-analysis model behind an internal API, using an existing service template.
+business_context: >
+  A product team needs the model live behind a stable internal endpoint before their
+  feature launch next sprint; there is no existing inference deployment to copy from directly.
+technical_environment:
+  platform: Amazon EKS
+  infrastructure_summary: >
+    A shared EKS cluster with an existing GPU node pool used by other teams; a templated
+    Helm chart exists for CPU-based services but not yet for GPU inference.
+  key_services: [Amazon EKS, Helm, Triton Inference Server, AWS ALB Ingress]
+starting_state: >
+  No deployment exists yet. A container image with the model is published to the
+  registry. A namespace and basic IAM role exist, but network and ingress are not configured.
+learner_mission: >
+  Deploy the model behind a working internal endpoint with health checks passing, using
+  the existing IaC and Helm patterns as a starting point.
+expected_investigation:
+  - Review the existing CPU-service Helm chart to see what needs to change for a GPU workload.
+  - Check the container image's declared GPU requirements against the node pool's available instance types.
+  - Confirm the namespace's network policy allows ingress traffic.
+expected_decisions:
+  - decision_point: Which node pool / instance type should the deployment target?
+    options_considered:
+      - "Correct: request scheduling onto the existing shared GPU node pool via the appropriate node selector/toleration."
+      - "Plausible but wrong: deploy without a node selector and let it fail to schedule, then debug from there."
+    sound_reasoning: >
+      Checking the node pool's taints and tolerations before deploying avoids an
+      avoidable Pending-pod cycle.
+build_activities:
+  - Adapt the existing Helm chart for a GPU-scheduled deployment.
+  - Configure ingress and health checks for the new endpoint.
+operational_activities:
+  - Verify the deployed service passes health checks and is reachable internally.
+failure_modes:
+  - Deploying without correct GPU node selectors, leaving pods stuck Pending.
+  - Skipping health check configuration, leaving the service technically "up" but not verified.
+constraints:
+  - Must reuse the existing shared GPU node pool - no budget for a dedicated one.
+  - Must be live before next sprint's feature launch.
+trade_offs:
+  - tension: Speed of reusing the CPU chart vs. correctness of a GPU-specific chart
+    choice_a: Adapt the existing CPU chart quickly, accepting some config debt to fix later.
+    choice_b: Write a clean GPU-specific chart from scratch, at the cost of more time before launch.
+success_conditions:
+  - The service is deployed, schedules successfully onto the GPU node pool, and passes health checks.
+  - The internal endpoint is reachable and returns a valid inference response.
+evidence_of_competence:
+  - A working deployment manifest/Helm values file.
+  - A successful health check and one successful end-to-end inference request.
+progression_archetype: foundation-build
+outcome_refs:
+  - out-deploy-inference-service-01
+  - out-deploy-inference-service-02

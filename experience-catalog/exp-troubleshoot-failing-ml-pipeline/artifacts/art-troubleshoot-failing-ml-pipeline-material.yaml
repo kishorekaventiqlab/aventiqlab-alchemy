@@ -1,0 +1,24 @@
+id: art-troubleshoot-failing-ml-pipeline-material
+type: material
+title: "Data Drift vs. Infrastructure Faults in ML Pipelines: Reference"
+experience_ref: exp-troubleshoot-failing-ml-pipeline
+outcome_refs:
+  - out-troubleshoot-failing-ml-pipeline-01
+capability_refs:
+  - cap-mlops-pipeline-orchestration
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on distinguishing data-side pipeline failures
+  from infrastructure-side ones, as pure reference facts - not a narrated
+  investigation (Video) or hands-on fix (Lab).
+content_summary: >
+  A reference document covering how to compare data schema/statistics across pipeline
+  runs, common infrastructure-fault signatures, and why "no code changes deployed"
+  shifts the prior toward a data-side cause.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - Comparing data schema/statistics across pipeline runs
+    - Common infrastructure-fault signatures at the evaluation step
+    - Why "no code changes" shifts suspicion toward a data-side cause

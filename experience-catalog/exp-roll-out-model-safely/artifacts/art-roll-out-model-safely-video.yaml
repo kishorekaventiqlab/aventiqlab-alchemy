@@ -1,0 +1,28 @@
+id: art-roll-out-model-safely-video
+type: video
+title: Watching a Canary Catch a Quality Regression
+experience_ref: exp-roll-out-model-safely
+outcome_refs:
+  - out-roll-out-model-safely-01
+  - out-roll-out-model-safely-02
+capability_refs:
+  - cap-observability-slo-based-alerting-for-inference
+purpose: >
+  Models an engineer's reasoning while a canary on a different model catches a real
+  quality dip - the HOW of watching a quality signal in real time, not the facts
+  (Material) or the learner's own rollout (Lab).
+content_summary: >
+  A screencast of a canary rollout on a different model where the online quality signal
+  dips mid-rollout, with the engineer narrating why they pause and roll back instead of
+  continuing.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a canary rollout dashboard showing traffic split and quality signal.
+    - Narrate the quality signal beginning to dip.
+    - Narrate the decision to pause and investigate rather than push through.
+    - Narrate triggering rollback and confirming traffic returns to the stable version.
+  on_screen_demonstrations:
+    - Live canary dashboard with traffic split and quality metric
+    - Triggering a rollback command

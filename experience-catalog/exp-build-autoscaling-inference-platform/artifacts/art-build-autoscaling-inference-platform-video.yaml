@@ -1,0 +1,26 @@
+id: art-build-autoscaling-inference-platform-video
+type: video
+title: Watching a KEDA Scaler Get Configured for a GPU Workload
+experience_ref: exp-build-autoscaling-inference-platform
+outcome_refs:
+  - out-build-autoscaling-inference-platform-01
+capability_refs:
+  - cap-kubernetes-workload-scaling-for-inference
+purpose: >
+  Models an engineer's reasoning for picking queue depth over CPU on a different GPU
+  service, narrated out loud - the HOW, not the facts (Material) or the learner's own
+  starter repo (Lab).
+content_summary: >
+  A screencast of an engineer configuring KEDA for a different GPU inference service,
+  narrating why they rejected a CPU-based approach and chose a queue-depth metric instead.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a fixed-replica GPU service with variable demand.
+    - Narrate why CPU utilization looks tempting but is misleading here.
+    - Narrate configuring a KEDA ScaledObject on queue depth.
+    - Narrate a quick load test confirming it scales as expected.
+  on_screen_demonstrations:
+    - Comparing a CPU dashboard against a queue-depth dashboard during a load spike
+    - Writing a KEDA ScaledObject manifest

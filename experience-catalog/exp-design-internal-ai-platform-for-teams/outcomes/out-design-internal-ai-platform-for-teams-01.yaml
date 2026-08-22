@@ -1,0 +1,25 @@
+id: out-design-internal-ai-platform-for-teams-01
+experience_ref: exp-design-internal-ai-platform-for-teams
+learner_summary: >
+  Design a self-service AI platform whose default path is clearly better than what any
+  team could build alone, making adoption the easy choice rather than a mandate.
+learner_profile_refs:
+  - lp-staff-principal-principal-ai-infrastructure-architect
+action:
+  verb: DESIGN
+  statement: >
+    Design a self-service internal AI platform validated against real team needs, whose
+    default path is a clearly better choice than each team's current ad hoc tooling.
+context: >
+  Given five teams independently running duplicated GPU infrastructure and tooling with
+  inconsistent reliability practices, and a mandate to consolidate without forcing a
+  disruptive mandate,
+expected_result: >
+  the learner designs self-service deployment templates and a shared observability
+  stack based on validated input from at least one real team, rather than assumptions
+  about what teams need.
+related_capabilities:
+  - cap-platform-architecture-tradeoff-driven-system-design
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+evidence_expectations: >
+  Evidence from team interviews/surveys informing the design.

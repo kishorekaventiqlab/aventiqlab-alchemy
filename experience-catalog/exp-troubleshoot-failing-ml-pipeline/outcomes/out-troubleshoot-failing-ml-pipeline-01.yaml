@@ -1,0 +1,23 @@
+id: out-troubleshoot-failing-ml-pipeline-01
+experience_ref: exp-troubleshoot-failing-ml-pipeline
+learner_summary: >
+  Diagnose a repeated pipeline failure as data drift versus an infrastructure fault by
+  comparing data statistics across runs, not by assuming a resource cause.
+learner_profile_refs: [lp-5yr-ai-platform-engineer, lp-7yr-mlops-lead]
+action:
+  verb: TROUBLESHOOT
+  statement: >
+    Diagnose a repeated evaluation-step pipeline failure as data-side or
+    infrastructure-side by comparing data schema/statistics across failing and
+    successful runs.
+context: >
+  Given a pipeline failing at the evaluation step for three consecutive nights with no
+  code changes deployed in that window,
+expected_result: >
+  the learner compares data schema/statistics between the failing and last-successful
+  runs before adjusting resource allocation, and reaches a specific, evidence-backed cause.
+related_capabilities:
+  - cap-mlops-pipeline-orchestration
+evidence_expectations: >
+  The specific data or dependency difference found between the failing and
+  last-successful runs.

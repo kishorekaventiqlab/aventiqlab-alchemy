@@ -1,0 +1,24 @@
+id: art-operate-llm-platform-under-traffic-growth-material
+type: material
+title: "LLM Cost Drivers and Hybrid Routing: Reference"
+experience_ref: exp-operate-llm-platform-under-traffic-growth
+outcome_refs:
+  - out-operate-llm-platform-under-traffic-growth-01
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on per-token pricing mechanics and hybrid
+  third-party/self-hosted routing, as pure reference facts - not a narrated scenario
+  (Video) or hands-on routing change (Lab).
+content_summary: >
+  A reference document covering how per-token pricing scales with context length (not
+  just request count), and the tradeoffs of routing traffic between a third-party API
+  and a self-hosted model.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - Per-token pricing and why context length matters as much as request volume
+    - Hybrid routing between third-party and self-hosted models
+    - Capacity headroom as a constraint on routing decisions

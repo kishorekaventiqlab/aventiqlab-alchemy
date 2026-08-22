@@ -1,0 +1,23 @@
+id: out-build-autoscaling-inference-platform-01
+experience_ref: exp-build-autoscaling-inference-platform
+learner_summary: >
+  Configure a KEDA ScaledObject on a demand signal appropriate for a GPU-bound
+  inference workload, not a CPU-based proxy.
+learner_profile_refs: [lp-5yr-ai-platform-engineer]
+action:
+  verb: BUILD
+  statement: >
+    Configure autoscaling for a GPU-backed inference deployment using a signal that
+    actually reflects GPU-bound demand.
+context: >
+  Given a fixed-replica inference deployment expected to see 5x demand variation and a
+  GPU node pool with limited headroom,
+expected_result: >
+  the learner configures a KEDA ScaledObject on queue depth (or an equivalent
+  GPU-relevant signal) rather than plain CPU utilization, and explains why CPU would be
+  a poor proxy for this workload.
+related_capabilities:
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-model-serving-autoscaling-policy-design
+evidence_expectations: >
+  The ScaledObject configuration plus a stated rationale for the chosen metric over CPU.

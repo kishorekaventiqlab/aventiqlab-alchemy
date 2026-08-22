@@ -1,0 +1,17 @@
+id: art-diagnose-gpu-capacity-exhaustion-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Diagnose GPU Capacity Exhaustion
+experience_ref: exp-diagnose-gpu-capacity-exhaustion
+outcome_refs:
+  - out-diagnose-gpu-capacity-exhaustion-01
+  - out-diagnose-gpu-capacity-exhaustion-02
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Open-ended evaluation of whether the diagnostic method transfers to a case where the
+  autoscaler log is ambiguous between two causes - not recall (Quiz) or
+  hands-on execution (Lab). Source-of-truth structure only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-diagnose-gpu-capacity-exhaustion

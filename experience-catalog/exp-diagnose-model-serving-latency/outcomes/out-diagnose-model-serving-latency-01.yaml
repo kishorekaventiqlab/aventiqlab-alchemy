@@ -1,0 +1,23 @@
+id: out-diagnose-model-serving-latency-01
+experience_ref: exp-diagnose-model-serving-latency
+learner_summary: >
+  Diagnose a gradual, traffic-independent p99 latency drift as a workload-shape change
+  rather than assuming a resource-exhaustion cause.
+learner_profile_refs: [lp-5yr-ai-platform-engineer, lp-7yr-mlops-lead]
+action:
+  verb: TROUBLESHOOT
+  statement: >
+    Diagnose a gradual p99 latency drift with flat p50 and flat traffic volume, using
+    request-characteristic data rather than assuming infrastructure exhaustion.
+context: >
+  Given p99 latency risen 40% over two weeks with flat p50, flat traffic, and no
+  recorded deploys or config changes,
+expected_result: >
+  the learner investigates whether the input data itself has drifted (e.g. longer
+  average sequence length) before concluding it's an infrastructure issue, and produces
+  a specific, evidence-backed hypothesis.
+related_capabilities:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-observability-slo-based-alerting-for-inference
+evidence_expectations: >
+  The specific correlation or pattern found in the slow-tail requests supporting the hypothesis.

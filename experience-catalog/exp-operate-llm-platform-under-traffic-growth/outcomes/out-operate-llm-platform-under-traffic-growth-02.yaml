@@ -1,0 +1,22 @@
+id: out-operate-llm-platform-under-traffic-growth-02
+experience_ref: exp-operate-llm-platform-under-traffic-growth
+learner_summary: >
+  Operate a routing-policy change between a third-party API and a self-hosted model
+  without exceeding the self-hosted model's capacity or regressing its latency.
+learner_profile_refs: [lp-5yr-ai-platform-engineer, lp-7yr-mlops-lead]
+action:
+  verb: OPERATE
+  statement: >
+    Adjust and monitor a traffic-routing policy shifting load toward a self-hosted
+    model, confirming it doesn't exceed capacity or regress latency.
+context: >
+  Given confirmed headroom on the self-hosted model and rising third-party API cost,
+expected_result: >
+  the learner shifts an appropriate portion of traffic to the self-hosted model and
+  monitors both cost-per-request and self-hosted latency to confirm neither regresses
+  beyond an acceptable bound.
+related_capabilities:
+  - cap-kubernetes-workload-scaling-for-inference
+evidence_expectations: >
+  Before/after cost-per-request and self-hosted latency measurements following the
+  routing change.

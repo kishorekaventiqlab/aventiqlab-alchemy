@@ -1,0 +1,24 @@
+id: art-optimize-gpu-utilization-material
+type: material
+title: "GPU Bin-Packing and Consolidation: Reference"
+experience_ref: exp-optimize-gpu-utilization
+outcome_refs:
+  - out-optimize-gpu-utilization-01
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on workload consolidation and latency
+  sensitivity classification, as pure reference facts - not a narrated optimization
+  (Video) or hands-on change (Lab).
+content_summary: >
+  A reference document covering how to classify workloads by off-peak tolerance versus
+  latency sensitivity, and consolidation/bin-packing strategies for GPU node pools.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - Classifying workloads by latency sensitivity and off-peak tolerance
+    - Consolidation and bin-packing strategies for GPU node pools
+    - Why a uniform change is risky when services have different sensitivity

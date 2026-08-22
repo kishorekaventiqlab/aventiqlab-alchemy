@@ -1,0 +1,27 @@
+id: art-diagnose-gpu-capacity-exhaustion-video
+type: video
+title: Watching a Capacity Crunch Get Diagnosed
+experience_ref: exp-diagnose-gpu-capacity-exhaustion
+outcome_refs:
+  - out-diagnose-gpu-capacity-exhaustion-01
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+purpose: >
+  Models an engineer's reasoning process on a different capacity-crunch incident,
+  narrated out loud - the HOW of reading autoscaler logs first, not the facts (Material)
+  or the learner's own exact incident.
+content_summary: >
+  A screencast of an engineer diagnosing a different Pending-pod incident, narrating why
+  they check Cluster Autoscaler's failure reason before touching anything else, and
+  ruling out a device-plugin explanation using that evidence.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on pods stuck Pending on a shared node pool.
+    - Narrate checking Cluster Autoscaler logs first, and why.
+    - Narrate ruling out a device-plugin cause using the log evidence.
+    - Narrate confirming the quota ceiling as the actual cause.
+  on_screen_demonstrations:
+    - Reading Cluster Autoscaler logs via kubectl/CloudWatch
+    - Checking AWS Service Quotas console

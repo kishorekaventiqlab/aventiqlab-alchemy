@@ -1,0 +1,82 @@
+id: lp-3yr-cloud-platform-engineer
+title: Cloud Platform Engineer
+experience_band: 3yr
+target_roles:
+  - Cloud Platform Engineer
+  - Junior Platform Engineer
+typical_background: >
+  Three years in general cloud/DevOps roles; first real exposure to AI/ML workloads within
+  the last year, supporting a platform team that runs a couple of models in production.
+existing_knowledge:
+  - General AWS/GCP fundamentals (VPC, IAM, EC2, S3)
+  - Basic Kubernetes concepts (Pods, Deployments, Services)
+  - CI/CD pipeline usage (not design)
+  - Docker containerization
+existing_skills:
+  - Can deploy a containerized service using an existing Helm chart or manifest
+  - Can follow a runbook to resolve a known incident
+  - Can write basic Terraform using existing modules
+technology_exposure:
+  - technology: Kubernetes
+    exposure_level: Intermediate
+  - technology: Terraform
+    exposure_level: Intermediate
+  - technology: GPU infrastructure
+    exposure_level: Beginner
+  - technology: Model serving runtimes
+    exposure_level: Beginner
+production_experience:
+  has_production_experience: true
+  description: >
+    Has operated stateless web services in production under supervision; has touched a
+    GPU inference service only as a support/on-call shadow, not as owner.
+  scale_indicators:
+    - Supports services handling low thousands of requests/minute
+    - Has not yet owned a GPU-based service end to end
+learning_needs:
+  - Understanding GPU-specific operational characteristics
+  - Learning Kubernetes scaling primitives beyond basic HPA
+  - Building confidence operating without a runbook for novel situations
+build_expectations:
+  - statement: >
+      Can deploy a basic containerized inference service behind a standard ingress using
+      an existing template.
+    verbs: [BUILD]
+    capability_refs: [cap-foundations-ai-ml-platform-engineering-baseline]
+  - statement: >
+      Can provision a VPC/network topology for a new service from an existing IaC module.
+    verbs: [BUILD]
+    capability_refs: [cap-cloud-platform-engineering-account-and-network-foundations]
+operational_expectations:
+  - statement: >
+      Can rotate credentials and request service quota increases for an existing account
+      under guidance.
+    verbs: [OPERATE]
+    capability_refs: [cap-cloud-platform-engineering-account-and-network-foundations]
+  - statement: >
+      Can read HPA status to confirm autoscaling is behaving as configured.
+    verbs: [OPERATE]
+    capability_refs: [cap-kubernetes-workload-scaling-for-inference]
+troubleshooting_expectations:
+  - statement: >
+      Can follow a runbook to resolve a known connectivity or scaling incident.
+    verbs: [TROUBLESHOOT]
+    capability_refs:
+      - cap-cloud-platform-engineering-account-and-network-foundations
+      - cap-kubernetes-workload-scaling-for-inference
+architecture_expectations:
+  - statement: >
+      Understands why a stateless-web autoscaling policy is insufficient for a GPU
+      workload, without yet being expected to design an alternative.
+    verbs: [UNDERSTAND]
+    capability_refs: [cap-foundations-ai-ml-platform-engineering-baseline]
+proof_expectations:
+  - statement: >
+      Can demonstrate a deployed templated service is reachable and passing health checks.
+    verbs: [PROVE]
+    capability_refs: [cap-foundations-ai-ml-platform-engineering-baseline]
+prerequisites: []
+expected_independence: Supervised
+expected_engineering_judgment: >
+  Recognizes when a situation deviates from a known runbook and escalates rather than
+  improvising; not yet expected to make novel architecture tradeoffs independently.

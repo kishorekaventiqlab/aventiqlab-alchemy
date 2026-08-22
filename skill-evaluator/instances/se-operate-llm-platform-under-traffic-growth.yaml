@@ -1,0 +1,74 @@
+id: se-operate-llm-platform-under-traffic-growth
+experience_ref: exp-operate-llm-platform-under-traffic-growth
+skills_evaluated:
+  - cap-llmops-prompt-and-eval-pipelines
+  - cap-kubernetes-workload-scaling-for-inference
+scenario: >
+  A variant situation: the self-hosted model has almost no spare headroom this time -
+  shifting meaningful traffic to it risks its own latency SLA - so the easy answer from
+  before ("just route more to self-hosted") doesn't cleanly apply.
+opening_question: >
+  Third-party cost is climbing again, but this time the self-hosted model barely has any
+  spare capacity. Would you still shift traffic to it? What would you actually do?
+expected_reasoning_areas:
+  - Recognizing that the previous solution's precondition (confirmed headroom) doesn't hold here
+  - Considering alternative levers beyond routing (e.g. prompt/context reduction, caching, rate negotiation)
+  - Not forcing a routing shift that would risk the self-hosted SLA
+follow_up_question_paths:
+  - trigger: Learner proposes shifting traffic to self-hosted without addressing the headroom constraint.
+    follow_up_question: You said there's barely any spare capacity - what happens to self-hosted latency if you shift more load there anyway?
+    targets_reasoning_area: Recognizing that the previous solution's precondition doesn't hold here
+  - trigger: Learner has no alternative lever beyond routing.
+    follow_up_question: If routing isn't available this time, what else could reduce cost without moving traffic?
+    targets_reasoning_area: Considering alternative levers beyond routing
+misconception_indicators:
+  - misconception: Applies the reference solution (shift to self-hosted) without checking whether its precondition still holds.
+    likely_root_cause: Treats the prior fix as a general rule rather than a solution conditioned on confirmed headroom.
+    corrective_follow_up: What was the condition that made routing the right call last time, and does it hold now?
+strong_answer_indicators:
+  - Explicitly notes the headroom precondition no longer holds.
+  - Proposes at least one non-routing lever (context reduction, caching, negotiation).
+weak_answer_indicators:
+  - Proposes the same routing shift without acknowledging the capacity risk.
+  - Has no alternative when routing is ruled out.
+evidence_criteria:
+  - States the specific reason routing is now risky (self-hosted SLA exposure).
+  - Names a concrete alternative lever.
+scoring_dimensions:
+  - dimension: REASONING
+    description: Recognizes when a previously valid solution's precondition no longer holds.
+    weight_percent: 35
+  - dimension: APPLICATION
+    description: Proposes a viable alternative lever appropriate to the new constraint.
+    weight_percent: 35
+  - dimension: TRADE_OFF_ANALYSIS
+    description: Weighs the risk to self-hosted SLA against the cost-reduction benefit.
+    weight_percent: 30
+proficiency_levels:
+  - level: Beginner
+    description: Proposes the same routing shift even after the headroom constraint is pointed out.
+    criteria:
+      - Does not adjust the recommendation after the follow-up.
+  - level: Intermediate
+    description: Acknowledges the constraint after prompting but has no alternative lever.
+    criteria:
+      - Agrees routing is risky only after the follow-up.
+  - level: Advanced
+    description: Independently identifies the headroom constraint and proposes an alternative lever.
+    criteria:
+      - Raises the headroom constraint unprompted.
+      - Proposes a specific alternative lever.
+  - level: Expert
+    description: As Advanced, and quantifies or prioritizes the alternative lever's tradeoff.
+    criteria:
+      - Explains why the proposed alternative is preferable given the constraint.
+  - level: Architect
+    description: As Expert, and generalizes into a framework for choosing cost levers based on which preconditions currently hold.
+    criteria:
+      - Articulates a reusable decision framework, not just this one instance's fix.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, APPLICATION]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to generalize their lever-selection reasoning into a framework (Architect-level probe).

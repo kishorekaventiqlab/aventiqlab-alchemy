@@ -1,0 +1,76 @@
+id: se-design-multi-tenant-ai-infrastructure
+experience_ref: exp-design-multi-tenant-ai-infrastructure
+skills_evaluated:
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+  - cap-platform-architecture-tradeoff-driven-system-design
+scenario: >
+  A fourth team joins after the design is finalized, citing "data sensitivity" as a
+  reason for dedicated infrastructure - a term that sounds like it could be a genuine
+  compliance requirement or could just be a vaguer version of the noisy-neighbor concern
+  already resolved for the other teams.
+opening_question: >
+  A fourth team says they need dedicated infrastructure because of "data sensitivity."
+  Does that qualify for hard isolation like the first team's compliance requirement, or
+  not? How do you find out?
+expected_reasoning_areas:
+  - Not accepting a vague term like "data sensitivity" as automatically equivalent to the prior genuine compliance case
+  - Asking clarifying questions to determine whether an actual regulatory/compliance driver exists
+  - Applying the same isolation-model framework consistently rather than making an ad hoc exception
+follow_up_question_paths:
+  - trigger: Learner grants dedicated infrastructure to the fourth team without further inquiry.
+    follow_up_question: What specifically makes "data sensitivity" the same kind of requirement as the first team's documented compliance need?
+    targets_reasoning_area: Not accepting a vague term as automatically equivalent to the prior genuine compliance case
+  - trigger: Learner rejects the request outright without investigating.
+    follow_up_question: How would you find out whether there's a real regulatory driver behind that phrase before deciding?
+    targets_reasoning_area: Asking clarifying questions to determine whether an actual regulatory/compliance driver exists
+misconception_indicators:
+  - misconception: Treats any mention of "sensitivity" or "compliance"-adjacent language as automatically qualifying for hard isolation.
+    likely_root_cause: Pattern-matches on vocabulary rather than applying the underlying genuine-requirement framework.
+    corrective_follow_up: What made the first team's requirement genuine - was it the words they used, or something more specific?
+strong_answer_indicators:
+  - Asks a specific clarifying question to determine whether a real regulatory driver exists.
+  - Applies the same genuine-vs-assumed framework used for the original three teams.
+weak_answer_indicators:
+  - Grants or denies dedicated infrastructure based on the phrase alone, without investigation.
+  - Treats this as a special case requiring a different framework than before.
+evidence_criteria:
+  - Names a specific clarifying question or piece of evidence that would resolve the ambiguity.
+  - States how the resulting decision fits the same framework as the original design.
+scoring_dimensions:
+  - dimension: REASONING
+    description: Avoids granting isolation based on vocabulary alone; seeks the underlying requirement.
+    weight_percent: 40
+  - dimension: APPLICATION
+    description: Applies the same isolation-model framework consistently to a new, ambiguous case.
+    weight_percent: 35
+  - dimension: COMMUNICATION
+    description: Articulates the clarifying question or decision clearly enough to be actionable.
+    weight_percent: 25
+proficiency_levels:
+  - level: Beginner
+    description: Decides based on the phrase alone even after prompting.
+    criteria:
+      - Does not propose a clarifying question or evidence check after the follow-up.
+  - level: Intermediate
+    description: Proposes investigating only after prompting.
+    criteria:
+      - Proposes a clarifying question after the follow-up.
+  - level: Advanced
+    description: Independently proposes a specific clarifying question and applies the existing framework.
+    criteria:
+      - Proposes a specific clarifying question unprompted.
+      - Explicitly ties the decision back to the original framework.
+  - level: Expert
+    description: As Advanced, and anticipates how to handle future similarly-vague requests consistently.
+    criteria:
+      - Proposes a standing process for evaluating future ambiguous isolation requests.
+  - level: Architect
+    description: As Expert, and generalizes the genuine-vs-assumed requirement framework into a documented, org-wide policy.
+    criteria:
+      - Articulates a reusable, documented policy for evaluating isolation requests company-wide.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, APPLICATION]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to draft the org-wide policy version of their framework (Architect-level probe).

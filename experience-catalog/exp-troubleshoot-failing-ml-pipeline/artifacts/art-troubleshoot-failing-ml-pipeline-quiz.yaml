@@ -1,0 +1,19 @@
+id: art-troubleshoot-failing-ml-pipeline-quiz
+type: quiz
+title: Pipeline Failure Diagnosis Facts Check
+experience_ref: exp-troubleshoot-failing-ml-pipeline
+outcome_refs:
+  - out-troubleshoot-failing-ml-pipeline-01
+capability_refs:
+  - cap-mlops-pipeline-orchestration
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test live diagnostic judgment under a deadline - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions on comparing data statistics across pipeline runs and recognizing
+  infrastructure-fault signatures.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

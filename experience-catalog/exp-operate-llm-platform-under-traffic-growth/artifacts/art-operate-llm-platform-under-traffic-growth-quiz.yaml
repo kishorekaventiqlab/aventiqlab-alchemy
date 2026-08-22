@@ -1,0 +1,19 @@
+id: art-operate-llm-platform-under-traffic-growth-quiz
+type: quiz
+title: LLM Cost Drivers Facts Check
+experience_ref: exp-operate-llm-platform-under-traffic-growth
+outcome_refs:
+  - out-operate-llm-platform-under-traffic-growth-01
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test live diagnostic judgment - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions on per-token pricing mechanics, context length vs. request volume as cost
+  drivers, and hybrid routing tradeoffs.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

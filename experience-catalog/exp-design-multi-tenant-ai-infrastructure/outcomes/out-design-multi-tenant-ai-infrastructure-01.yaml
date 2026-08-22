@@ -1,0 +1,26 @@
+id: out-design-multi-tenant-ai-infrastructure-01
+experience_ref: exp-design-multi-tenant-ai-infrastructure
+learner_summary: >
+  Design a multi-tenant isolation model that satisfies the one genuine compliance
+  requirement without granting hard isolation to every team by default.
+learner_profile_refs:
+  - lp-10yr-staff-ai-platform-engineer
+  - lp-staff-principal-principal-ai-infrastructure-architect
+action:
+  verb: DESIGN
+  statement: >
+    Design a multi-tenant AI infrastructure isolation model that distinguishes genuine
+    compliance requirements from generic noisy-neighbor concerns.
+context: >
+  Given three teams each requesting dedicated GPU infrastructure, only one with an
+  actual compliance requirement for hard isolation, and a mandate to avoid tripling
+  infrastructure cost,
+expected_result: >
+  the learner designs a namespace-based multi-tenancy model with quotas and priority
+  classes for the shared cases, reserving hard infrastructure isolation only for the
+  team with the genuine compliance requirement.
+related_capabilities:
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+  - cap-platform-architecture-tradeoff-driven-system-design
+evidence_expectations: >
+  The isolation model design doc, including which requirements are genuine vs. assumed.

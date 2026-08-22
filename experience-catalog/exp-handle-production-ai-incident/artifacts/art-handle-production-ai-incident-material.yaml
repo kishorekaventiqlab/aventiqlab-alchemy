@@ -1,0 +1,24 @@
+id: art-handle-production-ai-incident-material
+type: material
+title: "Multi-Service Incident Command: Reference"
+experience_ref: exp-handle-production-ai-incident
+outcome_refs:
+  - out-handle-production-ai-incident-01
+capability_refs:
+  - cap-ai-reliability-sre-incident-response-for-inference
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on shared-infrastructure incident correlation
+  and incident-command communication cadence, as pure reference facts - not a narrated
+  incident (Video) or a live simulation.
+content_summary: >
+  A reference document covering how to check shared infrastructure components for a
+  common root cause across simultaneous alerts, and a standard cadence for stakeholder
+  communication during an uncertain-cause incident.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - Checking shared infrastructure first when multiple services alert together
+    - "One incident or two? A decision framework"
+    - Communicating a working hypothesis with appropriate caveats

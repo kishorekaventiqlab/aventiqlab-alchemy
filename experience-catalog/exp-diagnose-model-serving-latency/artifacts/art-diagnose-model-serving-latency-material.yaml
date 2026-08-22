@@ -1,0 +1,25 @@
+id: art-diagnose-model-serving-latency-material
+type: material
+title: "Slow-Tail Latency Diagnosis: Reference"
+experience_ref: exp-diagnose-model-serving-latency
+outcome_refs:
+  - out-diagnose-model-serving-latency-01
+capability_refs:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-observability-slo-based-alerting-for-inference
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on p50-vs-p99 divergence patterns and
+  workload-shape drift, as pure reference facts - not a narrated investigation (Video)
+  or hands-on tracing (Lab).
+content_summary: >
+  A reference document covering how to distinguish a workload-shape-drift latency
+  pattern from a classic resource-exhaustion pattern, and what request-characteristic
+  data to examine.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - "p50 flat, p99 rising: what this pattern usually means"
+    - Workload-shape drift vs. resource exhaustion
+    - What request-characteristic data to examine and how

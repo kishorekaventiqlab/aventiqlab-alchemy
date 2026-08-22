@@ -1,0 +1,115 @@
+# Experience x Capability matrix.
+# Each capability shows expected engineering behavior per learner band, not a bare level
+# label. proficiency_level is the machine-readable tier matching that prose. Curves are
+# deliberately non-uniform - see notes[] on capabilities that plateau early, climb late,
+# or get delegated rather than deepened at senior bands.
+capabilities:
+  - capability_ref: cap-foundations-ai-ml-platform-engineering-baseline
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Can name platform lifecycle stages and deploy a templated service under guidance." }
+      5yr: { proficiency_level: Intermediate, behavior: "Independently deploys templated services and explains lifecycle stages to peers." }
+      7yr: { proficiency_level: Advanced, behavior: "Mentors others on platform vocabulary and mental models." }
+      10yr: { proficiency_level: Expert, behavior: "Sets baseline onboarding expectations for platform vocabulary across teams." }
+      staff-principal: { proficiency_level: Expert, behavior: "Same as 10yr - this is a foundational capability that plateaus early and is not a distinguishing skill at the most senior bands." }
+    notes:
+      - "Front-loaded, plateaus at Expert rather than climbing to Architect - foundational knowledge matures fast and stays flat."
+
+  - capability_ref: cap-cloud-platform-engineering-account-and-network-foundations
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Can provision a network topology from an existing module; escalates on connectivity failures." }
+      5yr: { proficiency_level: Advanced, behavior: "Independently operates account/network resources for owned services and resolves common connectivity incidents." }
+      7yr: { proficiency_level: Expert, behavior: "Diagnoses cross-account connectivity incidents and reviews others' network designs." }
+      10yr: { proficiency_level: Expert, behavior: "Designs multi-account network topology and sets isolation standards." }
+      staff-principal: { proficiency_level: Expert, behavior: "Sets company-wide account/network topology strategy; capability has plateaued since 7yr." }
+    notes:
+      - "Steep early climb (3yr to 5yr) then flat - a foundational skill that matures fast and stays flat rather than climbing to Architect."
+
+  - capability_ref: cap-kubernetes-workload-scaling-for-inference
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Can deploy and troubleshoot basic workloads." }
+      5yr: { proficiency_level: Intermediate, behavior: "Can independently operate production workloads." }
+      7yr: { proficiency_level: Advanced, behavior: "Can diagnose complex cluster behavior and lead incidents." }
+      10yr: { proficiency_level: Expert, behavior: "Can design platform strategy and organizational standards." }
+      staff-principal: { proficiency_level: Architect, behavior: "Can define multi-platform architecture and long-term technical direction." }
+    notes:
+      - "The canonical smooth progression - each band is a clear step up from the last."
+
+  - capability_ref: cap-gpu-engineering-utilization-and-capacity-signals
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Has minimal exposure; can read a GPU utilization number but not interpret compute- vs memory-bound." }
+      5yr: { proficiency_level: Intermediate, behavior: "Independently classifies compute-, memory-, or queue-bound bottlenecks using dashboards as primary on-call for a GPU service." }
+      7yr: { proficiency_level: Advanced, behavior: "Diagnoses capacity-vs-quota root causes and leads GPU incident response." }
+      10yr: { proficiency_level: Expert, behavior: "Designs GPU capacity strategy across multiple services under org-wide quota constraints." }
+      staff-principal: { proficiency_level: Architect, behavior: "Sets company-wide GPU capacity and quota policy." }
+    notes:
+      - "Smooth progression, specialized domain so 3yr starts lower than Kubernetes."
+
+  - capability_ref: cap-model-serving-autoscaling-policy-design
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Deploys a serving runtime with default settings; does not tune batching." }
+      5yr: { proficiency_level: Intermediate, behavior: "Tunes batching/concurrency to hit a stated latency SLA." }
+      7yr: { proficiency_level: Advanced, behavior: "Diagnoses complex latency regressions across queueing, GPU, and cold-start causes." }
+      10yr: { proficiency_level: Expert, behavior: "Sets serving/autoscaling policy standards applied across multiple deployments." }
+      staff-principal: { proficiency_level: Architect, behavior: "Defines model-serving architecture strategy company-wide, including build-vs-buy runtime decisions." }
+    notes:
+      - "Smooth progression, mirrors GPU Engineering since the two are usually developed together."
+
+  - capability_ref: cap-observability-slo-based-alerting-for-inference
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Sets up basic dashboards with thresholds copied from another service." }
+      5yr: { proficiency_level: Intermediate, behavior: "Independently instruments and monitors a production inference service." }
+      7yr: { proficiency_level: Advanced, behavior: "Triages ambiguous alerts using burn-rate analysis; leads incident-detection improvements." }
+      10yr: { proficiency_level: Expert, behavior: "Sets org-wide SLO and alerting standards." }
+      staff-principal: { proficiency_level: Expert, behavior: "Same as 10yr - observability standard-setting plateaus rather than becoming an architecture differentiator at the top band." }
+    notes:
+      - "Plateaus at Expert - operational-excellence capability, not the thing that distinguishes an Architect from a Staff engineer."
+
+  - capability_ref: cap-ai-infrastructure-cluster-and-node-pool-provisioning
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Provisions a node pool by copying an existing template without adjusting instance type." }
+      5yr: { proficiency_level: Intermediate, behavior: "Independently operates node pool capacity and headroom monitoring." }
+      7yr: { proficiency_level: Advanced, behavior: "Diagnoses complex Pending-pod incidents across taints, device plugins, and capacity." }
+      10yr: { proficiency_level: Expert, behavior: "Designs org-wide node pool and instance-type strategy across multiple clusters." }
+      staff-principal: { proficiency_level: Architect, behavior: "Defines infrastructure provisioning strategy across the company's entire AI estate, including multi-cloud/multi-region tradeoffs." }
+    notes:
+      - "Smooth progression."
+
+  - capability_ref: cap-mlops-pipeline-orchestration
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Runs an existing pipeline but cannot modify its structure." }
+      5yr: { proficiency_level: Intermediate, behavior: "Independently builds and operates a multi-step pipeline including retries." }
+      7yr: { proficiency_level: Advanced, behavior: "Diagnoses drift-vs-infrastructure failures and leads pipeline incident response." }
+      10yr: { proficiency_level: Advanced, behavior: "Delegates hands-on pipeline ownership to 5-7yr engineers; reviews pipeline architecture decisions rather than authoring them personally." }
+      staff-principal: { proficiency_level: Advanced, behavior: "Same delegation pattern continues - architecture judgment at this band is exercised through Platform Architecture, not by personally deepening pipeline orchestration." }
+    notes:
+      - "Deliberately does NOT climb to Expert/Architect at the top bands - this capability gets delegated rather than personally deepened once an engineer reaches Staff, unlike every other capability in this matrix."
+
+  - capability_ref: cap-llmops-prompt-and-eval-pipelines
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Writes prompts ad hoc without a repeatable eval process." }
+      5yr: { proficiency_level: Beginner, behavior: "Uses an existing eval pipeline but does not yet design one independently." }
+      7yr: { proficiency_level: Intermediate, behavior: "Independently runs an eval pipeline and diagnoses retrieval-vs-generation regressions." }
+      10yr: { proficiency_level: Advanced, behavior: "Designs eval strategy standards for new LLM-backed features across a team." }
+      staff-principal: { proficiency_level: Advanced, behavior: "LLMOps judgment at this band is comparable to a 10-year engineer's - the field itself is still emergent, not a capability gap at the top." }
+    notes:
+      - "Slowest climb in the matrix, and never reaches Architect - reflects LLMOps being an emergent domain rather than a mature one like Kubernetes."
+
+  - capability_ref: cap-ai-reliability-sre-incident-response-for-inference
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Follows a runbook step-by-step; cannot adapt when the incident deviates." }
+      5yr: { proficiency_level: Intermediate, behavior: "Independently mitigates known incident patterns within SLA." }
+      7yr: { proficiency_level: Expert, behavior: "Leads cross-layer root-cause investigations and incident command for novel incidents." }
+      10yr: { proficiency_level: Expert, behavior: "Operational incident-response maturity has plateaued; focus shifts to setting incident-process standards rather than personally leading every incident." }
+      staff-principal: { proficiency_level: Expert, behavior: "Sets company-wide reliability standards but is rarely the incident commander in practice." }
+    notes:
+      - "Jumps to Expert at 7yr, then plateaus - operational maturity in this capability peaks before formal seniority does."
+
+  - capability_ref: cap-platform-architecture-tradeoff-driven-system-design
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Recognizes that tradeoffs exist but cannot yet weigh them without guidance." }
+      5yr: { proficiency_level: Beginner, behavior: "Proposes tradeoffs for review but does not yet own the final call." }
+      7yr: { proficiency_level: Advanced, behavior: "Weighs and defends tradeoffs for single- and multi-service design decisions independently." }
+      10yr: { proficiency_level: Expert, behavior: "Designs multi-team platform architecture balancing isolation, cost, and operability." }
+      staff-principal: { proficiency_level: Architect, behavior: "Sets company-wide, multi-year technical direction and architecture standards." }
+    notes:
+      - "Steepest late climb in the matrix - stays at Beginner through 5yr, then jumps to Advanced at 7yr. Architecture judgment is cross-capability synthesis and is deliberately the last capability to mature."

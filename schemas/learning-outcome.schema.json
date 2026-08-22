@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "learning-outcome.schema.json",
+  "title": "Learning Outcome",
+  "description": "Expresses what a learner should achieve as Learner + Action + Context + Expected Result. Deliberately separate from assessment/scoring criteria, which live only in the skill-evaluator schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "experience_ref", "learner_summary", "learner_profile_refs",
+    "action", "context", "expected_result", "related_capabilities"
+  ],
+  "properties": {
+    "id": { "$ref": "./common/vocab.schema.json#/$defs/out_id" },
+    "experience_ref": { "$ref": "./common/vocab.schema.json#/$defs/exp_id" },
+    "learner_summary": { "type": "string" },
+    "learner_profile_refs": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/lp_id" },
+      "minItems": 1
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verb", "statement"],
+      "properties": {
+        "verb": { "$ref": "./common/vocab.schema.json#/$defs/capability_verb" },
+        "statement": { "type": "string" }
+      }
+    },
+    "context": { "type": "string" },
+    "expected_result": { "type": "string" },
+    "related_capabilities": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/cap_id" }
+    },
+    "evidence_expectations": { "type": "string" }
+  }
+}

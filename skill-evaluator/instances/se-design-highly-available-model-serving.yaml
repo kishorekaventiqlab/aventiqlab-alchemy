@@ -1,0 +1,76 @@
+id: se-design-highly-available-model-serving
+experience_ref: exp-design-highly-available-model-serving
+skills_evaluated:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-platform-architecture-tradeoff-driven-system-design
+scenario: >
+  A variant case: the two confirmed AZs each individually have only 60% of the capacity
+  needed to serve full peak traffic alone - so a single-AZ failure would mean the
+  surviving AZ genuinely cannot absorb everything, unlike the reference design where the
+  surviving AZ had full headroom.
+opening_question: >
+  Each AZ only has 60% of peak capacity on its own. If one AZ goes down, the other
+  genuinely can't handle all the traffic. Does that break the two-AZ design? What would
+  you do?
+expected_reasoning_areas:
+  - Recognizing that "failover works" and "failover preserves full capacity" are different claims
+  - Considering graceful degradation (e.g. shedding or throttling) as part of the HA design itself, not an afterthought
+  - Not overselling the design's guarantees given the real capacity constraint
+follow_up_question_paths:
+  - trigger: Learner claims the design still fully handles an AZ outage without qualification.
+    follow_up_question: If the surviving AZ only has 60% of what's needed, what actually happens to the other 40% of traffic during a failover?
+    targets_reasoning_area: Recognizing that "failover works" and "failover preserves full capacity" are different claims
+  - trigger: Learner has no plan for the capacity shortfall during failover.
+    follow_up_question: Is there a way to serve most requests during a failover even if you can't serve all of them at full quality?
+    targets_reasoning_area: Considering graceful degradation as part of the HA design itself
+misconception_indicators:
+  - misconception: Assumes a two-AZ active-active design always fully absorbs a single-AZ failure regardless of per-AZ capacity.
+    likely_root_cause: Generalized from the reference case where the surviving AZ had full headroom, without checking whether that precondition holds here.
+    corrective_follow_up: What was true about capacity in the reference design that let full failover work, and is that true here?
+strong_answer_indicators:
+  - Explicitly distinguishes availability (traffic reaches a healthy AZ) from full-capacity preservation.
+  - Proposes a specific graceful-degradation mechanism for the capacity shortfall.
+weak_answer_indicators:
+  - Claims the design fully handles an AZ outage without acknowledging the capacity gap.
+  - Has no plan for the shortfall beyond "it will be degraded."
+evidence_criteria:
+  - States the specific capacity shortfall (40%) and its consequence.
+  - Names a specific mechanism for handling the shortfall (shedding, throttling, priority tiers).
+scoring_dimensions:
+  - dimension: REASONING
+    description: Correctly distinguishes availability from full-capacity preservation under this constraint.
+    weight_percent: 35
+  - dimension: TRADE_OFF_ANALYSIS
+    description: Proposes and reasons about a graceful-degradation mechanism for the shortfall.
+    weight_percent: 35
+  - dimension: ENGINEERING_JUDGMENT
+    description: Does not oversell the design's guarantees given the real capacity constraint.
+    weight_percent: 30
+proficiency_levels:
+  - level: Beginner
+    description: Claims full failover works without qualification even after prompting.
+    criteria:
+      - Does not acknowledge the capacity shortfall after the follow-up.
+  - level: Intermediate
+    description: Acknowledges the shortfall after prompting but has no mitigation plan.
+    criteria:
+      - Agrees the shortfall exists after the follow-up.
+  - level: Advanced
+    description: Independently identifies the shortfall and proposes a graceful-degradation mechanism.
+    criteria:
+      - States the capacity shortfall unprompted.
+      - Proposes a specific degradation mechanism unprompted.
+  - level: Expert
+    description: As Advanced, and explicitly documents the design's real guarantee (partial, not full, capacity during failover).
+    criteria:
+      - States the honest guarantee the design actually provides.
+  - level: Architect
+    description: As Expert, and generalizes into a principle for stating HA guarantees honestly relative to actual confirmed capacity in any design.
+    criteria:
+      - Articulates a reusable principle for scoping HA claims to real capacity, beyond this one case.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, TRADE_OFF_ANALYSIS]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to state the general principle for honestly scoping HA guarantees (Architect-level probe).

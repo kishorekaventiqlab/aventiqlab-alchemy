@@ -1,0 +1,123 @@
+id: se-inference-under-load
+experience_ref: exp-inference-under-load
+skills_evaluated:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+  - cap-ai-reliability-sre-incident-response-for-inference
+  - cap-platform-architecture-tradeoff-driven-system-design
+scenario: >
+  A variant of the reference experience: same platform, but a 5x traffic multiplier
+  instead of 3x, and a different constraint - the latency SLA now covers every customer
+  tier, not just the paid tier, so tier-based request shedding is no longer a clean
+  lever. The learner must transfer their reasoning, not recall the reference answer.
+opening_question: >
+  GPU utilization is at 95%, queue depth is climbing, and every customer tier is covered
+  by the same latency SLA - so you can't just shed the free tier. Walk me through how
+  you'd figure out what's actually going wrong before you touch anything.
+expected_reasoning_areas:
+  - Root-cause diagnosis using corroborating signals
+  - Recognizing that the quota ceiling changes the mitigation search space
+  - Weighing mitigation options when tier-based shedding isn't available
+  - Naming a longer-term tradeoff appropriate to a uniform-SLA environment
+follow_up_question_paths:
+  - trigger: Learner jumps straight to a mitigation without describing diagnosis.
+    follow_up_question: >
+      Before we get to fixing it - what specifically told you this is GPU-bound rather
+      than, say, a scheduling or network problem?
+    targets_reasoning_area: Root-cause diagnosis using corroborating signals
+  - trigger: Learner proposes "add more GPUs" as the immediate fix.
+    follow_up_question: >
+      The GPU quota ceiling is fixed and a quota increase isn't instant - what can you
+      actually do in the next 10 minutes?
+    targets_reasoning_area: Recognizing that the quota ceiling changes the mitigation search space
+  - trigger: Learner proposes reducing batch size or model precision.
+    follow_up_question: What does that cost you, and for which requests?
+    targets_reasoning_area: Weighing mitigation options when tier-based shedding isn't available
+misconception_indicators:
+  - misconception: >
+      Believes autoscaling failing to relieve pressure means the autoscaler is misconfigured.
+    likely_root_cause: >
+      Doesn't yet distinguish "not scaling because misconfigured" from "not scaling
+      because at a hard ceiling."
+    corrective_follow_up: >
+      Ask them to check the replica count against KEDA's maxReplicaCount and the ASG
+      against its max size specifically.
+  - misconception: Treats "request a quota increase" as an immediate mitigation.
+    likely_root_cause: >
+      Doesn't yet internalize that quota increases go through an approval/provisioning
+      process and are not available within an incident window.
+    corrective_follow_up: What would you do if the quota increase takes 24 hours to approve?
+strong_answer_indicators:
+  - Names at least two corroborating signals before committing to a root cause.
+  - Explicitly states why an alternative explanation doesn't fit the evidence.
+  - Proposes a mitigation that is actually executable given the stated constraint.
+  - Names a specific, costed tradeoff for the longer-term fix.
+weak_answer_indicators:
+  - Jumps to a fix before diagnosing.
+  - Proposes a mitigation that requires capacity beyond the quota ceiling.
+  - Gives an unqualified "add more capacity" recommendation with no named tradeoff.
+evidence_criteria:
+  - Cites specific dashboard signals, not just "I'd check the dashboards."
+  - States the constraint that rules out an otherwise-plausible option.
+  - Names the cost side of any proposed tradeoff.
+scoring_dimensions:
+  - dimension: REASONING
+    description: Quality of the diagnostic reasoning chain from symptom to root cause.
+    weight_percent: 30
+  - dimension: TROUBLESHOOTING
+    description: Correct application of GPU/Kubernetes troubleshooting knowledge to this specific incident.
+    weight_percent: 25
+  - dimension: TRADE_OFF_ANALYSIS
+    description: Quality and specificity of the tradeoff named for the mitigation and longer-term proposal.
+    weight_percent: 25
+  - dimension: COMMUNICATION
+    description: Clarity of the explanation, appropriate for a stakeholder update during a live incident.
+    weight_percent: 20
+proficiency_levels:
+  - level: Beginner
+    description: >
+      Cannot diagnose the root cause without heavy prompting; proposes mitigations that
+      don't fit the constraints.
+    criteria:
+      - Requires more than 2 follow-up prompts to reach a plausible root cause.
+      - Proposes at least one infeasible mitigation without reconsidering when prompted.
+  - level: Intermediate
+    description: >
+      Reaches the correct root cause with some prompting; mitigation is feasible but the
+      tradeoff is left implicit.
+    criteria:
+      - Reaches root cause within 1-2 follow-ups.
+      - Selects a feasible mitigation but does not name its cost unprompted.
+  - level: Advanced
+    description: >
+      Reaches root cause independently with corroborating signals; selects a feasible
+      mitigation and names its tradeoff.
+    criteria:
+      - States root cause with at least two corroborating signals unprompted.
+      - Names the mitigation's tradeoff without being asked.
+  - level: Expert
+    description: >
+      As Advanced, and also transfers cleanly to the changed constraint (uniform SLA)
+      without falling back on the reference experience's tier-shedding answer.
+    criteria:
+      - Recognizes unprompted that tier-based shedding doesn't apply under a uniform SLA.
+      - Proposes an alternative mitigation appropriate to the new constraint.
+  - level: Architect
+    description: >
+      As Expert, and also generalizes the incident into a durable architectural
+      recommendation with quantified tradeoffs.
+    criteria:
+      - Proposes a longer-term fix with a named, quantified cost, not just a qualitative one.
+      - Frames the recommendation in terms that would hold for future, differently-shaped traffic spikes.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, TROUBLESHOOTING]
+escalation_rules:
+  - condition: Learner reaches Expert-level reasoning on the opening question without any follow-up needed.
+    action: >
+      Skip the first follow-up path and go directly to the longer-term-proposal
+      follow-up to probe Architect-level generalization.
+  - condition: Learner exhibits the "quota increase as immediate fix" misconception twice across different questions.
+    action: >
+      Route to the corresponding corrective follow-up and flag this evaluator run for
+      review of the Material artifact's clarity on quota-ceiling facts.

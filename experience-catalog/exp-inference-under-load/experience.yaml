@@ -1,0 +1,124 @@
+id: exp-inference-under-load
+title: Operate an AI Inference Platform Under Load
+target_learner_profiles:
+  - lp-5yr-ai-platform-engineer
+  - lp-7yr-mlops-lead
+target_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-observability-slo-based-alerting-for-inference
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+  - cap-ai-reliability-sre-incident-response-for-inference
+prerequisites:
+  - exp-deploy-inference-service
+  - exp-build-autoscaling-inference-platform
+scenario: >
+  You are the on-call AI Platform Engineer for an LLM-powered summarization feature. The
+  service runs on Amazon EKS with a dedicated GPU node pool (g5.2xlarge instances,
+  NVIDIA A10G), serving requests through a Triton Inference Server / vLLM backend behind
+  a KEDA-scaled Deployment. A marketing campaign launches without prior notice to the
+  platform team, and inbound request volume triples within 20 minutes.
+business_context: >
+  The summarization feature is a paid-tier differentiator; sustained p99 latency SLA
+  breaches trigger contractual credits to enterprise customers. The marketing team does
+  not coordinate campaign timing with platform on-call.
+technical_environment:
+  platform: Amazon EKS
+  infrastructure_summary: >
+    A dedicated GPU node pool (g5.2xlarge, NVIDIA A10G) runs a Triton Inference
+    Server / vLLM backend behind a KEDA-scaled Kubernetes Deployment. Cluster Autoscaler
+    manages the node pool up to an account-level GPU service quota ceiling. Prometheus
+    scrapes GPU, queue-depth, and latency metrics; Grafana dashboards and PagerDuty
+    alerts are wired to an SLO-based burn-rate policy.
+  key_services:
+    - Amazon EKS
+    - GPU node pool (g5.2xlarge / A10G)
+    - Triton Inference Server
+    - vLLM
+    - KEDA
+    - Cluster Autoscaler
+    - Prometheus
+    - Grafana
+    - PagerDuty
+starting_state: >
+  GPU utilization has climbed from a steady 60% to 92% over 15 minutes. Request queue
+  depth is climbing and has not stabilized. p50 latency is still within SLA, but p99
+  latency is up 3x and trending worse. KEDA has already scaled the Deployment to its
+  configured maximum replica count. The GPU node pool's autoscaling group is at its
+  maximum size, which is set by the account's GPU service quota - there is no more GPU
+  capacity to add without a quota increase, and quota increases are not instant.
+learner_mission: >
+  Diagnose the actual bottleneck, execute a mitigation that fits within the current GPU
+  quota ceiling, and propose a longer-term capacity or architecture fix with an explicit
+  tradeoff - all before the p99 latency SLA breach triggers a contractual credit.
+expected_investigation:
+  - Check GPU utilization and memory dashboards to confirm whether the workload is compute-bound or memory-bound.
+  - Check current KEDA replica count against its configured maximum.
+  - Check the GPU node pool's autoscaling group size against the account's GPU service quota.
+  - Check request queue depth trend, not just its current value, to judge whether the system is stabilizing or still degrading.
+  - Check whether p50 and p99 latency are diverging (a queueing signature) versus both rising together (a compute-saturation signature).
+expected_decisions:
+  - decision_point: What is the actual root-cause bottleneck?
+    options_considered:
+      - "Correct: GPU compute saturation, confirmed by high GPU utilization plus a widening p50/p99 gap consistent with queueing at a saturated backend."
+      - "Plausible but wrong: assume it's a Kubernetes scheduling problem and spend the incident tuning KEDA's polling interval, which does not address the underlying GPU saturation."
+      - "Plausible but wrong: assume it's a network/ingress bottleneck given rising latency, without first checking GPU utilization."
+    sound_reasoning: >
+      GPU utilization at 92%+ combined with a widening p50/p99 gap and a saturated
+      replica count is a compute-saturation signature, not a scheduling or network
+      signature - the learner should rule out the alternatives using dashboard evidence
+      before committing to a mitigation.
+  - decision_point: What immediate mitigation fits within the current GPU quota ceiling?
+    options_considered:
+      - "Correct: shed or defer lower-priority requests (e.g. rate-limit non-paying tiers) to protect the paid-tier latency SLA within existing capacity."
+      - "Plausible but wrong: 'just scale pods further' - KEDA is already at its configured maximum and the node pool is at its quota ceiling, so this does nothing."
+      - "Plausible but wrong: 'request an emergency GPU quota increase as the immediate fix' - quota increases are not instant and cannot resolve an active incident within the SLA window."
+    sound_reasoning: >
+      The only levers that act within the current quota ceiling are reducing demand
+      (shedding/deferring) or reducing per-request cost (e.g. temporarily lowering batch
+      size or model precision) - both trade something away, which is why this decision
+      has a real tradeoff rather than a free win.
+  - decision_point: What longer-term capacity or architecture fix should be proposed?
+    options_considered:
+      - "Correct: propose a named tradeoff - e.g. a GPU overflow pool in a second instance family with pre-approved burst quota, versus accepting a documented request-shedding policy for future traffic spikes."
+      - "Plausible but wrong: an unqualified 'add more GPUs' recommendation with no named tradeoff or cost/latency implication."
+    sound_reasoning: >
+      A credible longer-term proposal names what it costs (money, complexity, or
+      graceful-degradation risk) - not just what it fixes.
+build_activities:
+  - Configure request shedding or priority-tier rate limiting on the inference gateway.
+  - Adjust batching/concurrency configuration on the serving runtime to trade latency for throughput within the existing GPU footprint.
+operational_activities:
+  - Monitor GPU utilization, queue depth, and p50/p99 latency dashboards throughout the incident.
+  - Communicate incident status to stakeholders as the mitigation is applied.
+failure_modes:
+  - Spending the incident tuning Kubernetes-level scaling parameters that cannot add GPU capacity beyond the quota ceiling.
+  - Requesting an emergency quota increase as the immediate mitigation and waiting on it instead of taking an action available now.
+  - Shedding traffic indiscriminately instead of preserving the paid tier the business context identifies as contractually protected.
+constraints:
+  - Fixed GPU service quota - no additional GPU capacity is available within the incident window.
+  - Contractual p99 latency SLA for paid-tier customers.
+  - No budget pre-approved for an emergency quota increase or additional instance reservation.
+trade_offs:
+  - tension: Request shedding vs. degraded quality
+    choice_a: >
+      Reject or defer excess requests to protect the paid-tier latency SLA, at the cost
+      of a worse experience (or outright failure) for shed requests.
+    choice_b: >
+      Reduce batch size or model precision to preserve throughput for all requests, at
+      the cost of somewhat worse output quality or latency for everyone.
+success_conditions:
+  - Root cause is correctly attributed to GPU compute saturation using at least two corroborating dashboard signals.
+  - A mitigation is selected and applied that is actually executable within the current GPU quota ceiling.
+  - The paid-tier p99 latency SLA is protected, or the tradeoff of not protecting it is explicitly and knowingly made.
+  - A longer-term proposal is produced with a named, specific tradeoff.
+evidence_of_competence:
+  - A timeline showing which dashboards were checked and in what order, demonstrating the investigation ruled out at least one plausible-but-wrong bottleneck.
+  - The specific mitigation applied and its measured effect on queue depth and p99 latency.
+  - A written longer-term proposal naming its tradeoff.
+progression_archetype: advanced-troubleshoot
+outcome_refs:
+  - out-inference-under-load-01
+  - out-inference-under-load-02
+  - out-inference-under-load-03

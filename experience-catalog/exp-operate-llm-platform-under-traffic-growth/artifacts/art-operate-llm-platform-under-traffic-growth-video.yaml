@@ -1,0 +1,26 @@
+id: art-operate-llm-platform-under-traffic-growth-video
+type: video
+title: Watching a Cost Growth Investigation
+experience_ref: exp-operate-llm-platform-under-traffic-growth
+outcome_refs:
+  - out-operate-llm-platform-under-traffic-growth-01
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+purpose: >
+  Models an engineer's reasoning process breaking down a different service's cost
+  growth into volume vs. context-length components, narrated out loud - the HOW, not
+  the facts (Material) or the learner's own dataset (Lab).
+content_summary: >
+  A screencast of an engineer pulling usage data for a different LLM feature, narrating
+  how they separate request-count growth from per-request context-length growth to find
+  the real cost driver.
+estimated_duration_minutes: 8
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a cost dashboard showing overall spend rising.
+    - Narrate pulling request-count and average-context-length trends separately.
+    - Narrate identifying which trend actually explains the cost growth.
+  on_screen_demonstrations:
+    - Cost tracking dashboard
+    - Querying usage data by request count and token count

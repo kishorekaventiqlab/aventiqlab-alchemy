@@ -1,0 +1,90 @@
+# Index of all 21 capability domains for AI / ML Ops / Platform Engineering.
+# status: authored  -> at least one capability file exists under this domain's folder
+# status: stub       -> domain is reserved but no capability has been authored yet (Phase 1+ work)
+# planned_capability_ids are illustrative future ids, NOT real objects yet - they must never be
+# referenced by target_capabilities/related_capabilities/skills_evaluated in any instance file.
+domains:
+  - domain: foundations
+    seq: 1
+    status: authored
+    capability_ids: [cap-foundations-ai-ml-platform-engineering-baseline]
+  - domain: cloud-platform-engineering
+    seq: 2
+    status: authored
+    capability_ids: [cap-cloud-platform-engineering-account-and-network-foundations]
+  - domain: container-platforms
+    seq: 3
+    status: stub
+    planned_capability_ids: [cap-container-platforms-image-and-runtime-fundamentals]
+  - domain: kubernetes
+    seq: 4
+    status: authored
+    capability_ids: [cap-kubernetes-workload-scaling-for-inference]
+  - domain: networking
+    seq: 5
+    status: stub
+    planned_capability_ids: [cap-networking-service-mesh-and-traffic-management]
+  - domain: iac-and-automation
+    seq: 6
+    status: stub
+    planned_capability_ids: [cap-iac-and-automation-declarative-infrastructure-lifecycle]
+  - domain: ci-cd
+    seq: 7
+    status: stub
+    planned_capability_ids: [cap-ci-cd-ml-pipeline-continuous-delivery]
+  - domain: ai-infrastructure
+    seq: 8
+    status: authored
+    capability_ids: [cap-ai-infrastructure-cluster-and-node-pool-provisioning]
+  - domain: gpu-engineering
+    seq: 9
+    status: authored
+    capability_ids: [cap-gpu-engineering-utilization-and-capacity-signals]
+  - domain: model-serving
+    seq: 10
+    status: authored
+    capability_ids: [cap-model-serving-autoscaling-policy-design]
+  - domain: inference-engineering
+    seq: 11
+    status: stub
+    planned_capability_ids: [cap-inference-engineering-latency-and-throughput-optimization]
+  - domain: mlops
+    seq: 12
+    status: authored
+    capability_ids: [cap-mlops-pipeline-orchestration]
+  - domain: llmops
+    seq: 13
+    status: authored
+    capability_ids: [cap-llmops-prompt-and-eval-pipelines]
+  - domain: ai-platform-engineering
+    seq: 14
+    status: stub
+    planned_capability_ids: [cap-ai-platform-engineering-self-service-platform-design]
+  - domain: observability
+    seq: 15
+    status: authored
+    capability_ids: [cap-observability-slo-based-alerting-for-inference]
+  - domain: ai-reliability-sre
+    seq: 16
+    status: authored
+    capability_ids: [cap-ai-reliability-sre-incident-response-for-inference]
+  - domain: ai-security
+    seq: 17
+    status: stub
+    planned_capability_ids: [cap-ai-security-model-and-data-access-controls]
+  - domain: capacity-engineering
+    seq: 18
+    status: stub
+    planned_capability_ids: [cap-capacity-engineering-demand-forecasting-and-headroom-planning]
+  - domain: cost-engineering
+    seq: 19
+    status: stub
+    planned_capability_ids: [cap-cost-engineering-gpu-spend-attribution-and-optimization]
+  - domain: distributed-ai-systems
+    seq: 20
+    status: stub
+    planned_capability_ids: [cap-distributed-ai-systems-multi-node-training-and-serving]
+  - domain: platform-architecture
+    seq: 21
+    status: authored
+    capability_ids: [cap-platform-architecture-tradeoff-driven-system-design]

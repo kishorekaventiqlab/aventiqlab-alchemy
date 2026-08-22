@@ -1,0 +1,63 @@
+id: exp-design-highly-available-model-serving
+title: Design Highly Available Model Serving
+target_learner_profiles: [lp-10yr-staff-ai-platform-engineer, lp-staff-principal-principal-ai-infrastructure-architect]
+target_capabilities:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-platform-architecture-tradeoff-driven-system-design
+prerequisites: [exp-diagnose-model-serving-latency]
+scenario: >
+  A model-serving deployment currently runs in a single availability zone on a single
+  GPU node pool; leadership wants it to survive a full AZ outage without a
+  customer-visible outage of its own.
+business_context: >
+  A recent AZ-level incident at the cloud provider (affecting a different service) has
+  made leadership newly risk-averse to single-AZ dependencies for customer-facing AI features.
+technical_environment:
+  platform: Amazon EKS across multiple AZs
+  infrastructure_summary: >
+    The current deployment runs entirely within one AZ's GPU node pool; GPU capacity for
+    the required instance type is not guaranteed to be available on-demand in every AZ.
+  key_services: [Amazon EKS, Multi-AZ node pools, AWS Service Quotas per AZ, Load balancer health checks]
+starting_state: >
+  The service runs single-AZ. GPU capacity for the needed instance type is confirmed
+  available in a second AZ but not a third. No cross-AZ failover mechanism exists yet.
+learner_mission: >
+  Design a highly-available model-serving architecture that survives a single AZ
+  outage, given that GPU capacity is not guaranteed in every AZ.
+expected_investigation:
+  - Confirm actual GPU instance-type availability and quota in candidate AZs, not just general region availability.
+  - Check whether the load balancer / ingress layer already supports AZ-aware failover or needs new configuration.
+expected_decisions:
+  - decision_point: How many AZs to actively serve from, and how?
+    options_considered:
+      - "Correct: actively serve from two AZs with confirmed GPU capacity, with the load balancer configured to fail traffic over if one AZ becomes unhealthy - rather than assuming a third, unconfirmed AZ will work."
+      - "Plausible but wrong: design for three-AZ active-active without first confirming GPU capacity is actually available in the third AZ, risking a design that can't be implemented as specified."
+    sound_reasoning: >
+      A resilience design is only as good as the capacity assumptions behind it -
+      designing around unconfirmed capacity in a third AZ would produce a plan that
+      fails when actually implemented.
+build_activities:
+  - Provision a second AZ's GPU node pool with confirmed capacity.
+  - Configure load-balancer-level health checks and failover between the two active AZs.
+operational_activities:
+  - Test failover by simulating one AZ's node pool becoming unavailable.
+failure_modes:
+  - Designing for AZ coverage that isn't actually backed by confirmed GPU capacity.
+  - Failover mechanism that isn't actually tested before being relied upon.
+constraints:
+  - GPU capacity for the needed instance type is only confirmed in two of three AZs.
+  - Must not introduce a customer-visible outage during migration to the new architecture.
+trade_offs:
+  - tension: Full three-AZ resilience vs. what capacity actually supports
+    choice_a: Design for two confirmed AZs now, accepting a residual (smaller) risk versus true three-AZ resilience, but with a plan that is actually implementable today.
+    choice_b: Wait to design until three-AZ capacity is confirmed, achieving full resilience later at the cost of remaining single-AZ exposed in the meantime.
+success_conditions:
+  - The design covers at least two AZs with confirmed GPU capacity and a tested failover mechanism.
+  - Migration to the new architecture does not cause a customer-visible outage.
+evidence_of_competence:
+  - The capacity-confirmation evidence for each AZ used in the design.
+  - Results of a simulated AZ-failure failover test.
+progression_archetype: architect-design
+outcome_refs:
+  - out-design-highly-available-model-serving-01
+  - out-design-highly-available-model-serving-02

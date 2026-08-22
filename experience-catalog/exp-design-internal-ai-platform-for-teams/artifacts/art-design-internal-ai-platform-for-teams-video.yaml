@@ -1,0 +1,26 @@
+id: art-design-internal-ai-platform-for-teams-video
+type: video
+title: Watching a Platform Architect Interview a Skeptical Team
+experience_ref: exp-design-internal-ai-platform-for-teams
+outcome_refs:
+  - out-design-internal-ai-platform-for-teams-01
+capability_refs:
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Models an architect's reasoning interviewing a different skeptical team about a
+  proposed internal platform, narrated out loud - the HOW of separating what a team
+  values from what's pure toil, not the facts (Material) or the learner's own five teams (Lab).
+content_summary: >
+  A screencast of an architect interviewing a different team that's wary of losing
+  control of their tooling, narrating how they distinguish genuinely valued
+  customization from duplicated toil the team would happily give up.
+estimated_duration_minutes: 10
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a team skeptical of adopting a shared platform.
+    - Narrate asking what specifically about their current tooling they'd miss.
+    - Narrate identifying which parts are valued customization vs. duplicated toil.
+    - Narrate shaping the platform's default path around that distinction.
+  on_screen_demonstrations:
+    - Interview notes being organized into "keep" vs. "toil" categories

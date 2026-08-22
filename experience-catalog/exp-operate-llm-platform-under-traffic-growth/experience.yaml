@@ -1,0 +1,63 @@
+id: exp-operate-llm-platform-under-traffic-growth
+title: Operate an LLM Platform Under Traffic Growth
+target_learner_profiles: [lp-5yr-ai-platform-engineer, lp-7yr-mlops-lead]
+target_capabilities:
+  - cap-llmops-prompt-and-eval-pipelines
+  - cap-kubernetes-workload-scaling-for-inference
+prerequisites: [exp-build-autoscaling-inference-platform]
+scenario: >
+  An LLM-backed feature's usage has grown steadily 20% week-over-week for a month, and
+  per-request cost and latency are both drifting upward as usage grows.
+business_context: >
+  The feature is on a per-token-billed third-party LLM API for part of its traffic and a
+  self-hosted open model for the rest; growth is putting pressure on both cost and
+  latency budgets simultaneously.
+technical_environment:
+  platform: Hybrid - third-party LLM API + self-hosted open model on EKS
+  infrastructure_summary: >
+    Traffic is routed between a third-party API and a self-hosted model based on request
+    complexity; both paths are seeing growth-driven pressure.
+  key_services: [Third-party LLM API, Self-hosted model on EKS, KEDA, Cost tracking dashboard]
+starting_state: >
+  Weekly active usage has grown 20% week-over-week for a month. Third-party API cost per
+  week is rising faster than usage due to per-token pricing at growing context lengths.
+  Self-hosted model latency is also drifting upward.
+learner_mission: >
+  Keep the platform healthy under continued growth while managing the cost and latency
+  pressure on both paths.
+expected_investigation:
+  - Check whether the third-party API cost growth is driven by request volume or by growing context length per request.
+  - Check whether the self-hosted model's latency drift correlates with its own utilization growth or something else.
+expected_decisions:
+  - decision_point: How to manage growing third-party API cost?
+    options_considered:
+      - "Correct: investigate whether routing more traffic to the self-hosted model (within its capacity) reduces cost without harming quality for the shifted traffic."
+      - "Plausible but wrong: simply negotiate a lower per-token rate as the only lever, ignoring that request routing itself could reduce spend."
+    sound_reasoning: >
+      Routing policy is a lever the platform team directly controls and can act on
+      immediately, unlike a rate renegotiation which depends on an external party and timeline.
+build_activities:
+  - Adjust the traffic-routing policy between the third-party API and the self-hosted model.
+  - Scale the self-hosted model's autoscaling ceiling to absorb more routed traffic.
+operational_activities:
+  - Monitor cost-per-request and latency on both paths as routing changes are made.
+failure_modes:
+  - Routing more traffic to the self-hosted model without confirming it has the capacity headroom to absorb it.
+  - Focusing only on cost and allowing latency to regress as a side effect.
+constraints:
+  - Cannot regress answer quality for traffic shifted to the self-hosted model.
+  - Self-hosted model capacity is not unlimited and shares infrastructure with other services.
+trade_offs:
+  - tension: Cost reduction vs. self-hosted infrastructure load
+    choice_a: Shift more traffic to the self-hosted model to cut third-party cost, increasing load and operational risk on owned infrastructure.
+    choice_b: Keep more traffic on the third-party API to protect self-hosted headroom, accepting continued cost growth.
+success_conditions:
+  - Cost-per-request growth is slowed without a corresponding quality regression.
+  - Self-hosted model latency does not worsen due to the routing change.
+evidence_of_competence:
+  - Before/after cost-per-request and latency measurements.
+  - The routing policy change and its stated rationale.
+progression_archetype: intermediate-operate
+outcome_refs:
+  - out-operate-llm-platform-under-traffic-growth-01
+  - out-operate-llm-platform-under-traffic-growth-02

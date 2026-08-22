@@ -1,0 +1,64 @@
+id: exp-diagnose-gpu-capacity-exhaustion
+title: Diagnose GPU Capacity Exhaustion
+target_learner_profiles: [lp-7yr-mlops-lead]
+target_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+future_capability_domains: [capacity-engineering]
+prerequisites: [exp-deploy-inference-service]
+scenario: >
+  A batch of new pods for a newly launched model are stuck in Pending state, and
+  existing services on the same GPU node pool are also showing signs of degraded
+  scheduling.
+business_context: >
+  The new model was expected to share existing GPU capacity; nobody explicitly checked
+  whether there was headroom before launch.
+technical_environment:
+  platform: Amazon EKS
+  infrastructure_summary: >
+    A shared GPU node pool at or near its autoscaling group maximum, serving multiple
+    teams' inference workloads.
+  key_services: [Amazon EKS, Cluster Autoscaler, NVIDIA device plugin, AWS Service Quotas]
+starting_state: >
+  New pods are stuck Pending. Existing pods on the same node pool are running but some
+  report intermittent scheduling delays. Cluster Autoscaler logs show scale-up attempts failing.
+learner_mission: >
+  Determine whether the root cause is a hard GPU quota ceiling, a node pool
+  misconfiguration (taints/device plugin), or something else, and identify a path to
+  unblock scheduling.
+expected_investigation:
+  - Check Cluster Autoscaler logs for the specific reason scale-up is failing.
+  - Check the account's GPU service quota against current node pool size.
+  - Check whether new pods have correct tolerations for the node pool's taints.
+expected_decisions:
+  - decision_point: Is this a quota ceiling or a configuration problem?
+    options_considered:
+      - "Correct: read the Cluster Autoscaler failure reason directly rather than guessing."
+      - "Plausible but wrong: assume it's a device plugin bug and start restarting DaemonSets before checking the autoscaler logs."
+    sound_reasoning: >
+      The autoscaler's own failure reason is the fastest and most reliable signal -
+      guessing wastes time during an active capacity crunch.
+build_activities:
+  - Draft a quota-increase request with the specific justification needed for approval.
+operational_activities:
+  - Communicate current capacity status to the teams whose services are affected.
+failure_modes:
+  - Restarting unrelated components without first reading the actual failure reason.
+  - Failing to communicate the blocked launch status to the affected product team promptly.
+constraints:
+  - Quota increases require justification and are not instant.
+  - No budget for a second GPU node pool without exec approval.
+trade_offs:
+  - tension: Delay the new model's launch vs. degrade existing services' headroom
+    choice_a: Hold the new model's launch until quota is approved.
+    choice_b: Temporarily reduce existing services' replica counts to free headroom for the new model.
+success_conditions:
+  - Root cause (quota ceiling vs. configuration) is correctly identified with supporting log evidence.
+  - A concrete unblocking path is proposed.
+evidence_of_competence:
+  - The specific autoscaler log line or quota check used to reach the diagnosis.
+  - The unblocking proposal and its tradeoff.
+progression_archetype: advanced-troubleshoot
+outcome_refs:
+  - out-diagnose-gpu-capacity-exhaustion-01
+  - out-diagnose-gpu-capacity-exhaustion-02

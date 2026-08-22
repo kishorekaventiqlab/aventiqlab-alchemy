@@ -1,0 +1,22 @@
+id: out-diagnose-broken-rag-pipeline-01
+experience_ref: exp-diagnose-broken-rag-pipeline
+learner_summary: >
+  Diagnose a RAG quality regression as a retrieval problem versus a generation problem
+  by comparing retrieved context before and after a corpus re-index.
+learner_profile_refs: [lp-7yr-mlops-lead]
+action:
+  verb: TROUBLESHOOT
+  statement: >
+    Diagnose a RAG answer-quality regression as retrieval-side or generation-side,
+    given the regression's timing correlates with a recent corpus re-index.
+context: >
+  Given an eval-pipeline quality score drop over the past week, no LLM or prompt changes
+  in that window, and a corpus re-index five days ago,
+expected_result: >
+  the learner checks whether the re-index changed chunking/embedding and inspects
+  retrieved context for a sample of failing queries before touching the prompt or model,
+  and reaches a specific, evidence-backed attribution.
+related_capabilities:
+  - cap-llmops-prompt-and-eval-pipelines
+evidence_expectations: >
+  The specific retrieval comparison (before/after re-index) used to reach the diagnosis.

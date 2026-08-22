@@ -1,0 +1,27 @@
+id: art-diagnose-broken-rag-pipeline-lab
+type: source_code_lab
+title: Diagnose and Fix the RAG Regression
+experience_ref: exp-diagnose-broken-rag-pipeline
+outcome_refs:
+  - out-diagnose-broken-rag-pipeline-01
+  - out-diagnose-broken-rag-pipeline-02
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+purpose: >
+  Untimed BUILD/TROUBLESHOOT practice: compare retrieval before/after and apply a fix
+  with no time pressure - this is where it's first practiced correctly.
+content_summary: >
+  A starter repo with a vector database snapshot from before and after the re-index, a
+  sample of failing queries, and the eval pipeline. The learner isolates the cause and
+  applies a targeted fix.
+estimated_duration_minutes: 90
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-diagnose-broken-rag-pipeline
+  tasks:
+    - Compare retrieved chunks for sample failing queries before and after the re-index.
+    - Identify the specific chunking/embedding change responsible.
+    - Apply a targeted fix and confirm the eval score recovers.
+  environment_requirements:
+    - Provided before/after vector database snapshots
+    - Eval pipeline sandbox
+  hints_available: true

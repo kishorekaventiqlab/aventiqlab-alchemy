@@ -1,0 +1,29 @@
+id: art-design-internal-ai-platform-for-teams-lab
+type: source_code_lab
+title: Build the Self-Service Deployment Templates
+experience_ref: exp-design-internal-ai-platform-for-teams
+outcome_refs:
+  - out-design-internal-ai-platform-for-teams-01
+  - out-design-internal-ai-platform-for-teams-02
+capability_refs:
+  - cap-platform-architecture-tradeoff-driven-system-design
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Untimed DESIGN/BUILD practice: build the actual self-service templates and shared
+  observability stack based on provided team-interview transcripts, with no time
+  pressure - this is where it's first built correctly.
+content_summary: >
+  A starter repo with five simulated team-interview transcripts (based on the most
+  mature existing team's practices) and a stub self-service template set. The learner
+  builds the templates and shared observability stack.
+estimated_duration_minutes: 120
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-design-internal-ai-platform-for-teams
+  tasks:
+    - Review the five team-interview transcripts and classify requirements as valued vs. toil.
+    - Build self-service deployment templates based on the most mature team's practices.
+    - Design a shared observability stack teams can adopt incrementally.
+  environment_requirements:
+    - Provided team-interview transcripts
+    - Sandbox EKS cluster for template validation
+  hints_available: true

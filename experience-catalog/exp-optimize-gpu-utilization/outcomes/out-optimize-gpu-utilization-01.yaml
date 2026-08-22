@@ -1,0 +1,23 @@
+id: out-optimize-gpu-utilization-01
+experience_ref: exp-optimize-gpu-utilization
+learner_summary: >
+  Identify a consolidation strategy that raises off-peak GPU utilization without
+  applying a uniform change that would harm the latency-sensitive peak-hour service.
+learner_profile_refs: [lp-7yr-mlops-lead, lp-10yr-staff-ai-platform-engineer]
+action:
+  verb: DESIGN
+  statement: >
+    Propose a GPU utilization improvement that treats services differently based on
+    their latency sensitivity, rather than applying one change uniformly.
+context: >
+  Given GPU utilization averaging 35% with an 85%+ peak window where queueing briefly
+  appears, and multiple services of varying latency sensitivity sharing the node pool,
+expected_result: >
+  the learner proposes consolidating off-peak-tolerant workloads while explicitly
+  excluding the peak-hour latency-sensitive service from the same treatment, naming why
+  a uniform change would be unsafe.
+related_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+evidence_expectations: >
+  A written explanation of why the chosen approach doesn't harm the peak-hour service.

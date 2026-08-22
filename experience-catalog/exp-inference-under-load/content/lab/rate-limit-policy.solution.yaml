@@ -1,0 +1,23 @@
+apiVersion: gateway.networking.k8s.io/v1alpha1
+kind: RateLimitPolicy
+metadata:
+  name: free-tier-shed
+  namespace: inference
+spec:
+  targetRef:
+    kind: HTTPRoute
+    name: doc-search-summarizer-route
+  rules:
+    - selector:
+        headers:
+          - name: x-customer-tier
+            value: paid-tier
+      action: allow
+
+    - selector:
+        headers:
+          - name: x-customer-tier
+            value: free-tier
+      action: reduce
+      reduction_percent: 40
+      duration: 1h

@@ -1,0 +1,25 @@
+id: art-roll-out-model-safely-material
+type: material
+title: "Canary Rollouts and Online Quality Signals: Reference"
+experience_ref: exp-roll-out-model-safely
+outcome_refs:
+  - out-roll-out-model-safely-01
+capability_refs:
+  - cap-mlops-pipeline-orchestration
+  - cap-observability-slo-based-alerting-for-inference
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on why infrastructure health checks cannot
+  detect a silent quality regression and what an online quality signal looks like, as
+  pure reference facts - not a narrated incident (Video) or a built pipeline (Lab).
+content_summary: >
+  A reference document covering the difference between infrastructure health and model
+  quality, canary/traffic-split mechanics, and how to define a fast-enough online
+  quality signal.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - Why infrastructure health checks can't catch a quality regression
+    - Canary and traffic-split rollout mechanics
+    - Defining an online quality signal that's fast enough to gate a rollout

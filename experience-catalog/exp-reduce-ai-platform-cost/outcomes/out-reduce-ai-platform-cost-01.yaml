@@ -1,0 +1,26 @@
+id: out-reduce-ai-platform-cost-01
+experience_ref: exp-reduce-ai-platform-cost
+learner_summary: >
+  Propose a cost-reduction plan reaching a 20% target using purchasing strategy and
+  consolidation, without touching any existing reliability commitment.
+learner_profile_refs: [lp-7yr-mlops-lead, lp-10yr-staff-ai-platform-engineer]
+action:
+  verb: DESIGN
+  statement: >
+    Propose a cost-reduction plan reaching a 20% infrastructure spend reduction target
+    using reserved-capacity conversion and consolidation, with no proposed action
+    reducing an existing reliability commitment.
+context: >
+  Given a cost breakdown showing uneven utilization and mostly on-demand instances for
+  services with stable, predictable baseline load, and an explicit mandate not to
+  weaken reliability,
+expected_result: >
+  the learner proposes a mix of reserved-capacity commitments and node-pool
+  consolidation that plausibly reaches the 20% target, and explicitly states why each
+  action doesn't touch a reliability commitment.
+related_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+evidence_expectations: >
+  The cost model showing where the 20% comes from, and an explicit reliability-impact
+  statement per action.

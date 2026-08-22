@@ -1,0 +1,21 @@
+id: out-roll-out-model-safely-02
+experience_ref: exp-roll-out-model-safely
+learner_summary: >
+  Operate the canary rollout, monitoring the quality signal and infrastructure health
+  together, and confirm the rollback path actually works.
+learner_profile_refs: [lp-5yr-ai-platform-engineer]
+action:
+  verb: OPERATE
+  statement: >
+    Execute and monitor a canary rollout against its quality signal and infrastructure
+    health, and verify the rollback path functions.
+context: >
+  Given a configured canary rollout with a defined quality signal and threshold,
+expected_result: >
+  the learner monitors the canary through completion (or a triggered rollback), and
+  produces evidence the rollback path was exercised or explicitly verified, not just assumed.
+related_capabilities:
+  - cap-mlops-pipeline-orchestration
+evidence_expectations: >
+  A monitoring timeline of the canary and confirmation the rollback mechanism was tested
+  or verified.

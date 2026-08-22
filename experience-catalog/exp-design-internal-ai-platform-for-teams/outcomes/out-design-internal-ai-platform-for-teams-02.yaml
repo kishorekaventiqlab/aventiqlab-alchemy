@@ -1,0 +1,21 @@
+id: out-design-internal-ai-platform-for-teams-02
+experience_ref: exp-design-internal-ai-platform-for-teams
+learner_summary: >
+  Pilot the platform with one real team voluntarily before proposing a company-wide rollout.
+learner_profile_refs:
+  - lp-staff-principal-principal-ai-infrastructure-architect
+action:
+  verb: PROVE
+  statement: >
+    Pilot the platform with one real team and produce evidence of its value before
+    proposing a company-wide rollout.
+context: >
+  Given a designed platform validated against team input,
+expected_result: >
+  the learner runs a voluntary pilot with one team and produces concrete evidence (e.g.
+  deployment speed, reliability improvement) that the platform is genuinely better than
+  the team's prior tooling, before proposing broader adoption.
+related_capabilities:
+  - cap-platform-architecture-tradeoff-driven-system-design
+evidence_expectations: >
+  Pilot results from the first adopting team, including a comparison to their prior tooling.

@@ -1,0 +1,58 @@
+id: cap-foundations-ai-ml-platform-engineering-baseline
+name: AI/ML Platform Engineering Baseline
+domain: foundations
+description: >
+  The shared vocabulary and mental model every AI/ML Platform Engineer needs before
+  specializing: what makes ML/AI workloads operationally different from typical
+  stateless web services, and how the platform lifecycle stages fit together.
+skills:
+  - id: skl-foundations-baseline-01
+    name: Core terminology fluency
+    verb: KNOW
+    statement: >
+      Knows core AI/ML platform terminology (training vs. inference, model serving,
+      feature store, vector store, GPU vs. CPU workload) and does not confuse them.
+    evidence:
+      - Correctly defines and differentiates these terms unprompted in a technical discussion.
+  - id: skl-foundations-baseline-02
+    name: Operational-difference reasoning
+    verb: UNDERSTAND
+    statement: >
+      Understands why ML/AI workloads have different operational characteristics than
+      stateless web services (bursty GPU demand, large artifacts, latency-sensitive inference).
+    evidence:
+      - Explains in a design review why a stateless-web autoscaling policy is insufficient
+        for a GPU inference workload.
+  - id: skl-foundations-baseline-03
+    name: Templated inference deployment
+    verb: BUILD
+    statement: >
+      Can deploy a basic containerized inference service behind a standard ingress/load
+      balancer using an existing template.
+    evidence:
+      - Has deployed at least one templated inference service end-to-end following a runbook.
+  - id: skl-foundations-baseline-04
+    name: Lifecycle communication
+    verb: EXPLAIN
+    statement: >
+      Can explain the AI/ML platform lifecycle stages (data, training, evaluation, serving,
+      monitoring) to a non-specialist stakeholder.
+    evidence:
+      - Has produced a one-page lifecycle explainer, or walked a stakeholder through it
+        verbally with no major gaps identified afterward.
+common_tools:
+  - Docker
+  - Git
+  - A cloud provider console (AWS/GCP/Azure)
+  - Prometheus/Grafana (read-only familiarity)
+beginner_indicators:
+  - Can name the platform lifecycle stages but confuses training and inference resource needs.
+  - Needs a runbook to deploy even a templated service.
+intermediate_indicators:
+  - Deploys templated services independently.
+  - Can explain lifecycle stages to a peer without prompting.
+advanced_indicators:
+  - Anticipates where a stateless-web pattern will fail for an ML workload before trying it.
+  - Mentors newer engineers on platform vocabulary and mental models.
+expert_architect_indicators:
+  - Sets the baseline vocabulary and onboarding expectations for an entire platform team.

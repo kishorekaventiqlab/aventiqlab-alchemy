@@ -1,0 +1,24 @@
+id: out-roll-out-model-safely-01
+experience_ref: exp-roll-out-model-safely
+learner_summary: >
+  Design a canary rollout gated by an online quality signal, not just infrastructure
+  health checks.
+learner_profile_refs: [lp-5yr-ai-platform-engineer]
+action:
+  verb: DESIGN
+  statement: >
+    Design a canary rollout mechanism gated by a defined online quality signal, given
+    that infrastructure health checks alone previously missed a silent quality regression.
+context: >
+  Given a new model version that has passed offline evaluation and a production
+  environment with no existing canary infrastructure,
+expected_result: >
+  the learner defines a canary rollout with a specific online quality signal and
+  threshold that would have caught the previous regression, explicitly rejecting a
+  health-check-only rollout as insufficient.
+related_capabilities:
+  - cap-mlops-pipeline-orchestration
+  - cap-observability-slo-based-alerting-for-inference
+evidence_expectations: >
+  The quality signal definition, its threshold, and an explanation of why it would have
+  caught the previous incident.

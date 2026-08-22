@@ -1,0 +1,24 @@
+id: art-inference-under-load-skill-evaluator
+type: skill_evaluator
+title: Reasoning & Judgment Evaluation - Inference Under Load
+experience_ref: exp-inference-under-load
+outcome_refs:
+  - out-inference-under-load-01
+  - out-inference-under-load-02
+  - out-inference-under-load-03
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-observability-slo-based-alerting-for-inference
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+  - cap-ai-reliability-sre-incident-response-for-inference
+purpose: >
+  Open-ended evaluation of reasoning quality, transfer to a novel variant, and
+  communication across all 3 outcomes - assesses judgment under variation, not
+  recall (Quiz) or hands-on execution (Lab). This is the source-of-truth
+  structure a future ASTRA conversation would eventually execute; no
+  conversational AI is implemented here.
+estimated_duration_minutes: 20
+type_specific:
+  evaluator_ref: se-inference-under-load

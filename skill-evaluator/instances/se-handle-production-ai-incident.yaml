@@ -1,0 +1,74 @@
+id: se-handle-production-ai-incident
+experience_ref: exp-handle-production-ai-incident
+skills_evaluated:
+  - cap-ai-reliability-sre-incident-response-for-inference
+  - cap-observability-slo-based-alerting-for-inference
+scenario: >
+  A variant incident: three services alert within a five-minute window instead of two,
+  and only two of the three actually share the suspected infrastructure - the third is
+  independently deployed and its alert may be coincidental.
+opening_question: >
+  Three services just alerted within five minutes of each other, but only two of them
+  actually share infrastructure. How do you approach this differently than the two-alert case?
+expected_reasoning_areas:
+  - Not assuming all three alerts share one cause just because they're close in time
+  - Applying the shared-infrastructure check specifically to the two that share it, and treating the third separately
+  - Prioritizing investigation and communication across three services under time pressure
+follow_up_question_paths:
+  - trigger: Learner treats all three alerts as one incident by default.
+    follow_up_question: You said the third service doesn't share infrastructure with the other two - what does that suggest about treating this as one incident?
+    targets_reasoning_area: Not assuming all three alerts share one cause just because they're close in time
+  - trigger: Learner doesn't address how communication changes with three services instead of two.
+    follow_up_question: How does having three services instead of two change how you'd sequence your stakeholder updates?
+    targets_reasoning_area: Prioritizing investigation and communication across three services under time pressure
+misconception_indicators:
+  - misconception: Assumes any alerts close in time must share a root cause, regardless of infrastructure overlap.
+    likely_root_cause: Over-generalizes the "check shared infrastructure" heuristic without checking whether shared infrastructure actually exists.
+    corrective_follow_up: What was the actual reason to suspect a shared cause in the two-alert case, and does that reason apply to the third service?
+strong_answer_indicators:
+  - Explicitly separates the two infrastructure-sharing services from the third.
+  - Proposes a sensible prioritization for investigating and communicating about three services at once.
+weak_answer_indicators:
+  - Treats all three alerts as one incident without checking infrastructure overlap.
+  - Has no plan for handling three parallel communication threads.
+evidence_criteria:
+  - States why the third service is treated differently (or explicitly justifies treating it the same).
+  - Names a specific approach to managing communication across three services.
+scoring_dimensions:
+  - dimension: REASONING
+    description: Correctly applies the shared-infrastructure principle only where it actually holds.
+    weight_percent: 40
+  - dimension: APPLICATION
+    description: Adapts investigation and communication approach to a three-service scenario.
+    weight_percent: 35
+  - dimension: COMMUNICATION
+    description: Proposes a workable communication plan under increased complexity.
+    weight_percent: 25
+proficiency_levels:
+  - level: Beginner
+    description: Treats all three as one incident even after prompting.
+    criteria:
+      - Does not separate the third service after the follow-up.
+  - level: Intermediate
+    description: Separates the third service only after prompting.
+    criteria:
+      - Corrects course after the follow-up.
+  - level: Advanced
+    description: Independently separates the third service and proposes a communication approach for three services.
+    criteria:
+      - Distinguishes the third service unprompted.
+      - Proposes a specific communication approach unprompted.
+  - level: Expert
+    description: As Advanced, and prioritizes investigation effort explicitly across all three services.
+    criteria:
+      - States a specific prioritization rationale.
+  - level: Architect
+    description: As Expert, and generalizes into a framework for scaling incident command as alert count grows.
+    criteria:
+      - Articulates a reusable approach for N simultaneous alerts, not just this specific case.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, APPLICATION]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to generalize their approach to N simultaneous alerts (Architect-level probe).

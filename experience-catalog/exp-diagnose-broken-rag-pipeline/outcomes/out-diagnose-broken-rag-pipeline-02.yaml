@@ -1,0 +1,21 @@
+id: out-diagnose-broken-rag-pipeline-02
+experience_ref: exp-diagnose-broken-rag-pipeline
+learner_summary: >
+  Apply a fix targeted at the specific retrieval cause rather than fully rolling back
+  the re-index, preserving its benefits where possible.
+learner_profile_refs: [lp-7yr-mlops-lead]
+action:
+  verb: BUILD
+  statement: >
+    Apply a targeted fix for the confirmed retrieval-side cause, preserving the
+    re-index's benefits rather than defaulting to a full rollback.
+context: >
+  Given a confirmed retrieval-side cause (e.g. a chunking strategy change) for the
+  quality regression,
+expected_result: >
+  the learner applies a fix scoped to the specific cause and confirms via the eval
+  pipeline that the quality score recovers, rather than fully reverting the re-index by default.
+related_capabilities:
+  - cap-llmops-prompt-and-eval-pipelines
+evidence_expectations: >
+  The eval score before and after the fix, and a statement of why a full rollback wasn't necessary.

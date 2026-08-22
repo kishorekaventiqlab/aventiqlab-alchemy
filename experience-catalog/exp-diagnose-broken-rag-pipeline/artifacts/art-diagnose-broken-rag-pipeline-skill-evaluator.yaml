@@ -1,0 +1,16 @@
+id: art-diagnose-broken-rag-pipeline-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Diagnose a Broken RAG Pipeline
+experience_ref: exp-diagnose-broken-rag-pipeline
+outcome_refs:
+  - out-diagnose-broken-rag-pipeline-01
+  - out-diagnose-broken-rag-pipeline-02
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+purpose: >
+  Open-ended evaluation of whether the retrieval-first diagnostic approach transfers
+  when no corpus change occurred at all - not recall (Quiz) or hands-on
+  execution (Lab). Source-of-truth structure only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-diagnose-broken-rag-pipeline

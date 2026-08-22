@@ -1,0 +1,20 @@
+id: art-deploy-inference-service-quiz
+type: quiz
+title: GPU Scheduling & Health Check Facts Check
+experience_ref: exp-deploy-inference-service
+outcome_refs:
+  - out-deploy-inference-service-01
+capability_refs:
+  - cap-foundations-ai-ml-platform-engineering-baseline
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content, confirming
+  the learner knows what taints/tolerations and readiness checks actually do before
+  attempting the Lab. Does not test judgment - that is the Skill Evaluator's job.
+content_summary: >
+  8 questions covering taints/tolerations, the device plugin, and the difference between
+  a Running pod and a genuinely healthy service.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

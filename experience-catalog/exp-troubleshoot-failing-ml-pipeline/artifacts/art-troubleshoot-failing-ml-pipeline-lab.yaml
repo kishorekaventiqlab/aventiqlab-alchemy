@@ -1,0 +1,27 @@
+id: art-troubleshoot-failing-ml-pipeline-lab
+type: source_code_lab
+title: Fix the Failing Pipeline and Add Validation
+experience_ref: exp-troubleshoot-failing-ml-pipeline
+outcome_refs:
+  - out-troubleshoot-failing-ml-pipeline-01
+  - out-troubleshoot-failing-ml-pipeline-02
+capability_refs:
+  - cap-mlops-pipeline-orchestration
+purpose: >
+  Untimed BUILD/TROUBLESHOOT practice: diagnose and fix a simulated failing pipeline
+  with no time pressure - this is where the method is first practiced correctly.
+content_summary: >
+  A starter repo with a pipeline definition, three nights of run logs showing the
+  evaluation-step failure, and the data used in each run. The learner diagnoses the
+  cause, applies a fix, and adds a validation step.
+estimated_duration_minutes: 75
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-troubleshoot-failing-ml-pipeline
+  tasks:
+    - Compare data schema/statistics across the three failing runs and the last successful run.
+    - Identify the specific data-side or infrastructure-side cause.
+    - Apply a targeted fix and add a data validation step ahead of evaluation.
+  environment_requirements:
+    - Kubeflow Pipelines sandbox or equivalent
+    - Provided run-log and data-snapshot dataset
+  hints_available: true

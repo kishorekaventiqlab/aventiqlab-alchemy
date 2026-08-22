@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "artifact-spec.schema.json",
+  "title": "Artifact Specification",
+  "description": "One of the five learning artifacts (material, video, source_code_lab, quiz, skill_evaluator) for a specific experience. Every instance's purpose field must state what it uniquely provides that the other four do not - artifacts must never simply duplicate one another.",
+  "type": "object",
+  "required": [
+    "id", "type", "title", "experience_ref", "outcome_refs", "capability_refs",
+    "purpose", "content_summary", "type_specific"
+  ],
+  "properties": {
+    "id": { "$ref": "./common/vocab.schema.json#/$defs/art_id" },
+    "type": { "$ref": "./common/vocab.schema.json#/$defs/artifact_type" },
+    "title": { "type": "string" },
+    "experience_ref": { "$ref": "./common/vocab.schema.json#/$defs/exp_id" },
+    "outcome_refs": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/out_id" }
+    },
+    "capability_refs": {
+      "type": "array",
+      "items": { "$ref": "./common/vocab.schema.json#/$defs/cap_id" }
+    },
+    "purpose": { "type": "string" },
+    "content_summary": { "type": "string" },
+    "estimated_duration_minutes": { "type": "integer", "minimum": 1 },
+    "type_specific": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "material" } } },
+      "then": {
+        "properties": {
+          "type_specific": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["format", "reading_time_minutes", "key_sections"],
+            "properties": {
+              "format": { "type": "string", "enum": ["article", "diagram-walkthrough", "reference-doc"] },
+              "reading_time_minutes": { "type": "integer", "minimum": 1 },
+              "key_sections": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "video" } } },
+      "then": {
+        "properties": {
+          "type_specific": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["format", "script_outline", "on_screen_demonstrations"],
+            "properties": {
+              "format": { "type": "string", "enum": ["screencast", "talking-head", "animated-explainer"] },
+              "script_outline": { "type": "array", "items": { "type": "string" } },
+              "on_screen_demonstrations": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "source_code_lab" } } },
+      "then": {
+        "properties": {
+          "type_specific": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["repo_or_starter_ref", "tasks", "environment_requirements", "hints_available"],
+            "properties": {
+              "repo_or_starter_ref": { "type": "string" },
+              "tasks": { "type": "array", "items": { "type": "string" } },
+              "environment_requirements": { "type": "array", "items": { "type": "string" } },
+              "hints_available": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "quiz" } } },
+      "then": {
+        "properties": {
+          "type_specific": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["question_count", "question_types", "passing_threshold_percent"],
+            "properties": {
+              "question_count": { "type": "integer", "minimum": 1 },
+              "question_types": {
+                "type": "array",
+                "items": { "type": "string", "enum": ["multiple-choice", "scenario-judgment", "ordering", "short-answer"] }
+              },
+              "passing_threshold_percent": { "type": "integer", "minimum": 1, "maximum": 100 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "skill_evaluator" } } },
+      "then": {
+        "properties": {
+          "type_specific": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["evaluator_ref"],
+            "properties": {
+              "evaluator_ref": { "$ref": "./common/vocab.schema.json#/$defs/se_id" }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

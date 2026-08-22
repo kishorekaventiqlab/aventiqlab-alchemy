@@ -1,0 +1,22 @@
+id: out-diagnose-gpu-capacity-exhaustion-02
+experience_ref: exp-diagnose-gpu-capacity-exhaustion
+learner_summary: >
+  Communicate the capacity status and a concrete unblocking path clearly to the teams
+  affected by the blocked launch.
+learner_profile_refs: [lp-7yr-mlops-lead]
+action:
+  verb: EXPLAIN
+  statement: >
+    Communicate current capacity status and a concrete unblocking path to affected
+    teams during an active capacity crunch.
+context: >
+  Given a confirmed root cause and a launch that is currently blocked on GPU scheduling,
+expected_result: >
+  the learner delivers a clear, specific status update naming the root cause and a
+  concrete unblocking path (e.g. quota request timeline, temporary headroom reallocation)
+  rather than a vague "we're looking into it."
+related_capabilities:
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+evidence_expectations: >
+  The actual communication delivered, and confirmation it named both the cause and a
+  concrete next step.

@@ -1,0 +1,83 @@
+id: lp-5yr-ai-platform-engineer
+title: AI Platform Engineer
+experience_band: 5yr
+target_roles:
+  - AI Platform Engineer
+  - ML Platform Engineer
+typical_background: >
+  Five years total, roughly two of them focused specifically on AI/ML platform work;
+  primary on-call owner for at least one GPU-backed inference service.
+existing_knowledge:
+  - Everything in lp-3yr-cloud-platform-engineer
+  - GPU utilization vs. memory vs. batching tradeoffs
+  - Model-serving runtime characteristics (Triton, vLLM)
+  - SLO/error-budget concepts
+existing_skills:
+  - Independently deploys and operates a GPU-backed inference service
+  - Configures KEDA on a custom queue-depth metric
+  - Reads GPU utilization/queue-depth dashboards to classify a bottleneck
+technology_exposure:
+  - technology: Kubernetes
+    exposure_level: Advanced
+  - technology: GPU infrastructure
+    exposure_level: Intermediate
+  - technology: Model serving runtimes
+    exposure_level: Intermediate
+  - technology: Observability (Prometheus/Grafana)
+    exposure_level: Intermediate
+production_experience:
+  has_production_experience: true
+  description: >
+    Primary on-call owner for a GPU-backed inference service handling real customer
+    traffic; has independently mitigated at least one live capacity incident.
+  scale_indicators:
+    - Owns a service serving tens of thousands of inference requests/day
+    - Has handled at least one live GPU capacity incident independently
+learning_needs:
+  - Deepening GPU capacity strategy under fixed quota constraints
+  - LLMOps eval pipeline design
+  - Leading, not just participating in, incident root-cause investigation
+build_expectations:
+  - statement: >
+      Can build a full autoscaling and batching configuration for a GPU-backed inference
+      service that hits a stated latency SLA.
+    verbs: [BUILD]
+    capability_refs:
+      - cap-kubernetes-workload-scaling-for-inference
+      - cap-model-serving-autoscaling-policy-design
+operational_expectations:
+  - statement: >
+      Independently operates GPU utilization and queue-depth dashboards to classify a
+      degrading service as compute-, memory-, or queue-bound.
+    verbs: [OPERATE]
+    capability_refs: [cap-gpu-engineering-utilization-and-capacity-signals]
+  - statement: >
+      Executes an incident runbook to mitigate a GPU-bound degradation within an SLA window.
+    verbs: [OPERATE]
+    capability_refs: [cap-ai-reliability-sre-incident-response-for-inference]
+troubleshooting_expectations:
+  - statement: >
+      Diagnoses GPU capacity exhaustion versus a scheduling/quota ceiling as the root
+      cause of degraded inference performance.
+    verbs: [TROUBLESHOOT]
+    capability_refs: [cap-gpu-engineering-utilization-and-capacity-signals]
+architecture_expectations:
+  - statement: >
+      Proposes (but does not yet unilaterally own) a GPU capacity strategy with a named
+      tradeoff under a fixed quota ceiling.
+    verbs: [DESIGN]
+    capability_refs:
+      - cap-gpu-engineering-utilization-and-capacity-signals
+      - cap-model-serving-autoscaling-policy-design
+proof_expectations:
+  - statement: >
+      Produces a load-test report demonstrating a serving configuration meets a stated
+      latency SLA.
+    verbs: [PROVE]
+    capability_refs: [cap-model-serving-autoscaling-policy-design]
+prerequisites: [lp-3yr-cloud-platform-engineer]
+expected_independence: Independent
+expected_engineering_judgment: >
+  Makes sound in-the-moment mitigation decisions within existing constraints (e.g. a GPU
+  quota ceiling) without needing to escalate for routine capacity pressure; still
+  typically pairs with a senior engineer for architecture-level tradeoffs.

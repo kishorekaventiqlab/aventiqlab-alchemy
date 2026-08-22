@@ -1,0 +1,23 @@
+id: out-diagnose-gpu-capacity-exhaustion-01
+experience_ref: exp-diagnose-gpu-capacity-exhaustion
+learner_summary: >
+  Diagnose whether stuck Pending pods are caused by a hard GPU quota ceiling or a node
+  pool configuration problem, using the autoscaler's own failure reason.
+learner_profile_refs: [lp-7yr-mlops-lead]
+action:
+  verb: TROUBLESHOOT
+  statement: >
+    Diagnose the root cause of stuck Pending pods on a shared GPU node pool, using
+    Cluster Autoscaler's failure reason rather than guessing.
+context: >
+  Given new pods stuck Pending, existing pods reporting intermittent scheduling delays,
+  and Cluster Autoscaler logs showing failed scale-up attempts,
+expected_result: >
+  the learner reads the autoscaler's specific failure reason and correctly attributes
+  the block to a quota ceiling or a configuration issue (taints/device plugin), rather
+  than starting with an unrelated fix.
+related_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+evidence_expectations: >
+  The specific autoscaler log line or quota check used to reach the diagnosis.

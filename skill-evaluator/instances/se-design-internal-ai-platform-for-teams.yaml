@@ -1,0 +1,75 @@
+id: se-design-internal-ai-platform-for-teams
+experience_ref: exp-design-internal-ai-platform-for-teams
+skills_evaluated:
+  - cap-platform-architecture-tradeoff-driven-system-design
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+scenario: >
+  A variant outcome: the pilot team's feedback comes back mostly negative - they found
+  the self-service templates slower than their old ad hoc process for their specific
+  use case, even though the design was based on validated interview input.
+opening_question: >
+  The pilot team says the platform is actually slower for them than what they had
+  before, even though you built it based on their own input. What do you do with that?
+expected_reasoning_areas:
+  - Not dismissing negative pilot feedback just because the design was "validated" beforehand
+  - Distinguishing whether the platform is wrong for this team's specific case or needs adjustment
+  - Deciding whether to proceed to a wider rollout, iterate, or pause given one negative pilot
+follow_up_question_paths:
+  - trigger: Learner dismisses the feedback because the design was already validated with interviews.
+    follow_up_question: Interviews capture what people say they need - what might explain a gap between that and their actual experience using it?
+    targets_reasoning_area: Not dismissing negative pilot feedback just because the design was "validated" beforehand
+  - trigger: Learner proposes rolling out company-wide anyway despite the negative result.
+    follow_up_question: What was the whole point of piloting with one team first, and does proceeding here honor that?
+    targets_reasoning_area: Deciding whether to proceed to a wider rollout, iterate, or pause given one negative pilot
+misconception_indicators:
+  - misconception: Treats "we validated this with interviews" as proof the design must be right, making negative pilot results suspect rather than the design.
+    likely_root_cause: Overweights the earlier validation step and underweights that stated needs and actual usage can diverge.
+    corrective_follow_up: What's the difference between what a team says they need in an interview and what actually happens when they try to use it?
+strong_answer_indicators:
+  - Takes the negative feedback seriously rather than defending the original design.
+  - Proposes a specific way to investigate the gap between stated needs and actual experience.
+  - Explicitly reasons about whether to iterate, pause, or proceed rather than defaulting to one.
+weak_answer_indicators:
+  - Dismisses the feedback because "we already validated this."
+  - Proceeds to company-wide rollout despite the negative pilot result.
+evidence_criteria:
+  - Proposes a specific way to investigate the interview-vs-experience gap.
+  - States a clear decision (iterate/pause/proceed) with reasoning.
+scoring_dimensions:
+  - dimension: ENGINEERING_JUDGMENT
+    description: Takes negative pilot evidence seriously rather than defending prior validation.
+    weight_percent: 40
+  - dimension: REASONING
+    description: Investigates the gap between stated needs and actual experience rather than assuming one side is simply wrong.
+    weight_percent: 30
+  - dimension: TRADE_OFF_ANALYSIS
+    description: Weighs iterate/pause/proceed options explicitly given one negative pilot.
+    weight_percent: 30
+proficiency_levels:
+  - level: Beginner
+    description: Dismisses the feedback or proceeds to rollout regardless, even after prompting.
+    criteria:
+      - Does not reconsider the original design after the follow-up.
+  - level: Intermediate
+    description: Reconsiders only after prompting, without a specific investigation plan.
+    criteria:
+      - Agrees to reconsider after the follow-up but proposes no specific next step.
+  - level: Advanced
+    description: Independently takes the feedback seriously and proposes a specific investigation.
+    criteria:
+      - Proposes a specific way to investigate the gap unprompted.
+      - States a clear iterate/pause/proceed decision with reasoning.
+  - level: Expert
+    description: As Advanced, and distinguishes whether the issue is platform-wide or specific to this team's use case.
+    criteria:
+      - Explicitly reasons about generalizability of the negative result.
+  - level: Architect
+    description: As Expert, and generalizes into a framework for interpreting pilot feedback that might diverge from earlier validation across future platform rollouts.
+    criteria:
+      - Articulates a reusable framework for weighing pilot results against prior validation, not just this one case.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [ENGINEERING_JUDGMENT, REASONING]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to generalize their pilot-feedback framework for future rollouts (Architect-level probe).

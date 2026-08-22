@@ -1,0 +1,26 @@
+id: art-diagnose-gpu-capacity-exhaustion-lab
+type: source_code_lab
+title: Diagnose a Simulated Capacity Crunch
+experience_ref: exp-diagnose-gpu-capacity-exhaustion
+outcome_refs:
+  - out-diagnose-gpu-capacity-exhaustion-01
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Untimed BUILD/TROUBLESHOOT practice: work through a simulated log bundle at your own
+  pace to identify the root cause - this is where the method is first practiced correctly.
+content_summary: >
+  A starter repo with a captured log bundle (Cluster Autoscaler logs, quota data, pod
+  events) from a simulated capacity crunch. The learner works through it to draft a
+  quota-increase request with correct justification.
+estimated_duration_minutes: 60
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-diagnose-gpu-capacity-exhaustion
+  tasks:
+    - Identify the specific Cluster Autoscaler failure reason in the log bundle.
+    - Determine whether the block is quota-ceiling or configuration-based.
+    - Draft a quota-increase request with the specific justification needed for approval.
+  environment_requirements:
+    - Provided log bundle (static files, no live cluster required)
+  hints_available: true

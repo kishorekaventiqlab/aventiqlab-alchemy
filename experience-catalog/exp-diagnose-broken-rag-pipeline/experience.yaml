@@ -1,0 +1,62 @@
+id: exp-diagnose-broken-rag-pipeline
+title: Diagnose a Broken RAG Pipeline
+target_learner_profiles: [lp-7yr-mlops-lead]
+target_capabilities:
+  - cap-llmops-prompt-and-eval-pipelines
+prerequisites: []
+scenario: >
+  Users of an internal documentation Q&A assistant have started reporting answers that
+  are confidently wrong or irrelevant to their question.
+business_context: >
+  The assistant is used company-wide to reduce support ticket volume; confidently-wrong
+  answers are worse for trust than the assistant simply saying it doesn't know.
+technical_environment:
+  platform: A RAG pipeline over a vector database
+  infrastructure_summary: >
+    Documents are chunked, embedded, and stored in a vector database; at query time,
+    top-k chunks are retrieved and passed to an LLM for answer generation.
+  key_services: [Vector database, Embedding service, LLM API, Eval pipeline]
+starting_state: >
+  An automated eval pipeline shows the overall answer-quality score has dropped over the
+  past week. No changes were made to the LLM or prompt template in that window. The
+  document corpus was re-indexed five days ago.
+learner_mission: >
+  Determine whether the quality regression is a retrieval problem or a generation
+  problem, and identify a fix.
+expected_investigation:
+  - Compare retrieved chunks for a sample of failing queries against what would have been retrieved before the re-index.
+  - Check whether the re-index changed the chunking strategy or embedding model.
+  - Manually inspect a few failing cases to see whether the retrieved context was actually relevant.
+expected_decisions:
+  - decision_point: Is this a retrieval problem or a generation problem?
+    options_considered:
+      - "Correct: check whether the re-index changed chunking/embedding, and inspect whether relevant context is actually being retrieved, before touching the prompt or model."
+      - "Plausible but wrong: assume the LLM itself has degraded and start swapping prompt templates or model versions without checking retrieval first."
+    sound_reasoning: >
+      The regression's timing directly correlates with the re-index, making a
+      retrieval-side cause far more likely than a generation-side one; checking
+      retrieval first avoids a wasted prompt-engineering detour.
+build_activities:
+  - Fix the identified retrieval issue (e.g. revert or adjust the chunking strategy).
+operational_activities:
+  - Re-run the eval pipeline after the fix to confirm the quality score recovers.
+failure_modes:
+  - Tuning the generation prompt when the actual problem is in retrieval, wasting time without fixing the regression.
+  - Rolling back the re-index without understanding what specifically about it caused the regression.
+constraints:
+  - The eval pipeline is the only quantitative signal available - there's no per-query production quality label.
+  - Must not roll back the entire corpus re-index if only part of it caused the regression.
+trade_offs:
+  - tension: Fixing the specific cause vs. safest full rollback
+    choice_a: Diagnose and fix the specific chunking/embedding change that caused the regression, preserving the benefits of the re-index.
+    choice_b: Fully roll back the re-index to the previous known-good state immediately, losing whatever improvement the re-index was meant to provide.
+success_conditions:
+  - The regression is correctly attributed to retrieval or generation with supporting evidence.
+  - The eval score recovers after the fix is applied.
+evidence_of_competence:
+  - The specific retrieval comparison (before/after re-index) used to reach the diagnosis.
+  - The eval score before and after the fix.
+progression_archetype: advanced-troubleshoot
+outcome_refs:
+  - out-diagnose-broken-rag-pipeline-01
+  - out-diagnose-broken-rag-pipeline-02

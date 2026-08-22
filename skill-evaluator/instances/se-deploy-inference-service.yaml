@@ -1,0 +1,77 @@
+id: se-deploy-inference-service
+experience_ref: exp-deploy-inference-service
+skills_evaluated:
+  - cap-foundations-ai-ml-platform-engineering-baseline
+  - cap-model-serving-autoscaling-policy-design
+scenario: >
+  A variant environment: the GPU node pool uses a different taint key/value than the
+  reference lab, and the container image declares a GPU memory requirement the chart
+  template doesn't currently account for.
+opening_question: >
+  Your pod is stuck Pending on a GPU node pool you haven't worked with before. Walk me
+  through how you'd figure out what to change in the chart, without me telling you the
+  taint key up front.
+expected_reasoning_areas:
+  - Using kubectl to inspect the actual node taints rather than guessing from the previous environment
+  - Recognizing that a GPU memory requirement needs to be reflected in resource requests, not just scheduling
+  - Verifying the fix with evidence, not just "the pod isn't Pending anymore"
+follow_up_question_paths:
+  - trigger: Learner assumes the taint key is the same as the reference lab's without checking.
+    follow_up_question: How would you confirm that assumption before writing the fix?
+    targets_reasoning_area: Using kubectl to inspect the actual node taints rather than guessing from the previous environment
+  - trigger: Learner fixes the toleration but doesn't mention the GPU memory requirement.
+    follow_up_question: The image declares a specific GPU memory need - where does that need to show up in the chart?
+    targets_reasoning_area: Recognizing that a GPU memory requirement needs to be reflected in resource requests, not just scheduling
+misconception_indicators:
+  - misconception: Believes a pod leaving Pending state is sufficient proof the deployment is correct.
+    likely_root_cause: Conflates "scheduled" with "actually serving correctly."
+    corrective_follow_up: What would you check next to be sure it's not just scheduled but actually working?
+strong_answer_indicators:
+  - Checks the actual node taints via kubectl before writing a fix, rather than assuming.
+  - Explicitly connects the GPU memory requirement to a resource request field.
+  - Verifies with a real request/response, not just pod status.
+weak_answer_indicators:
+  - Assumes the same taint key as a previous environment without checking.
+  - Declares success once the pod is Running without a functional check.
+evidence_criteria:
+  - Cites the specific kubectl command used to inspect taints.
+  - States the specific chart field changed for the GPU memory requirement.
+scoring_dimensions:
+  - dimension: APPLICATION
+    description: Correctly applies scheduling and resource-request knowledge to a new, unseen node pool configuration.
+    weight_percent: 40
+  - dimension: TROUBLESHOOTING
+    description: Diagnoses the Pending state using real inspection rather than assumption.
+    weight_percent: 30
+  - dimension: KNOWLEDGE
+    description: Correctly distinguishes scheduling correctness from functional correctness.
+    weight_percent: 30
+proficiency_levels:
+  - level: Beginner
+    description: Needs to be told the taint key and the resource-request fix.
+    criteria:
+      - Cannot identify the taint mismatch without being told.
+  - level: Intermediate
+    description: Finds the taint mismatch with a hint but misses the GPU memory requirement.
+    criteria:
+      - Identifies the taint issue with one follow-up prompt.
+      - Does not independently raise the GPU memory requirement.
+  - level: Advanced
+    description: Independently diagnoses both the taint mismatch and the resource-request gap.
+    criteria:
+      - Checks actual node taints unprompted.
+      - Raises the GPU memory requirement unprompted.
+  - level: Expert
+    description: As Advanced, and also verifies the fix with a real functional check rather than pod status alone.
+    criteria:
+      - Proposes a specific functional verification step unprompted.
+  - level: Architect
+    description: As Expert, and generalizes the diagnostic approach into a reusable checklist for future unfamiliar node pools.
+    criteria:
+      - Articulates a general approach (not just this instance's fix) for verifying scheduling assumptions on any new node pool.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [APPLICATION, TROUBLESHOOTING]
+escalation_rules:
+  - condition: Learner reaches Advanced without any follow-up.
+    action: Skip ahead to probe whether they'd generalize the approach (Architect-level check).

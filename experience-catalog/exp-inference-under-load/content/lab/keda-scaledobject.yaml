@@ -1,0 +1,26 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: doc-search-summarizer
+  namespace: inference
+spec:
+  scaleTargetRef:
+    name: doc-search-summarizer
+  # TODO: this service is GPU-bound - scaling on CPU (the KEDA default if no
+  # triggers are set) would not reflect actual demand. Set min/max replica
+  # counts appropriate for a service whose node pool has room for 12 replicas
+  # at peak, with at least 2 always warm to avoid cold-start latency.
+  minReplicaCount: # TODO
+  maxReplicaCount: # TODO
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-server.monitoring.svc:80
+        # TODO: write a PromQL query that returns the current request queue
+        # depth for this service. The gateway exports a gauge metric named
+        # `inference_gateway_queue_depth{service="doc-search-summarizer"}`.
+        query: # TODO
+        # TODO: set the threshold - the value of the query above at which
+        # KEDA should add one more replica. Queue depth above 5 per replica
+        # is this service's agreed threshold for triggering scale-up.
+        threshold: # TODO

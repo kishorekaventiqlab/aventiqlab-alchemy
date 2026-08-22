@@ -1,0 +1,24 @@
+id: out-deploy-inference-service-01
+experience_ref: exp-deploy-inference-service
+learner_summary: >
+  Adapt an existing CPU-service Helm chart to correctly schedule a GPU inference
+  workload on the first deployment attempt.
+learner_profile_refs: [lp-3yr-cloud-platform-engineer]
+action:
+  verb: BUILD
+  statement: >
+    Adapt an existing Helm chart template to deploy a GPU-scheduled inference service,
+    correctly configuring node selectors/tolerations for the shared GPU node pool.
+context: >
+  Given a container image for a new model, an existing CPU-service Helm chart template,
+  and a shared GPU node pool with known taints,
+expected_result: >
+  the learner produces a deployment that schedules successfully onto the GPU node pool
+  on the first attempt, avoiding an avoidable Pending-pod cycle caused by a missing or
+  incorrect toleration.
+related_capabilities:
+  - cap-foundations-ai-ml-platform-engineering-baseline
+  - cap-model-serving-autoscaling-policy-design
+evidence_expectations: >
+  The adapted Helm values file plus confirmation the pod scheduled without a Pending
+  state caused by node selector/toleration mismatch.

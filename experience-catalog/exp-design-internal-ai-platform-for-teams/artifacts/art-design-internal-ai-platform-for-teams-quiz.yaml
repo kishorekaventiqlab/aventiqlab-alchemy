@@ -1,0 +1,20 @@
+id: art-design-internal-ai-platform-for-teams-quiz
+type: quiz
+title: Platform Adoption Strategy Facts Check
+experience_ref: exp-design-internal-ai-platform-for-teams
+outcome_refs:
+  - out-design-internal-ai-platform-for-teams-01
+capability_refs:
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test live design judgment under real team friction - that's
+  the Skill Evaluator's job.
+content_summary: >
+  8 questions on distinguishing validated needs from assumptions, and voluntary vs.
+  mandated adoption strategy.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

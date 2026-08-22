@@ -1,0 +1,32 @@
+id: art-inference-under-load-video
+type: video
+title: "Watching an Expert Diagnose a GPU Saturation Incident"
+experience_ref: exp-inference-under-load
+outcome_refs:
+  - out-inference-under-load-01
+  - out-inference-under-load-02
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-reliability-sre-incident-response-for-inference
+purpose: >
+  Models an expert's reasoning process, narrated out loud, on a comparable-but-different
+  incident - showing HOW to think through the diagnosis, not just the facts (Material)
+  and not the learner's own exact scenario.
+content_summary: >
+  A screencast walkthrough of a senior engineer diagnosing a similar but not identical
+  GPU-saturation incident on a different service, narrating which dashboards they check
+  first and why, including a dead-end they deliberately rule out before committing to a
+  mitigation.
+estimated_duration_minutes: 12
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a different GPU inference service showing early symptoms.
+    - Narrate checking the GPU utilization dashboard first, and explain why that's the first check.
+    - Narrate ruling out a network/ingress explanation using an ingress dashboard.
+    - Narrate confirming the queue-depth trend before deciding.
+    - Narrate choosing a shedding mitigation and explaining the tradeoff out loud.
+  on_screen_demonstrations:
+    - Live Grafana dashboard navigation
+    - Reading a KEDA replica status via kubectl
+    - Applying a rate-limit configuration change

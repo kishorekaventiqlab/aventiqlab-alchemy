@@ -1,0 +1,63 @@
+id: exp-optimize-gpu-utilization
+title: Optimize GPU Utilization
+target_learner_profiles: [lp-7yr-mlops-lead, lp-10yr-staff-ai-platform-engineer]
+target_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+future_capability_domains: [inference-engineering, cost-engineering]
+prerequisites: [exp-inference-under-load]
+scenario: >
+  A GPU node pool is running at a stable but low 35% average utilization across the day
+  despite paying for full-time capacity, while a separate team complains of occasional
+  queueing during peak hours.
+business_context: >
+  Finance has flagged GPU spend as high relative to actual usage; leadership wants
+  utilization improved without harming peak-hour latency.
+technical_environment:
+  platform: Amazon EKS
+  infrastructure_summary: >
+    Multiple inference services share a GPU node pool sized for peak load, resulting in
+    low off-peak utilization.
+  key_services: [Amazon EKS, Triton Inference Server, Prometheus, Cost and Usage Reports]
+starting_state: >
+  GPU utilization averages 35% across a 24-hour window but spikes above 85% during a
+  2-hour peak window, when queueing briefly appears.
+learner_mission: >
+  Propose a way to raise average utilization (and reduce cost) without making the
+  existing peak-hour queueing worse.
+expected_investigation:
+  - Break down utilization by time-of-day and by service to find which services could tolerate consolidation.
+  - Check whether batching settings are already tuned for the services with the lowest utilization.
+expected_decisions:
+  - decision_point: How to raise utilization without harming peak-hour latency?
+    options_considered:
+      - "Correct: consolidate low-priority/off-peak-tolerant workloads onto fewer, more fully-utilized nodes, and let the autoscaler shrink the pool off-peak."
+      - "Plausible but wrong: simply raise batch sizes across all services uniformly, ignoring that the peak-hour service is already latency-sensitive."
+    sound_reasoning: >
+      Uniform changes ignore that different services have different latency
+      sensitivity; the peak-hour service needs to be treated differently from the others.
+build_activities:
+  - Implement workload consolidation / bin-packing changes for lower-priority services.
+  - Tune autoscaling so the node pool shrinks during confirmed low-utilization windows.
+operational_activities:
+  - Monitor utilization and peak-hour latency for at least one full day-night cycle after the change.
+failure_modes:
+  - Improving average utilization by degrading peak-hour latency for the latency-sensitive service.
+  - Consolidating a workload that turns out to have its own undocumented latency requirement.
+constraints:
+  - Cannot regress the peak-hour service's existing latency SLA.
+  - Change must be reversible within one deploy cycle if it goes wrong.
+trade_offs:
+  - tension: Utilization/cost improvement vs. operational complexity
+    choice_a: Consolidate workloads for meaningfully better utilization, at the cost of a more complex node-pool bin-packing setup to maintain.
+    choice_b: Make a smaller, simpler change (e.g. just shrink off-peak) for a smaller utilization gain but less ongoing complexity.
+success_conditions:
+  - Average utilization measurably improves.
+  - Peak-hour latency does not regress.
+evidence_of_competence:
+  - Before/after utilization and latency measurements.
+  - A written explanation of why the chosen approach doesn't harm the peak-hour service.
+progression_archetype: expert-optimize
+outcome_refs:
+  - out-optimize-gpu-utilization-01
+  - out-optimize-gpu-utilization-02

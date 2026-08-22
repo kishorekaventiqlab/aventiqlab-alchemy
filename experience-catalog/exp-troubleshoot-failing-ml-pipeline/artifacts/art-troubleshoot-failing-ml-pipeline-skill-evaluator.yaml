@@ -1,0 +1,17 @@
+id: art-troubleshoot-failing-ml-pipeline-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Troubleshoot a Failing ML Pipeline
+experience_ref: exp-troubleshoot-failing-ml-pipeline
+outcome_refs:
+  - out-troubleshoot-failing-ml-pipeline-01
+  - out-troubleshoot-failing-ml-pipeline-02
+capability_refs:
+  - cap-mlops-pipeline-orchestration
+purpose: >
+  Open-ended evaluation of whether the data-vs-infrastructure diagnostic approach
+  transfers to a case where a code change *did* occur but is a red herring -
+  not recall (Quiz) or hands-on execution (Lab). Source-of-truth structure
+  only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-troubleshoot-failing-ml-pipeline

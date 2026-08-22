@@ -1,0 +1,63 @@
+id: exp-build-autoscaling-inference-platform
+title: Build an Autoscaling Inference Platform
+target_learner_profiles: [lp-5yr-ai-platform-engineer]
+target_capabilities:
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-model-serving-autoscaling-policy-design
+prerequisites: [exp-deploy-inference-service]
+scenario: >
+  The inference service deployed in exp-deploy-inference-service currently runs at a
+  fixed replica count and needs to scale automatically with demand ahead of an upcoming
+  traffic-variable launch.
+business_context: >
+  The product team expects traffic to vary significantly by time of day once the feature
+  is publicly launched, and a fixed replica count would either waste cost off-peak or
+  under-serve at peak.
+technical_environment:
+  platform: Amazon EKS
+  infrastructure_summary: >
+    The existing fixed-replica inference deployment from exp-deploy-inference-service,
+    sharing a GPU node pool with headroom for growth.
+  key_services: [Amazon EKS, KEDA, Cluster Autoscaler, Triton Inference Server]
+starting_state: >
+  The service runs at a fixed replica count with no autoscaling configured. Request
+  volume is expected to vary 5x between off-peak and peak.
+learner_mission: >
+  Build an autoscaling configuration that scales the service to match demand within the
+  existing GPU node pool's headroom.
+expected_investigation:
+  - Determine which metric best represents demand for this service (request rate vs. queue depth).
+  - Check the node pool's current headroom against the expected peak replica count.
+expected_decisions:
+  - decision_point: Which signal should drive autoscaling?
+    options_considered:
+      - "Correct: scale on queue depth via KEDA, since it reflects actual backlog pressure better than raw request rate for a GPU-bound workload."
+      - "Plausible but wrong: use plain CPU-based HPA, which does not reflect GPU saturation at all for this workload."
+    sound_reasoning: >
+      CPU utilization is a poor proxy for GPU-bound inference load; queue depth or GPU
+      utilization are more direct signals.
+build_activities:
+  - Configure a KEDA ScaledObject on an appropriate custom metric.
+  - Verify the node pool's Cluster Autoscaler config can support the expected peak replica count.
+operational_activities:
+  - Load-test the autoscaling configuration against a simulated 5x traffic swing.
+failure_modes:
+  - Scaling on a metric (like CPU) that doesn't reflect actual GPU-bound demand.
+  - Configuring a max replica count that exceeds the node pool's actual headroom, causing Pending pods at peak.
+constraints:
+  - Must fit within the existing GPU node pool's headroom without a quota increase.
+  - Must be validated before the public launch date.
+trade_offs:
+  - tension: Scaling responsiveness vs. cost
+    choice_a: Aggressive scale-up thresholds for fast response to demand spikes, at higher off-peak cost from over-provisioned headroom.
+    choice_b: Conservative scale-up thresholds for lower cost, accepting a brief period of elevated latency during a sudden spike.
+success_conditions:
+  - The service scales up and down automatically in response to a simulated demand swing.
+  - Peak replica count stays within the node pool's actual capacity.
+evidence_of_competence:
+  - A load test showing replica count tracking the simulated demand curve.
+  - Confirmation that peak scaling did not exceed node pool capacity.
+progression_archetype: foundation-build
+outcome_refs:
+  - out-build-autoscaling-inference-platform-01
+  - out-build-autoscaling-inference-platform-02

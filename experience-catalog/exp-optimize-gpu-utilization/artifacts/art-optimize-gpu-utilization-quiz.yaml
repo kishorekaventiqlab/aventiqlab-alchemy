@@ -1,0 +1,19 @@
+id: art-optimize-gpu-utilization-quiz
+type: quiz
+title: Consolidation Scoping Facts Check
+experience_ref: exp-optimize-gpu-utilization
+outcome_refs:
+  - out-optimize-gpu-utilization-01
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test optimization judgment under live conditions - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions on classifying workload latency sensitivity and consolidation/bin-packing
+  strategy basics.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

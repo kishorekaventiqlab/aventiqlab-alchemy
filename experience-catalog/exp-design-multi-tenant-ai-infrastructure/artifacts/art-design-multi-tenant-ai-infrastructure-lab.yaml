@@ -1,0 +1,29 @@
+id: art-design-multi-tenant-ai-infrastructure-lab
+type: source_code_lab
+title: Build the Quota and Priority-Class Policies
+experience_ref: exp-design-multi-tenant-ai-infrastructure
+outcome_refs:
+  - out-design-multi-tenant-ai-infrastructure-01
+  - out-design-multi-tenant-ai-infrastructure-02
+capability_refs:
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Untimed DESIGN/PROVE practice: write the actual ResourceQuota/priority-class policies
+  and cost comparison with no time pressure - this is where it's first built correctly.
+content_summary: >
+  A starter repo with three teams' stated requirements (one with a real compliance doc),
+  a shared cluster, and a cost-model template. The learner defines the quota/priority
+  policies and completes the cost comparison.
+estimated_duration_minutes: 120
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-design-multi-tenant-ai-infrastructure
+  tasks:
+    - Define ResourceQuota and priority-class policies for the two shared-tenancy teams.
+    - Design hard infrastructure isolation for the one team with a genuine compliance requirement.
+    - Complete a cost comparison against the three-dedicated-pools alternative.
+  environment_requirements:
+    - Sandbox EKS cluster
+    - Provided team requirement documents
+    - Cost-modeling spreadsheet template
+  hints_available: true

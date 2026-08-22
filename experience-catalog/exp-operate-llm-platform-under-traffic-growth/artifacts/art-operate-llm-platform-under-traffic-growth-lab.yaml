@@ -1,0 +1,28 @@
+id: art-operate-llm-platform-under-traffic-growth-lab
+type: source_code_lab
+title: Build the Cost Breakdown and Routing Adjustment
+experience_ref: exp-operate-llm-platform-under-traffic-growth
+outcome_refs:
+  - out-operate-llm-platform-under-traffic-growth-01
+  - out-operate-llm-platform-under-traffic-growth-02
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+  - cap-kubernetes-workload-scaling-for-inference
+purpose: >
+  Untimed BUILD/OPERATE practice: query the usage data and adjust the routing policy
+  with no time pressure - this is where they're first exercised correctly.
+content_summary: >
+  A starter repo with sample usage logs, a cost-tracking query stub, and a routing
+  policy configuration. The learner completes the cost breakdown and adjusts routing weights.
+estimated_duration_minutes: 75
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-operate-llm-platform-under-traffic-growth
+  tasks:
+    - Complete a query separating cost growth into volume and context-length components.
+    - Adjust the routing policy to shift a bounded amount of traffic to the self-hosted model.
+    - Verify self-hosted latency and cost-per-request before and after the change.
+  environment_requirements:
+    - Sample usage log dataset
+    - Sandbox routing/gateway configuration
+    - Prometheus dashboards for the self-hosted model
+  hints_available: true

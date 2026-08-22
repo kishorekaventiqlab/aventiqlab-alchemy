@@ -1,0 +1,28 @@
+id: art-design-highly-available-model-serving-video
+type: video
+title: Watching an Architect Reject a Three-AZ Design
+experience_ref: exp-design-highly-available-model-serving
+outcome_refs:
+  - out-design-highly-available-model-serving-01
+capability_refs:
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Models an architect's reasoning on a different HA design where a tempting
+  three-region plan gets rejected for lacking confirmed capacity, narrated out loud -
+  the HOW of checking capacity before committing to a design, not the facts (Material)
+  or the learner's own two AZs (Lab).
+content_summary: >
+  A screencast of an architect reviewing a different service's proposed
+  three-region HA design, narrating why they check actual capacity confirmation before
+  accepting it, and scoping the design down to what's actually available.
+estimated_duration_minutes: 10
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on a proposed three-region active-active design.
+    - Narrate checking actual capacity confirmation for each region.
+    - Narrate discovering one region lacks confirmed capacity.
+    - Narrate scoping the design down to the two confirmed regions.
+  on_screen_demonstrations:
+    - Service quota console per region
+    - A revised architecture diagram

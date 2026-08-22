@@ -1,0 +1,19 @@
+id: art-design-multi-tenant-ai-infrastructure-quiz
+type: quiz
+title: Multi-Tenant Isolation Facts Check
+experience_ref: exp-design-multi-tenant-ai-infrastructure
+outcome_refs:
+  - out-design-multi-tenant-ai-infrastructure-01
+capability_refs:
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test design judgment or contention behavior - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions on ResourceQuotas, priority classes, and distinguishing genuine
+  compliance isolation from generic noisy-neighbor concerns.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

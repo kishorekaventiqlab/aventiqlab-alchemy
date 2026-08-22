@@ -1,0 +1,78 @@
+id: lp-7yr-mlops-lead
+title: MLOps Lead
+experience_band: 7yr
+target_roles:
+  - MLOps Lead
+  - Senior AI Platform Engineer
+typical_background: >
+  Seven years total; acts as incident commander across multi-service outages, mentors
+  5-year engineers, and owns pipeline orchestration and reliability practices for a team.
+existing_knowledge:
+  - Everything in lp-5yr-ai-platform-engineer
+  - Multi-service incident command patterns
+  - ML pipeline orchestration failure modes (drift vs. infrastructure)
+existing_skills:
+  - Leads root-cause investigation across GPU, serving, and application layers during a live incident
+  - Builds and operates multi-step ML pipelines with failure retries
+  - Mentors 5-year engineers through capacity and mitigation decisions
+technology_exposure:
+  - technology: Kubernetes
+    exposure_level: Expert
+  - technology: GPU infrastructure
+    exposure_level: Advanced
+  - technology: Model serving runtimes
+    exposure_level: Advanced
+  - technology: MLOps pipeline orchestration
+    exposure_level: Advanced
+production_experience:
+  has_production_experience: true
+  description: >
+    Incident commander across multi-service outages spanning GPU, serving, and pipeline
+    layers; owns the reliability practice for a platform team.
+  scale_indicators:
+    - Has led incident response for outages affecting multiple production services simultaneously
+    - Owns postmortem quality and follow-up tracking for the team
+learning_needs:
+  - Cross-service tradeoff reasoning at the architecture level
+  - Mentoring at scale (multiple engineers, not one-on-one)
+  - Diagnosing systemic patterns across repeated incidents
+build_expectations:
+  - statement: >
+      Builds reusable ML pipeline templates adopted by more than one team, not just
+      one-off pipelines.
+    verbs: [BUILD]
+    capability_refs: [cap-mlops-pipeline-orchestration]
+operational_expectations:
+  - statement: >
+      Leads SLA-window mitigation across multiple services during a simultaneous
+      multi-service incident.
+    verbs: [OPERATE]
+    capability_refs: [cap-ai-reliability-sre-incident-response-for-inference]
+troubleshooting_expectations:
+  - statement: >
+      Leads cross-layer root-cause investigation spanning GPU, serving, and application
+      layers during a live incident.
+    verbs: [TROUBLESHOOT]
+    capability_refs:
+      - cap-ai-reliability-sre-incident-response-for-inference
+      - cap-platform-architecture-tradeoff-driven-system-design
+architecture_expectations:
+  - statement: >
+      Authors an autoscaling and capacity policy that is implemented and holds up under
+      a load test for a production inference service.
+    verbs: [DESIGN]
+    capability_refs:
+      - cap-model-serving-autoscaling-policy-design
+      - cap-gpu-engineering-utilization-and-capacity-signals
+proof_expectations:
+  - statement: >
+      Authors postmortems with a validated root cause whose corrective actions are
+      tracked to completion.
+    verbs: [PROVE]
+    capability_refs: [cap-ai-reliability-sre-incident-response-for-inference]
+prerequisites: [lp-5yr-ai-platform-engineer]
+expected_independence: Leads Others
+expected_engineering_judgment: >
+  Weighs competing tradeoffs (e.g. request shedding vs. degraded quality) under live
+  pressure and can defend the choice afterward; mentors others through the same
+  reasoning process rather than simply directing them.

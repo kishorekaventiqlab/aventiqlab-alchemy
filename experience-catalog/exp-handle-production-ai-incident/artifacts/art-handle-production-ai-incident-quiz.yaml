@@ -1,0 +1,19 @@
+id: art-handle-production-ai-incident-quiz
+type: quiz
+title: Multi-Service Incident Facts Check
+experience_ref: exp-handle-production-ai-incident
+outcome_refs:
+  - out-handle-production-ai-incident-01
+capability_refs:
+  - cap-ai-reliability-sre-incident-response-for-inference
+purpose: >
+  Fast, objectively-gradable check of the Material's KNOW/UNDERSTAND content before the
+  Lab. Does not test live incident-command judgment - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions on shared-infrastructure incident correlation and stakeholder
+  communication cadence during uncertainty.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

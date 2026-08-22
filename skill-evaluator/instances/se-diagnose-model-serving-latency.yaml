@@ -1,0 +1,74 @@
+id: se-diagnose-model-serving-latency
+experience_ref: exp-diagnose-model-serving-latency
+skills_evaluated:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-observability-slo-based-alerting-for-inference
+scenario: >
+  A variant case: the same p50-flat/p99-rising pattern appears, but request sequence
+  length is unchanged. The drift instead correlates with a growing share of requests
+  coming from a specific customer segment with different usage patterns.
+opening_question: >
+  Sequence length hasn't changed this time, so that explanation doesn't fit. p99 is
+  still drifting up with flat p50. What would you check next?
+expected_reasoning_areas:
+  - Not fixating on the reference experience's exact cause (sequence length) when it doesn't fit the new evidence
+  - Generalizing "workload-shape drift" to other request characteristics beyond sequence length
+  - Testing the new hypothesis (customer segment) with the same rigor as the original
+follow_up_question_paths:
+  - trigger: Learner keeps investigating sequence length despite being told it's unchanged.
+    follow_up_question: You've confirmed sequence length is flat - what other characteristics of the requests might differ?
+    targets_reasoning_area: Generalizing "workload-shape drift" to other request characteristics beyond sequence length
+  - trigger: Learner identifies the customer segment correlation but doesn't propose a way to confirm causation.
+    follow_up_question: A correlation with a customer segment could be coincidental - how would you confirm it's actually the driver?
+    targets_reasoning_area: Testing the new hypothesis with the same rigor as the original
+misconception_indicators:
+  - misconception: Treats "workload-shape drift" as synonymous with "sequence length changed" specifically.
+    likely_root_cause: Over-anchored on the reference experience's specific cause rather than the general diagnostic principle.
+    corrective_follow_up: What's the general principle behind checking sequence length, and what else might that same principle point to?
+strong_answer_indicators:
+  - Moves past sequence length once ruled out and considers other request characteristics.
+  - Proposes a way to test the customer-segment hypothesis rather than accepting correlation as proof.
+weak_answer_indicators:
+  - Continues to investigate sequence length after being told it's unchanged.
+  - Accepts the customer-segment correlation without proposing further verification.
+evidence_criteria:
+  - Names a specific alternative characteristic considered.
+  - States a specific verification step for the customer-segment hypothesis.
+scoring_dimensions:
+  - dimension: REASONING
+    description: Generalizes the diagnostic principle rather than repeating the specific prior cause.
+    weight_percent: 35
+  - dimension: TROUBLESHOOTING
+    description: Proposes a rigorous verification step for the new hypothesis.
+    weight_percent: 35
+  - dimension: APPLICATION
+    description: Correctly applies the workload-shape-drift framework to a new characteristic.
+    weight_percent: 30
+proficiency_levels:
+  - level: Beginner
+    description: Continues investigating sequence length even after being told it's ruled out.
+    criteria:
+      - Does not pivot away from sequence length even with a follow-up.
+  - level: Intermediate
+    description: Pivots to a new characteristic only after prompting.
+    criteria:
+      - Considers an alternative characteristic after the first follow-up.
+  - level: Advanced
+    description: Independently generalizes to other characteristics and identifies the customer-segment correlation.
+    criteria:
+      - Considers alternative characteristics unprompted.
+      - Identifies the customer-segment correlation.
+  - level: Expert
+    description: As Advanced, and proposes a rigorous way to test the correlation for causation.
+    criteria:
+      - Proposes a specific verification step unprompted.
+  - level: Architect
+    description: As Expert, and generalizes into a framework for this class of diagnosis applicable beyond sequence length or customer segment.
+    criteria:
+      - Articulates the general "workload-shape drift" principle as reusable, not case-specific.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, TROUBLESHOOTING]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to state the general diagnostic principle underlying both cases (Architect-level probe).

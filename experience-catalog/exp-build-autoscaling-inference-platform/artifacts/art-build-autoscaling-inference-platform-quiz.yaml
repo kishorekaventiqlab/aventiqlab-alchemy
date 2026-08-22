@@ -1,0 +1,19 @@
+id: art-build-autoscaling-inference-platform-quiz
+type: quiz
+title: Autoscaling Signal Selection Check
+experience_ref: exp-build-autoscaling-inference-platform
+outcome_refs:
+  - out-build-autoscaling-inference-platform-01
+capability_refs:
+  - cap-kubernetes-workload-scaling-for-inference
+purpose: >
+  Fast, objectively-gradable check that the learner knows which signals suit GPU-bound
+  scaling before attempting the Lab. Does not test judgment - that's the Skill Evaluator's job.
+content_summary: >
+  8 questions covering HPA vs. KEDA, queue depth vs. CPU as a scaling signal, and
+  matching max replicas to node pool headroom.
+estimated_duration_minutes: 8
+type_specific:
+  question_count: 8
+  question_types: [multiple-choice, scenario-judgment]
+  passing_threshold_percent: 80

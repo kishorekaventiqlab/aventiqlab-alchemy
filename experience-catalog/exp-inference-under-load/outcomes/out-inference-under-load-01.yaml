@@ -1,0 +1,28 @@
+id: out-inference-under-load-01
+experience_ref: exp-inference-under-load
+learner_summary: >
+  Diagnose GPU compute saturation as the root cause of degraded inference performance,
+  ruling out a plausible alternative.
+learner_profile_refs:
+  - lp-5yr-ai-platform-engineer
+  - lp-7yr-mlops-lead
+action:
+  verb: TROUBLESHOOT
+  statement: >
+    Diagnose the root-cause bottleneck behind rising inference latency using at least
+    two corroborating dashboard signals, explicitly ruling out at least one
+    plausible-but-wrong alternative.
+context: >
+  Given a Kubernetes-based inference platform experiencing GPU capacity pressure - GPU
+  utilization at 92%, a widening p50/p99 latency gap, and KEDA already at its configured
+  replica maximum -
+expected_result: >
+  the learner correctly attributes the degradation to GPU compute saturation, citing at
+  least two corroborating signals, and explains why a scheduling-configuration or
+  network explanation does not fit the evidence.
+related_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-kubernetes-workload-scaling-for-inference
+evidence_expectations: >
+  A stated root cause plus the specific dashboard signals used to reach it and the
+  alternative(s) explicitly ruled out.

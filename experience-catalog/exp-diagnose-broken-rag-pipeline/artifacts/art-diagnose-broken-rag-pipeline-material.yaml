@@ -1,0 +1,24 @@
+id: art-diagnose-broken-rag-pipeline-material
+type: material
+title: "Retrieval vs. Generation Regressions in RAG: Reference"
+experience_ref: exp-diagnose-broken-rag-pipeline
+outcome_refs:
+  - out-diagnose-broken-rag-pipeline-01
+capability_refs:
+  - cap-llmops-prompt-and-eval-pipelines
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on how chunking/embedding changes affect
+  retrieval quality and how to isolate retrieval from generation as a failure source, as
+  pure reference facts - not a narrated investigation (Video) or hands-on fix (Lab).
+content_summary: >
+  A reference document covering how re-indexing (chunking strategy, embedding model)
+  can silently change retrieval quality, and how to compare retrieved context before and
+  after a corpus change.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - How chunking and embedding changes affect retrieval quality
+    - Isolating retrieval from generation as a failure source
+    - Comparing retrieved context before and after a corpus re-index

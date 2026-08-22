@@ -1,0 +1,24 @@
+id: art-design-internal-ai-platform-for-teams-material
+type: material
+title: "Internal Platform Adoption Without a Mandate: Reference"
+experience_ref: exp-design-internal-ai-platform-for-teams
+outcome_refs:
+  - out-design-internal-ai-platform-for-teams-01
+capability_refs:
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on validating internal platform design against
+  real team needs and driving voluntary adoption, as pure reference facts - not a
+  narrated stakeholder conversation (Video) or a built template set (Lab).
+content_summary: >
+  A reference document covering how to distinguish validated team needs from assumed
+  ones, and why voluntary adoption driven by a genuinely better default path outperforms
+  a mandated migration.
+estimated_duration_minutes: 20
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 20
+  key_sections:
+    - Validating platform design against real team needs, not assumptions
+    - Voluntary adoption vs. mandated migration
+    - Piloting before a company-wide rollout

@@ -1,0 +1,20 @@
+id: out-optimize-gpu-utilization-02
+experience_ref: exp-optimize-gpu-utilization
+learner_summary: >
+  Prove via before/after measurement that utilization improved without a peak-hour
+  latency regression.
+learner_profile_refs: [lp-7yr-mlops-lead, lp-10yr-staff-ai-platform-engineer]
+action:
+  verb: PROVE
+  statement: >
+    Demonstrate via before/after measurement that average utilization improved without
+    a peak-hour latency regression.
+context: >
+  Given a consolidation change implemented over at least one full day-night cycle,
+expected_result: >
+  the learner produces utilization and peak-hour latency measurements from before and
+  after the change, showing utilization improved and latency did not regress.
+related_capabilities:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+evidence_expectations: >
+  Before/after utilization and peak-hour latency measurements.

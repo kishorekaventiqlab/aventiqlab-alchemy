@@ -1,0 +1,27 @@
+id: art-design-multi-tenant-ai-infrastructure-video
+type: video
+title: Watching an Architect Push Back on "Just Give Everyone Their Own Pool"
+experience_ref: exp-design-multi-tenant-ai-infrastructure
+outcome_refs:
+  - out-design-multi-tenant-ai-infrastructure-01
+capability_refs:
+  - cap-platform-architecture-tradeoff-driven-system-design
+purpose: >
+  Models an architect's reasoning in a different multi-tenant design conversation,
+  narrated out loud - the HOW of separating genuine from assumed isolation
+  requirements, not the facts (Material) or the learner's own three teams (Lab).
+content_summary: >
+  A screencast of an architect reviewing a different set of teams' isolation requests,
+  narrating why they push back on defaulting to dedicated infrastructure for every team
+  and how they identify the one genuine compliance case.
+estimated_duration_minutes: 10
+type_specific:
+  format: screencast
+  script_outline:
+    - Open on three teams' isolation requests, each initially framed as "we need our own pool."
+    - Narrate probing each team's stated concern for whether it's genuine compliance or generic noisy-neighbor worry.
+    - Narrate identifying the one genuine case and designing around it.
+    - Narrate sketching the shared quota/priority-class model for the other two.
+  on_screen_demonstrations:
+    - Requirements interview notes
+    - A sketched isolation model diagram

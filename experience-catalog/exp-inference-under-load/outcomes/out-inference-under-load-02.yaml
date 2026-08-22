@@ -1,0 +1,27 @@
+id: out-inference-under-load-02
+experience_ref: exp-inference-under-load
+learner_summary: >
+  Select and execute a mitigation that is actually feasible within the current GPU
+  quota ceiling.
+learner_profile_refs:
+  - lp-5yr-ai-platform-engineer
+  - lp-7yr-mlops-lead
+action:
+  verb: OPERATE
+  statement: >
+    Select and execute a mitigation that is actually feasible within the current GPU
+    quota ceiling.
+context: >
+  Given the confirmed GPU-saturation root cause and a fixed GPU service quota with no
+  immediate capacity increase available,
+expected_result: >
+  the learner selects and applies a mitigation (such as request shedding/prioritization
+  or reduced batch size/precision) that measurably reduces queue depth and p99 latency
+  within the incident window, and explicitly rejects infeasible-in-the-moment options
+  like "scale pods further" or "request an emergency quota increase" as the immediate fix.
+related_capabilities:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-ai-reliability-sre-incident-response-for-inference
+evidence_expectations: >
+  The mitigation applied, the reasoning for choosing it over the rejected alternatives,
+  and its measured effect on queue depth and p99 latency.

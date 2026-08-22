@@ -1,0 +1,75 @@
+# Curriculum journeys: one entry per capability domain, listing that domain's catalog
+# experience ids in learning order. Domains with no catalog experience yet are listed
+# with an empty experience_ids[] rather than omitted, so the journey structure stays
+# complete even before every domain has content (Phase 1+ work).
+journeys:
+  - domain: foundations
+    journey_title: Foundations Journey
+    experience_ids: [exp-deploy-inference-service]
+  - domain: cloud-platform-engineering
+    journey_title: Cloud Platform Engineering Journey
+    experience_ids: [exp-design-multi-tenant-ai-infrastructure]
+  - domain: container-platforms
+    journey_title: Container Platforms Journey
+    experience_ids: []
+  - domain: kubernetes
+    journey_title: Kubernetes Journey
+    experience_ids: [exp-build-autoscaling-inference-platform, exp-inference-under-load]
+  - domain: networking
+    journey_title: Networking Journey
+    experience_ids: []
+  - domain: iac-and-automation
+    journey_title: IaC & Automation Journey
+    experience_ids: []
+  - domain: ci-cd
+    journey_title: CI/CD Journey
+    experience_ids: [exp-roll-out-model-safely]
+  - domain: ai-infrastructure
+    journey_title: AI Infrastructure Journey
+    experience_ids: [exp-diagnose-gpu-capacity-exhaustion, exp-design-multi-tenant-ai-infrastructure]
+  - domain: gpu-engineering
+    journey_title: GPU Engineering Journey
+    experience_ids: [exp-diagnose-gpu-capacity-exhaustion, exp-optimize-gpu-utilization, exp-inference-under-load]
+  - domain: model-serving
+    journey_title: Model Serving Journey
+    experience_ids:
+      - exp-deploy-inference-service
+      - exp-build-autoscaling-inference-platform
+      - exp-diagnose-model-serving-latency
+      - exp-design-highly-available-model-serving
+  - domain: inference-engineering
+    journey_title: Inference Engineering Journey
+    experience_ids: [exp-optimize-gpu-utilization]
+  - domain: mlops
+    journey_title: MLOps Journey
+    experience_ids: [exp-roll-out-model-safely, exp-troubleshoot-failing-ml-pipeline]
+  - domain: llmops
+    journey_title: LLMOps Journey
+    experience_ids: [exp-operate-llm-platform-under-traffic-growth, exp-diagnose-broken-rag-pipeline]
+  - domain: ai-platform-engineering
+    journey_title: AI Platform Engineering Journey
+    experience_ids: [exp-design-internal-ai-platform-for-teams]
+  - domain: observability
+    journey_title: Observability Journey
+    experience_ids: [exp-diagnose-model-serving-latency, exp-handle-production-ai-incident]
+  - domain: ai-reliability-sre
+    journey_title: AI Reliability / SRE Journey
+    experience_ids: [exp-handle-production-ai-incident, exp-inference-under-load]
+  - domain: ai-security
+    journey_title: AI Security Journey
+    experience_ids: []
+  - domain: capacity-engineering
+    journey_title: Capacity Engineering Journey
+    experience_ids: [exp-diagnose-gpu-capacity-exhaustion]
+  - domain: cost-engineering
+    journey_title: Cost Engineering Journey
+    experience_ids: [exp-reduce-ai-platform-cost]
+  - domain: distributed-ai-systems
+    journey_title: Distributed AI Systems Journey
+    experience_ids: []
+  - domain: platform-architecture
+    journey_title: Platform Architecture Journey
+    experience_ids:
+      - exp-design-multi-tenant-ai-infrastructure
+      - exp-design-highly-available-model-serving
+      - exp-design-internal-ai-platform-for-teams

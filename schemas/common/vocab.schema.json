@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vocab.schema.json",
+  "title": "AventiqLab Shared Vocabulary",
+  "description": "Controlled vocabularies referenced by every other schema in this repository. Change values here, not in individual schemas, so terminology stays consistent across learner profiles, capabilities, experiences, and skill evaluators.",
+  "$defs": {
+    "experience_band": {
+      "type": "string",
+      "enum": ["3yr", "5yr", "7yr", "10yr", "staff-principal"]
+    },
+    "capability_verb": {
+      "type": "string",
+      "description": "The 8 non-synonymous capability verbs. KNOW = recall facts/terminology. UNDERSTAND = reason about why/tradeoffs conceptually without having built/operated it. BUILD = construct/implement/configure from requirements. OPERATE = run/monitor/maintain a live system ongoing. DESIGN = make cross-constraint architecture tradeoff decisions. TROUBLESHOOT = diagnose root cause from symptoms under uncertainty. EXPLAIN = externally communicate reasoning/decisions to others. PROVE = produce verifiable evidence substantiating a claim.",
+      "enum": ["KNOW", "UNDERSTAND", "BUILD", "OPERATE", "DESIGN", "TROUBLESHOOT", "EXPLAIN", "PROVE"]
+    },
+    "proficiency_level": {
+      "type": "string",
+      "enum": ["Beginner", "Intermediate", "Advanced", "Expert", "Architect"]
+    },
+    "artifact_type": {
+      "type": "string",
+      "enum": ["material", "video", "source_code_lab", "quiz", "skill_evaluator"]
+    },
+    "independence_level": {
+      "type": "string",
+      "enum": ["Guided", "Supervised", "Independent", "Leads Others", "Sets Org Direction"]
+    },
+    "progression_archetype": {
+      "type": "string",
+      "description": "The dominant verb-stage an experience develops. See /experience-model/experience-progression.md.",
+      "enum": ["foundation-build", "intermediate-operate", "advanced-troubleshoot", "expert-optimize", "architect-design"]
+    },
+    "evaluation_dimension": {
+      "type": "string",
+      "enum": ["KNOWLEDGE", "REASONING", "APPLICATION", "TROUBLESHOOTING", "TRADE_OFF_ANALYSIS", "COMMUNICATION", "ENGINEERING_JUDGMENT"]
+    },
+    "domain_slug": {
+      "type": "string",
+      "description": "The 21 capability domains. See /capability-map/domain-index.yaml for authored-vs-stub status.",
+      "enum": [
+        "foundations",
+        "cloud-platform-engineering",
+        "container-platforms",
+        "kubernetes",
+        "networking",
+        "iac-and-automation",
+        "ci-cd",
+        "ai-infrastructure",
+        "gpu-engineering",
+        "model-serving",
+        "inference-engineering",
+        "mlops",
+        "llmops",
+        "ai-platform-engineering",
+        "observability",
+        "ai-reliability-sre",
+        "ai-security",
+        "capacity-engineering",
+        "cost-engineering",
+        "distributed-ai-systems",
+        "platform-architecture"
+      ]
+    },
+    "lp_id": {
+      "type": "string",
+      "pattern": "^lp-[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "cap_id": {
+      "type": "string",
+      "pattern": "^cap-[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "skl_id": {
+      "type": "string",
+      "pattern": "^skl-[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "exp_id": {
+      "type": "string",
+      "pattern": "^exp-[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "out_id": {
+      "type": "string",
+      "pattern": "^out-[a-z0-9]+(-[a-z0-9]+)*-[0-9]{2}$"
+    },
+    "art_id": {
+      "type": "string",
+      "pattern": "^art-[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "se_id": {
+      "type": "string",
+      "pattern": "^se-[a-z0-9]+(-[a-z0-9]+)*$"
+    }
+  }
+}

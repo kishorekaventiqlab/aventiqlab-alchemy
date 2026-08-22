@@ -1,0 +1,74 @@
+id: se-troubleshoot-failing-ml-pipeline
+experience_ref: exp-troubleshoot-failing-ml-pipeline
+skills_evaluated:
+  - cap-mlops-pipeline-orchestration
+scenario: >
+  A variant case: a minor, unrelated code change WAS deployed the same day the pipeline
+  started failing - but it touches a logging statement, not the evaluation logic. The
+  timing makes it a tempting but likely-wrong suspect.
+opening_question: >
+  There was a code change deployed the same day this started failing. Does that settle
+  it - is the code change the cause? How would you actually confirm that?
+expected_reasoning_areas:
+  - Not concluding causation from timing correlation alone
+  - Evaluating whether the specific change (a logging statement) is plausibly connected to an evaluation-step failure
+  - Still checking data-side causes even with a same-day code change present
+follow_up_question_paths:
+  - trigger: Learner concludes the code change is the cause based on timing alone.
+    follow_up_question: What does that logging statement actually touch? Is there a mechanism by which it could cause this specific failure?
+    targets_reasoning_area: Evaluating whether the specific change is plausibly connected to the failure
+  - trigger: Learner dismisses the code change entirely without checking it.
+    follow_up_question: How would you rule it out rather than just assume it's unrelated?
+    targets_reasoning_area: Not concluding causation from timing correlation alone
+misconception_indicators:
+  - misconception: Treats "a change was deployed the same day" as sufficient evidence of causation.
+    likely_root_cause: Confuses temporal correlation with a demonstrated causal mechanism.
+    corrective_follow_up: What would you need to see to confirm the change actually causes this failure, versus just co-occurring with it?
+strong_answer_indicators:
+  - Explicitly separates timing correlation from causal mechanism.
+  - Proposes checking the actual content of the change against the failure's plausible causes.
+  - Continues to check data-side possibilities rather than stopping at the first correlated event.
+weak_answer_indicators:
+  - Concludes causation from timing alone without examining the change's content.
+  - Dismisses the code change without a stated reason.
+evidence_criteria:
+  - States what the change actually does and whether that's mechanistically connected to the failure.
+  - Names a specific way to test the hypothesis rather than accepting or rejecting it on timing alone.
+scoring_dimensions:
+  - dimension: REASONING
+    description: Distinguishes correlation from causation when a same-day change exists.
+    weight_percent: 40
+  - dimension: TROUBLESHOOTING
+    description: Correctly evaluates the plausibility of the code change as a mechanistic cause.
+    weight_percent: 35
+  - dimension: KNOWLEDGE
+    description: Understands what a logging-only change can and cannot affect.
+    weight_percent: 25
+proficiency_levels:
+  - level: Beginner
+    description: Concludes the code change caused the failure based on timing alone, even after prompting.
+    criteria:
+      - Does not reconsider after the follow-up.
+  - level: Intermediate
+    description: Reconsiders only after prompting, without examining the change's actual content.
+    criteria:
+      - Backs off the timing-only conclusion after a follow-up but doesn't inspect the diff.
+  - level: Advanced
+    description: Independently examines the change's actual content and correctly judges it implausible as a cause.
+    criteria:
+      - Inspects the change's content unprompted.
+      - Correctly reasons it's unlikely to cause an evaluation-step failure.
+  - level: Expert
+    description: As Advanced, and continues pursuing data-side hypotheses in parallel rather than stopping at the code change.
+    criteria:
+      - Explicitly keeps data-side investigation active despite the tempting same-day change.
+  - level: Architect
+    description: As Expert, and generalizes a rule for weighing correlated-but-implausible causes against less obvious but more plausible ones.
+    criteria:
+      - Articulates a reusable principle for this class of "tempting but wrong" correlation.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, TROUBLESHOOTING]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to generalize their correlation-vs-causation reasoning into a rule (Architect-level probe).

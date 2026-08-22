@@ -1,0 +1,74 @@
+id: se-build-autoscaling-inference-platform
+experience_ref: exp-build-autoscaling-inference-platform
+skills_evaluated:
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-model-serving-autoscaling-policy-design
+scenario: >
+  A variant service has a traffic pattern that is spiky rather than gradual - sudden
+  bursts rather than a smooth ramp - and the team is debating whether queue depth is
+  still the right signal or whether a faster-reacting metric is needed.
+opening_question: >
+  This service gets sudden traffic bursts, not gradual ramps like the one you configured
+  before. Would you still scale on queue depth here? Walk me through your thinking.
+expected_reasoning_areas:
+  - Recognizing that a burst pattern stresses the responsiveness of whatever signal is chosen, not just its relevance
+  - Weighing scale-up latency against the cost of over-provisioning for bursts
+  - Not assuming the previous experience's exact configuration transfers unchanged
+follow_up_question_paths:
+  - trigger: Learner reuses the exact same configuration without adjustment.
+    follow_up_question: What specifically about a burst pattern might make that configuration too slow to react?
+    targets_reasoning_area: Recognizing that a burst pattern stresses the responsiveness of whatever signal is chosen, not just its relevance
+  - trigger: Learner proposes a faster-reacting metric.
+    follow_up_question: What does reacting faster cost you when there isn't actually a burst happening?
+    targets_reasoning_area: Weighing scale-up latency against the cost of over-provisioning for bursts
+misconception_indicators:
+  - misconception: Assumes any signal that worked for a gradual ramp will work equally well for bursts.
+    likely_root_cause: Hasn't separated "is this signal relevant" from "is this signal fast enough."
+    corrective_follow_up: What's the difference between a signal being relevant and a signal being fast enough?
+strong_answer_indicators:
+  - Explicitly separates signal relevance from reaction speed.
+  - Names a concrete tradeoff between responsiveness and over-provisioning cost.
+weak_answer_indicators:
+  - Reuses the prior configuration without considering the different traffic shape.
+  - Proposes a faster signal with no acknowledgment of its cost.
+evidence_criteria:
+  - States what specifically about bursts changes the requirement.
+  - Names the tradeoff of the proposed adjustment.
+scoring_dimensions:
+  - dimension: APPLICATION
+    description: Correctly applies scaling knowledge to a differently-shaped traffic pattern.
+    weight_percent: 40
+  - dimension: TRADE_OFF_ANALYSIS
+    description: Names the cost side of any proposed adjustment.
+    weight_percent: 35
+  - dimension: REASONING
+    description: Distinguishes signal relevance from reaction speed.
+    weight_percent: 25
+proficiency_levels:
+  - level: Beginner
+    description: Reuses the prior configuration without adjustment even after prompting.
+    criteria:
+      - Does not identify a burst-specific concern even with a follow-up.
+  - level: Intermediate
+    description: Identifies a concern with prompting but doesn't propose a specific adjustment.
+    criteria:
+      - Recognizes an issue only after the first follow-up.
+  - level: Advanced
+    description: Independently identifies the responsiveness concern and proposes an adjustment.
+    criteria:
+      - Raises the burst-vs-gradual distinction unprompted.
+      - Proposes a specific adjustment.
+  - level: Expert
+    description: As Advanced, and explicitly names the tradeoff of the adjustment unprompted.
+    criteria:
+      - States the over-provisioning cost of a faster-reacting signal unprompted.
+  - level: Architect
+    description: As Expert, and generalizes into a framework for choosing signals by traffic shape.
+    criteria:
+      - Articulates a general rule for matching signal choice to traffic-pattern shape, not just this one case.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [APPLICATION, TRADE_OFF_ANALYSIS]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to generalize their reasoning into a rule for future services (Architect-level probe).

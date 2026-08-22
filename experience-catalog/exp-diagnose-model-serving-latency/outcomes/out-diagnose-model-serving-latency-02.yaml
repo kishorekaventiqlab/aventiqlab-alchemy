@@ -1,0 +1,22 @@
+id: out-diagnose-model-serving-latency-02
+experience_ref: exp-diagnose-model-serving-latency
+learner_summary: >
+  Recommend a next step appropriate to the confirmed cause, and communicate a
+  preliminary update to the customer-facing team without waiting for full certainty.
+learner_profile_refs: [lp-5yr-ai-platform-engineer, lp-7yr-mlops-lead]
+action:
+  verb: EXPLAIN
+  statement: >
+    Communicate a preliminary finding and recommended next step to a customer-facing
+    team while investigation is still ongoing.
+context: >
+  Given a working hypothesis for the latency drift that is not yet fully confirmed,
+expected_result: >
+  the learner delivers a preliminary update that states the working hypothesis with
+  appropriate caveats and a recommended next step, rather than either staying silent
+  until full certainty or overstating confidence.
+related_capabilities:
+  - cap-observability-slo-based-alerting-for-inference
+evidence_expectations: >
+  The actual communication delivered and confirmation it distinguished hypothesis from
+  confirmed fact.

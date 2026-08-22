@@ -1,0 +1,30 @@
+id: art-deploy-inference-service-lab
+type: source_code_lab
+title: Build and Deploy the GPU-Scheduled Inference Service
+experience_ref: exp-deploy-inference-service
+outcome_refs:
+  - out-deploy-inference-service-01
+  - out-deploy-inference-service-02
+capability_refs:
+  - cap-foundations-ai-ml-platform-engineering-baseline
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Untimed BUILD practice: actually adapt the Helm chart and deploy it to a sandbox
+  cluster with no time pressure - this is where it's first done correctly.
+content_summary: >
+  A starter repo with the existing CPU-service Helm chart, a container image reference,
+  and a sandbox cluster with a tainted GPU node pool. The learner adapts the chart,
+  deploys it, and verifies a real inference response.
+estimated_duration_minutes: 60
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-deploy-inference-service
+  tasks:
+    - Add the correct node selector and toleration to the Helm chart for the GPU node pool.
+    - Configure ingress and a readiness probe for the service.
+    - Deploy to the sandbox cluster and confirm the pod schedules successfully.
+    - Send a real inference request and capture the response as evidence.
+  environment_requirements:
+    - kind or a sandbox EKS cluster with a tainted GPU-labeled node pool
+    - Helm CLI
+    - kubectl
+  hints_available: true

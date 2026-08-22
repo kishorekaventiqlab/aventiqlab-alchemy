@@ -1,0 +1,25 @@
+id: art-diagnose-gpu-capacity-exhaustion-material
+type: material
+title: "Reading Cluster Autoscaler Failure Reasons: Reference"
+experience_ref: exp-diagnose-gpu-capacity-exhaustion
+outcome_refs:
+  - out-diagnose-gpu-capacity-exhaustion-01
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+purpose: >
+  Builds the KNOW/UNDERSTAND foundation on Cluster Autoscaler's failure-reason logging
+  and GPU service quotas, as pure reference facts - not a narrated incident (Video) or
+  hands-on diagnosis (Lab).
+content_summary: >
+  A reference document covering how to read Cluster Autoscaler's scale-up failure
+  reasons, the difference between a quota-ceiling block and a taint/device-plugin
+  misconfiguration, and how to check account-level GPU quota against node pool size.
+estimated_duration_minutes: 15
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 15
+  key_sections:
+    - Reading Cluster Autoscaler scale-up failure reasons
+    - "Quota ceiling vs. configuration: two different Pending-pod causes"
+    - Checking account-level GPU quota against node pool size

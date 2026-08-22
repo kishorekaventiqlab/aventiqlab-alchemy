@@ -1,0 +1,18 @@
+id: art-optimize-gpu-utilization-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Optimize GPU Utilization
+experience_ref: exp-optimize-gpu-utilization
+outcome_refs:
+  - out-optimize-gpu-utilization-01
+  - out-optimize-gpu-utilization-02
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Open-ended evaluation of whether the classification-based consolidation reasoning
+  transfers when there are two latency-sensitive services instead of one -
+  not recall (Quiz) or hands-on execution (Lab). Source-of-truth structure
+  only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-optimize-gpu-utilization

@@ -1,0 +1,74 @@
+id: se-diagnose-gpu-capacity-exhaustion
+experience_ref: exp-diagnose-gpu-capacity-exhaustion
+skills_evaluated:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+scenario: >
+  A variant incident where the Cluster Autoscaler log message is ambiguous - it
+  mentions both "insufficient quota" and a recent taint change in the same time window
+  - so the two candidate causes aren't cleanly separable from the log alone.
+opening_question: >
+  The autoscaler log mentions both a quota issue and a recent taint change around the
+  same time. How would you figure out which one is actually blocking scheduling - or
+  whether it's both?
+expected_reasoning_areas:
+  - Designing a way to test the two candidate causes independently rather than picking one and hoping
+  - Recognizing that "both" is a valid answer and not forcing a single-cause conclusion prematurely
+  - Sequencing the investigation to minimize wasted time given the live pressure
+follow_up_question_paths:
+  - trigger: Learner picks one cause without a way to independently verify it.
+    follow_up_question: What could you check that would confirm this cause specifically, independent of the other one?
+    targets_reasoning_area: Designing a way to test the two candidate causes independently
+  - trigger: Learner insists it must be exactly one cause.
+    follow_up_question: What would it look like if both were actually contributing at once?
+    targets_reasoning_area: Recognizing that "both" is a valid answer
+misconception_indicators:
+  - misconception: Assumes an incident must have exactly one root cause.
+    likely_root_cause: Pattern-matches to the reference experience's single clean cause rather than reasoning about this specific ambiguous case.
+    corrective_follow_up: Is there a reason two contributing factors couldn't both be true here?
+strong_answer_indicators:
+  - Proposes a specific check that would isolate each candidate cause.
+  - Explicitly allows for a multi-cause conclusion if the evidence supports it.
+weak_answer_indicators:
+  - Picks a cause based on gut feel without a verification step.
+  - Insists on a single cause without evidence ruling out the other.
+evidence_criteria:
+  - Names the specific check used to isolate each candidate cause.
+  - States the actual conclusion reached and the evidence for it.
+scoring_dimensions:
+  - dimension: TROUBLESHOOTING
+    description: Designs an effective way to disambiguate between two plausible causes.
+    weight_percent: 40
+  - dimension: REASONING
+    description: Avoids premature single-cause conclusions without evidence.
+    weight_percent: 35
+  - dimension: COMMUNICATION
+    description: Clearly explains the disambiguation approach and conclusion.
+    weight_percent: 25
+proficiency_levels:
+  - level: Beginner
+    description: Picks a cause arbitrarily with no verification method even after prompting.
+    criteria:
+      - Cannot propose an isolating check even with a follow-up.
+  - level: Intermediate
+    description: Proposes an isolating check for one cause only after prompting.
+    criteria:
+      - Proposes a check after the first follow-up.
+  - level: Advanced
+    description: Independently proposes isolating checks for both candidate causes.
+    criteria:
+      - Proposes a specific check for each cause unprompted.
+  - level: Expert
+    description: As Advanced, and sequences the checks to minimize time given live pressure.
+    criteria:
+      - Explicitly reasons about check ordering under time pressure.
+  - level: Architect
+    description: As Expert, and generalizes into a rule for handling ambiguous multi-signal incidents in general.
+    criteria:
+      - Articulates a reusable approach for disambiguating overlapping signals beyond this one incident.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [TROUBLESHOOTING, REASONING]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to generalize their disambiguation approach into a reusable rule (Architect-level probe).

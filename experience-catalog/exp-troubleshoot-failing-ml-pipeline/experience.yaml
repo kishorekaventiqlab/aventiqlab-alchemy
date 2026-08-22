@@ -1,0 +1,62 @@
+id: exp-troubleshoot-failing-ml-pipeline
+title: Troubleshoot a Failing ML Pipeline
+target_learner_profiles: [lp-5yr-ai-platform-engineer, lp-7yr-mlops-lead]
+target_capabilities:
+  - cap-mlops-pipeline-orchestration
+prerequisites: []
+scenario: >
+  A nightly training pipeline that has run reliably for months has failed for the third
+  night in a row at the evaluation step.
+business_context: >
+  The model this pipeline retrains feeds a recommendation feature; missing three
+  consecutive retrains risks the model going stale in production.
+technical_environment:
+  platform: Kubeflow Pipelines on EKS
+  infrastructure_summary: >
+    A multi-step pipeline (ingest, train, evaluate, register) that has run nightly
+    without failure for months until three nights ago.
+  key_services: [Kubeflow Pipelines, Model registry, Data warehouse]
+starting_state: >
+  The pipeline fails at the evaluation step on all three of the last three nightly runs.
+  The ingest and train steps complete successfully each time. No code changes were
+  deployed to the pipeline in that window.
+learner_mission: >
+  Determine whether the failure is caused by upstream data drift, an infrastructure
+  fault, or a dependency change, and get the pipeline healthy again.
+expected_investigation:
+  - Compare the evaluation step's input data schema/statistics against the prior successful run.
+  - Check whether any upstream dependency (library version, data source schema) changed around the failure's start date.
+  - Check the evaluation step's resource allocation for signs of resource exhaustion.
+expected_decisions:
+  - decision_point: Is this a data problem or an infrastructure problem?
+    options_considered:
+      - "Correct: compare data schema/statistics across the failing and last-successful runs before assuming an infra cause."
+      - "Plausible but wrong: immediately increase the evaluation step's resource allocation, assuming resource exhaustion, without checking the data first."
+    sound_reasoning: >
+      No code changes were deployed, so a data-side change is at least as plausible as
+      an infra cause, and checking data statistics is fast and non-disruptive compared
+      to a resource-allocation change-and-retest cycle.
+build_activities:
+  - Add a data validation/schema-check step ahead of evaluation to catch this class of failure earlier next time.
+operational_activities:
+  - Re-trigger the pipeline from the failed step once the cause is identified and addressed.
+failure_modes:
+  - Repeatedly re-running the full pipeline from scratch instead of isolating the failing step.
+  - Fixing the symptom (e.g. bumping a timeout) without identifying the actual root cause, risking recurrence.
+constraints:
+  - The model must not go a fourth night without a successful retrain.
+  - Any fix must not silently change evaluation semantics without review.
+trade_offs:
+  - tension: Speed of unblocking vs. root-cause certainty
+    choice_a: Apply a targeted fix once the root cause is confirmed, at the cost of one more night's delay to confirm it properly.
+    choice_b: Apply a broader defensive fix (e.g. relaxing a validation threshold) immediately to unblock tonight's run, accepting less certainty about the actual cause.
+success_conditions:
+  - The failing step's root cause is identified with supporting evidence (data comparison or dependency change).
+  - The pipeline completes successfully after the fix is applied.
+evidence_of_competence:
+  - The specific data or dependency difference found between the failing and last-successful runs.
+  - Confirmation of a successful pipeline run after the fix.
+progression_archetype: advanced-troubleshoot
+outcome_refs:
+  - out-troubleshoot-failing-ml-pipeline-01
+  - out-troubleshoot-failing-ml-pipeline-02

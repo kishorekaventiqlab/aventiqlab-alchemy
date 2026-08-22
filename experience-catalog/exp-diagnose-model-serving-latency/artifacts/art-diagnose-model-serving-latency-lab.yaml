@@ -1,0 +1,26 @@
+id: art-diagnose-model-serving-latency-lab
+type: source_code_lab
+title: Trace the Slow-Tail Requests
+experience_ref: exp-diagnose-model-serving-latency
+outcome_refs:
+  - out-diagnose-model-serving-latency-01
+capability_refs:
+  - cap-model-serving-autoscaling-policy-design
+  - cap-observability-slo-based-alerting-for-inference
+purpose: >
+  Untimed BUILD practice: add or refine tracing/logging to break down latency by
+  request characteristic with no time pressure - this is where it's first practiced correctly.
+content_summary: >
+  A starter repo with a synthetic two-week request log exhibiting a workload-shape
+  drift. The learner adds request-characteristic breakdowns and finds the correlation.
+estimated_duration_minutes: 60
+type_specific:
+  repo_or_starter_ref: lab-starters/exp-diagnose-model-serving-latency
+  tasks:
+    - Add tracing/logging to break down latency by request characteristic.
+    - Identify the correlation between a request-characteristic trend and the p99 drift.
+    - Write a short hypothesis summary with supporting evidence.
+  environment_requirements:
+    - Provided synthetic request-log dataset
+    - Query/analysis environment (notebook or CLI)
+  hints_available: true

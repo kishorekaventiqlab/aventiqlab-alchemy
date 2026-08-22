@@ -1,0 +1,23 @@
+id: out-handle-production-ai-incident-01
+experience_ref: exp-handle-production-ai-incident
+learner_summary: >
+  Determine whether two closely-timed alerts on services sharing infrastructure share a
+  root cause, by checking the shared components first.
+learner_profile_refs: [lp-7yr-mlops-lead]
+action:
+  verb: TROUBLESHOOT
+  statement: >
+    Determine whether two closely-timed alerts on infrastructure-sharing services share
+    a root cause, by checking the shared components before splitting into separate
+    investigations.
+context: >
+  Given Service A alerting on elevated error rates and, two minutes later, Service B
+  (sharing the same GPU node pool and model registry) alerting on elevated latency,
+expected_result: >
+  the learner checks the shared infrastructure components first for a common event
+  before committing investigative resources to two independent threads, and reaches a
+  supported conclusion on whether the alerts are linked.
+related_capabilities:
+  - cap-ai-reliability-sre-incident-response-for-inference
+evidence_expectations: >
+  The specific shared-infrastructure evidence used to link or rule out linking the two alerts.

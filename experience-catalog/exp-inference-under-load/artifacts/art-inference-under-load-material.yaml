@@ -1,0 +1,31 @@
+id: art-inference-under-load-material
+type: material
+title: "GPU Inference Capacity & Autoscaling Signals: Reference"
+experience_ref: exp-inference-under-load
+outcome_refs:
+  - out-inference-under-load-01
+  - out-inference-under-load-02
+  - out-inference-under-load-03
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+  - cap-kubernetes-workload-scaling-for-inference
+purpose: >
+  Builds the pre-requisite KNOW/UNDERSTAND foundation (GPU signal interpretation,
+  autoscaling trigger signals, capacity ceilings, batching tradeoffs) as pure reference
+  facts. It does not narrate a scenario or model reasoning - that is the Video's job -
+  and it carries no time pressure or graded execution - that is the Lab's job.
+content_summary: >
+  A reference document covering: GPU utilization vs. memory utilization vs. SM
+  occupancy; how KEDA and Cluster Autoscaler each react to different signals; what a GPU
+  service quota ceiling is and why it can't be raised instantly; and how dynamic
+  batching trades throughput for latency.
+estimated_duration_minutes: 20
+type_specific:
+  format: reference-doc
+  reading_time_minutes: 20
+  key_sections:
+    - "GPU utilization signals: what they do and don't tell you"
+    - Kubernetes autoscaling primitives and their trigger signals
+    - GPU service quotas and why they aren't an instant lever
+    - "Dynamic batching: the throughput/latency tradeoff"

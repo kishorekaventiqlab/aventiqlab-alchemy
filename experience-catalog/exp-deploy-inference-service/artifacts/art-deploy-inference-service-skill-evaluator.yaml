@@ -1,0 +1,18 @@
+id: art-deploy-inference-service-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Deploy an Inference Service
+experience_ref: exp-deploy-inference-service
+outcome_refs:
+  - out-deploy-inference-service-01
+  - out-deploy-inference-service-02
+capability_refs:
+  - cap-foundations-ai-ml-platform-engineering-baseline
+  - cap-model-serving-autoscaling-policy-design
+purpose: >
+  Open-ended evaluation of transfer to a differently-configured node pool - assesses
+  whether the learner's diagnostic approach generalizes, not recall (Quiz) or
+  hands-on execution (Lab). Source-of-truth structure only; no conversational
+  AI is implemented here.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-deploy-inference-service

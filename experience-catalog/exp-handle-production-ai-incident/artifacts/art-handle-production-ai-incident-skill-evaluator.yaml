@@ -1,0 +1,17 @@
+id: art-handle-production-ai-incident-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Handle a Production AI Incident
+experience_ref: exp-handle-production-ai-incident
+outcome_refs:
+  - out-handle-production-ai-incident-01
+  - out-handle-production-ai-incident-02
+capability_refs:
+  - cap-ai-reliability-sre-incident-response-for-inference
+  - cap-observability-slo-based-alerting-for-inference
+purpose: >
+  Open-ended evaluation of whether the "check shared infrastructure first" reasoning
+  transfers when three services alert instead of two - not recall (Quiz) or
+  hands-on execution (Lab). Source-of-truth structure only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-handle-production-ai-incident

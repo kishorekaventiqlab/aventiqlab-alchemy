@@ -1,0 +1,65 @@
+id: exp-design-multi-tenant-ai-infrastructure
+title: Design Multi-Tenant AI Infrastructure
+target_learner_profiles: [lp-10yr-staff-ai-platform-engineer, lp-staff-principal-principal-ai-infrastructure-architect]
+target_capabilities:
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+  - cap-platform-architecture-tradeoff-driven-system-design
+  - cap-cloud-platform-engineering-account-and-network-foundations
+prerequisites: [exp-diagnose-gpu-capacity-exhaustion]
+scenario: >
+  Three separate product teams each want their own dedicated GPU infrastructure, but
+  leadership wants a shared multi-tenant platform to avoid duplicated cost and
+  operational overhead.
+business_context: >
+  Each team has legitimate isolation concerns (noisy-neighbor risk, differing compliance
+  requirements) but the company cannot afford three separate fully-dedicated GPU infrastructures.
+technical_environment:
+  platform: Amazon EKS
+  infrastructure_summary: >
+    Currently, one team has a dedicated GPU node pool; the other two are requesting the
+    same as they scale up, which would triple GPU infrastructure overhead.
+  key_services: [Amazon EKS, Namespace-based multi-tenancy, Kubernetes ResourceQuotas, Cluster Autoscaler]
+starting_state: >
+  One team has dedicated infrastructure. Two more teams are about to request the same
+  pattern. No shared multi-tenant design exists yet.
+learner_mission: >
+  Design a multi-tenant AI infrastructure architecture that gives each team adequate
+  isolation and predictable capacity without tripling infrastructure cost.
+expected_investigation:
+  - Identify each team's actual isolation requirements (compliance, noisy-neighbor sensitivity) versus assumed requirements.
+  - Identify which resources can safely be shared (e.g. node pools) versus which genuinely need hard isolation (e.g. data access).
+expected_decisions:
+  - decision_point: What isolation model to use?
+    options_considered:
+      - "Correct: namespace-based multi-tenancy with ResourceQuotas and priority classes on a shared node pool, reserving hard infrastructure isolation only for the team with an actual compliance requirement for it."
+      - "Plausible but wrong: give every team a fully dedicated node pool by default because it's the simplest way to avoid the design conversation, recreating the cost problem the effort was meant to solve."
+    sound_reasoning: >
+      Not every stated isolation concern requires hard infrastructure isolation -
+      distinguishing genuine compliance requirements from generic noisy-neighbor
+      concerns that can be solved with quotas and priority classes is the core of the
+      design decision.
+build_activities:
+  - Define ResourceQuota and priority-class policies per tenant.
+  - Document the isolation model and which team(s) require hard infrastructure separation and why.
+operational_activities:
+  - Define an onboarding process for future teams joining the shared platform.
+failure_modes:
+  - Granting hard isolation to every team by default, failing to solve the cost problem.
+  - Under-isolating a team that genuinely has a compliance requirement for hard separation.
+constraints:
+  - Cannot triple GPU infrastructure cost.
+  - Must satisfy the one team's genuine compliance isolation requirement.
+trade_offs:
+  - tension: Shared-platform efficiency vs. per-team autonomy
+    choice_a: Maximize shared infrastructure for cost efficiency, at the cost of teams having less control over their own capacity and scheduling.
+    choice_b: Grant more per-team autonomy (e.g. dedicated priority tiers with guaranteed minimums), at some cost to overall utilization efficiency.
+success_conditions:
+  - A multi-tenant design is proposed that avoids tripling infrastructure cost.
+  - The one genuine compliance isolation requirement is satisfied.
+evidence_of_competence:
+  - The isolation model design doc, including which requirements are genuine vs. assumed.
+  - A cost comparison against the three-dedicated-pools alternative.
+progression_archetype: architect-design
+outcome_refs:
+  - out-design-multi-tenant-ai-infrastructure-01
+  - out-design-multi-tenant-ai-infrastructure-02

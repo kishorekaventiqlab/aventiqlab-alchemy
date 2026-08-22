@@ -1,0 +1,23 @@
+id: out-design-multi-tenant-ai-infrastructure-02
+experience_ref: exp-design-multi-tenant-ai-infrastructure
+learner_summary: >
+  Substantiate the isolation model with a cost comparison against the
+  three-dedicated-pools alternative that leadership would otherwise default to.
+learner_profile_refs:
+  - lp-10yr-staff-ai-platform-engineer
+  - lp-staff-principal-principal-ai-infrastructure-architect
+action:
+  verb: PROVE
+  statement: >
+    Substantiate the proposed multi-tenant design with a cost comparison against the
+    three-dedicated-pools alternative.
+context: >
+  Given the designed isolation model and the naive three-dedicated-pools alternative
+  leadership might otherwise default to,
+expected_result: >
+  the learner produces a cost comparison quantifying the savings of the shared model
+  over the dedicated alternative, giving leadership a concrete basis for the decision.
+related_capabilities:
+  - cap-platform-architecture-tradeoff-driven-system-design
+evidence_expectations: >
+  A cost comparison between the proposed design and the three-dedicated-pools alternative.

@@ -1,0 +1,73 @@
+id: se-optimize-gpu-utilization
+experience_ref: exp-optimize-gpu-utilization
+skills_evaluated:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-model-serving-autoscaling-policy-design
+scenario: >
+  A variant node pool has two latency-sensitive services with peak windows that don't
+  overlap - one peaks in the morning, the other in the afternoon - complicating a simple
+  "exclude the sensitive one" approach.
+opening_question: >
+  This time there are two latency-sensitive services, and their peak windows don't
+  overlap. Can you still consolidate around them the same way? What would you do differently?
+expected_reasoning_areas:
+  - Recognizing that non-overlapping peak windows create an opportunity, not just a doubled constraint
+  - Designing a time-aware consolidation rather than a single static exclusion
+  - Verifying both services' peak windows are protected, not just one
+follow_up_question_paths:
+  - trigger: Learner excludes both services from consolidation entirely.
+    follow_up_question: Their peak windows don't overlap - does that change what's possible during each other's off-peak time?
+    targets_reasoning_area: Recognizing that non-overlapping peak windows create an opportunity
+  - trigger: Learner proposes a single static rule without accounting for the time dimension.
+    follow_up_question: How would a static, always-on exclusion handle two services whose sensitive windows are at different times of day?
+    targets_reasoning_area: Designing a time-aware consolidation rather than a single static exclusion
+misconception_indicators:
+  - misconception: Assumes protecting a latency-sensitive service always means fully excluding it from consolidation at all times.
+    likely_root_cause: Applied the reference experience's static exclusion pattern without considering the time dimension.
+    corrective_follow_up: Does a service need protection during its off-peak hours the same way it does during its peak hours?
+strong_answer_indicators:
+  - Proposes a time-aware consolidation scheme rather than a blanket exclusion.
+  - Explicitly verifies both services' peak windows are protected.
+weak_answer_indicators:
+  - Excludes both services entirely, missing the consolidation opportunity in their respective off-peak windows.
+  - Proposes a single static rule that doesn't account for the time-of-day dimension.
+evidence_criteria:
+  - Describes a specific time-aware scheme (e.g. schedule-based bin-packing).
+  - States how both services' peak windows are verified as protected.
+scoring_dimensions:
+  - dimension: REASONING
+    description: Recognizes the opportunity created by non-overlapping peak windows.
+    weight_percent: 35
+  - dimension: APPLICATION
+    description: Designs a time-aware consolidation appropriate to the new constraint.
+    weight_percent: 40
+  - dimension: TRADE_OFF_ANALYSIS
+    description: Balances utilization gain against the risk to both sensitive services.
+    weight_percent: 25
+proficiency_levels:
+  - level: Beginner
+    description: Excludes both services entirely even after prompting, missing the opportunity.
+    criteria:
+      - Does not propose a time-aware scheme even with a follow-up.
+  - level: Intermediate
+    description: Recognizes the opportunity only after prompting, without a concrete scheme.
+    criteria:
+      - Acknowledges the opportunity after the follow-up.
+  - level: Advanced
+    description: Independently proposes a time-aware consolidation scheme.
+    criteria:
+      - Proposes a specific time-aware approach unprompted.
+  - level: Expert
+    description: As Advanced, and explicitly verifies both services' peak windows remain protected.
+    criteria:
+      - States a specific verification approach for both services.
+  - level: Architect
+    description: As Expert, and generalizes into a framework for N services with arbitrary peak-window overlap patterns.
+    criteria:
+      - Articulates a reusable scheduling framework beyond just two services.
+pass_conditions:
+  minimum_level: Advanced
+  required_dimensions: [REASONING, APPLICATION]
+escalation_rules:
+  - condition: Learner reaches Expert without follow-up.
+    action: Ask them to generalize to N services with arbitrary peak-window patterns (Architect-level probe).

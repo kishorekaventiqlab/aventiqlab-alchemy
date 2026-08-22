@@ -1,0 +1,17 @@
+id: art-roll-out-model-safely-skill-evaluator
+type: skill_evaluator
+title: Reasoning Check - Roll Out a Model Safely
+experience_ref: exp-roll-out-model-safely
+outcome_refs:
+  - out-roll-out-model-safely-01
+  - out-roll-out-model-safely-02
+capability_refs:
+  - cap-mlops-pipeline-orchestration
+  - cap-observability-slo-based-alerting-for-inference
+purpose: >
+  Open-ended evaluation of whether the learner's quality-gating reasoning transfers to a
+  model where no obvious quality metric exists yet - not recall (Quiz) or
+  hands-on execution (Lab). Source-of-truth structure only.
+estimated_duration_minutes: 12
+type_specific:
+  evaluator_ref: se-roll-out-model-safely

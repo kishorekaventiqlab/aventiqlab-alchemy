@@ -1,0 +1,20 @@
+id: out-reduce-ai-platform-cost-02
+experience_ref: exp-reduce-ai-platform-cost
+learner_summary: >
+  Track realized savings against the 20% target after the cost-reduction actions are
+  implemented.
+learner_profile_refs: [lp-7yr-mlops-lead, lp-10yr-staff-ai-platform-engineer]
+action:
+  verb: PROVE
+  statement: >
+    Track and report realized savings against the 20% target after implementing the
+    proposed cost-reduction actions.
+context: >
+  Given implemented reserved-capacity and consolidation changes,
+expected_result: >
+  the learner produces a realized-savings report comparing actual spend reduction
+  against the 20% target and against the original cost model's projection.
+related_capabilities:
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+evidence_expectations: >
+  A realized-savings report comparing actual results to the projected cost model.

@@ -1,0 +1,22 @@
+id: out-build-autoscaling-inference-platform-02
+experience_ref: exp-build-autoscaling-inference-platform
+learner_summary: >
+  Demonstrate via load test that the autoscaling configuration tracks a simulated
+  demand curve without exceeding the node pool's actual capacity.
+learner_profile_refs: [lp-5yr-ai-platform-engineer]
+action:
+  verb: PROVE
+  statement: >
+    Demonstrate via load test that replica count tracks a simulated demand swing without
+    exceeding the node pool's actual headroom.
+context: >
+  Given a configured autoscaling setup and a node pool with a known maximum headroom,
+expected_result: >
+  the learner produces a load-test result showing replica count rising and falling with
+  a simulated 5x demand swing, and confirms peak replica count never exceeded the node
+  pool's actual capacity.
+related_capabilities:
+  - cap-kubernetes-workload-scaling-for-inference
+evidence_expectations: >
+  A load-test report or captured replica-count timeline correlated with the simulated
+  demand curve.

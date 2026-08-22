@@ -1,0 +1,61 @@
+id: cap-ai-reliability-sre-incident-response-for-inference
+name: Incident Response for AI Inference Services
+domain: ai-reliability-sre
+description: >
+  Executing and leading the incident lifecycle (detect, triage, mitigate, resolve,
+  postmortem) for AI inference services under production pressure.
+skills:
+  - id: skl-ai-reliability-incident-response-01
+    name: Incident lifecycle fluency
+    verb: KNOW
+    statement: >
+      Knows the standard incident lifecycle (detect, triage, mitigate, resolve,
+      postmortem) as applied to an AI inference service.
+    evidence:
+      - Correctly sequences these stages for a hypothetical incident.
+  - id: skl-ai-reliability-incident-response-02
+    name: SLA-window mitigation execution
+    verb: OPERATE
+    statement: >
+      Can execute an incident runbook to mitigate a GPU-bound inference degradation
+      within an SLA window.
+    evidence:
+      - Mitigated a live or simulated incident within the stated SLA window.
+  - id: skl-ai-reliability-incident-response-03
+    name: Cross-layer root-cause leadership
+    verb: TROUBLESHOOT
+    statement: >
+      Can lead root-cause investigation across GPU, serving, and application layers
+      during a live incident.
+    evidence:
+      - Led a cross-layer root-cause investigation to a confirmed root cause.
+  - id: skl-ai-reliability-incident-response-04
+    name: Live-incident communication
+    verb: EXPLAIN
+    statement: >
+      Can communicate incident status and impact clearly to stakeholders during an
+      active incident.
+    evidence:
+      - Delivered status updates during a live/simulated incident rated clear by stakeholders.
+  - id: skl-ai-reliability-incident-response-05
+    name: Postmortem substantiation
+    verb: PROVE
+    statement: >
+      Can produce a postmortem with a validated root cause and concrete follow-up actions.
+    evidence:
+      - Authored a postmortem whose corrective actions were tracked to completion.
+common_tools:
+  - PagerDuty
+  - Incident runbooks
+  - Prometheus / Grafana
+  - Postmortem templates
+beginner_indicators:
+  - Follows a runbook step-by-step but cannot adapt it when the incident deviates.
+intermediate_indicators:
+  - Independently mitigates known incident patterns within SLA.
+advanced_indicators:
+  - Leads cross-layer root-cause investigations and incident command for novel incidents.
+  - Per the experience-capability matrix, operational incident-response maturity typically
+    plateaus by the 7-year band rather than continuing to climb with formal seniority.
+expert_architect_indicators:
+  - Sets incident response process and reliability standards across multiple AI services.

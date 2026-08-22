@@ -1,0 +1,63 @@
+id: exp-handle-production-ai-incident
+title: Handle a Production AI Incident
+target_learner_profiles: [lp-7yr-mlops-lead]
+target_capabilities:
+  - cap-ai-reliability-sre-incident-response-for-inference
+  - cap-observability-slo-based-alerting-for-inference
+prerequisites: [exp-diagnose-model-serving-latency]
+scenario: >
+  A PagerDuty alert fires for a customer-facing AI feature reporting elevated error
+  rates, and within minutes a second, seemingly unrelated service also starts alerting.
+business_context: >
+  This is the first incident where two AI services have degraded simultaneously; it's
+  unclear at the outset whether they share a common root cause or are coincidental.
+technical_environment:
+  platform: Amazon EKS
+  infrastructure_summary: >
+    Two customer-facing AI services share some underlying infrastructure (the same GPU
+    node pool and the same model registry) but are otherwise independently deployed.
+  key_services: [Amazon EKS, PagerDuty, Prometheus, Model registry]
+starting_state: >
+  Service A is alerting on elevated 5xx error rates. Two minutes later, Service B -
+  which shares the same GPU node pool and model registry as Service A - also starts
+  alerting on elevated latency.
+learner_mission: >
+  Lead the incident: determine whether the two services' alerts share a root cause,
+  mitigate customer impact, and communicate status throughout.
+expected_investigation:
+  - Check whether both services' symptoms started within the same shared-infrastructure component's timeline (node pool, model registry) rather than assuming coincidence.
+  - Check each service's own recent deploy history independently.
+expected_decisions:
+  - decision_point: Is this one incident or two?
+    options_considered:
+      - "Correct: check the shared infrastructure (node pool, model registry) first for a common event, since both services depend on it and the timing is close."
+      - "Plausible but wrong: treat them as two fully independent incidents and split investigation resources evenly without first checking for a shared cause, risking duplicated effort if it is in fact one root cause."
+    sound_reasoning: >
+      Given the services share infrastructure and the alerts are closely timed,
+      checking the shared components first is the faster path to either confirming a
+      common cause or genuinely ruling it out.
+build_activities: []
+operational_activities:
+  - Mitigate customer impact on both services once the cause is understood.
+  - Send stakeholder status updates at defined intervals throughout the incident.
+failure_modes:
+  - Splitting into two uncoordinated investigation threads when a shared root cause exists, wasting time.
+  - Failing to communicate status to stakeholders during the investigation, causing escalation pressure that distracts from the actual fix.
+constraints:
+  - Both services have active customer traffic throughout - any mitigation must not make either service worse.
+  - Incident command must maintain clear communication even while the root cause is still uncertain.
+trade_offs:
+  - tension: Investigation thoroughness vs. speed of stakeholder communication
+    choice_a: Wait for a confirmed root cause before communicating anything specific to stakeholders, at the cost of a longer information gap.
+    choice_b: Communicate the working hypothesis early with appropriate caveats, at the risk of needing to walk back an initial theory.
+success_conditions:
+  - Whether the two alerts share a root cause is correctly determined with supporting evidence.
+  - Customer impact on both services is mitigated.
+  - Stakeholders receive timely status updates throughout.
+evidence_of_competence:
+  - The specific shared-infrastructure evidence used to link (or rule out linking) the two alerts.
+  - A timeline of stakeholder communications during the incident.
+progression_archetype: advanced-troubleshoot
+outcome_refs:
+  - out-handle-production-ai-incident-01
+  - out-handle-production-ai-incident-02
