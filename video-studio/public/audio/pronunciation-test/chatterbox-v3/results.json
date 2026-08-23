@@ -1,0 +1,97 @@
+{
+  "engine": "chatterbox-v3",
+  "voice": "chatterbox-default",
+  "generatedAt": "2026-08-23T03:00:39.902Z",
+  "results": [
+    {
+      "term": "Kubernetes",
+      "file": "01-kubernetes.wav",
+      "durationSeconds": 1,
+      "wallSeconds": 15.334
+    },
+    {
+      "term": "Amazon EKS",
+      "file": "02-amazon-eks.wav",
+      "durationSeconds": 1.36,
+      "wallSeconds": 13.453
+    },
+    {
+      "term": "KEDA",
+      "file": "03-keda.wav",
+      "durationSeconds": 0.8,
+      "wallSeconds": 14.36
+    },
+    {
+      "term": "Karpenter",
+      "file": "04-karpenter.wav",
+      "durationSeconds": 0.64,
+      "wallSeconds": 14.683
+    },
+    {
+      "term": "Kubernetes Scheduler",
+      "file": "05-kubernetes-scheduler.wav",
+      "durationSeconds": 1.36,
+      "wallSeconds": 13.018
+    },
+    {
+      "term": "GPU",
+      "file": "06-gpu.wav",
+      "durationSeconds": 1.04,
+      "wallSeconds": 15.808
+    },
+    {
+      "term": "vLLM",
+      "file": "07-vllm.wav",
+      "durationSeconds": 0.96,
+      "wallSeconds": 14.238
+    },
+    {
+      "term": "inference",
+      "file": "08-inference.wav",
+      "durationSeconds": 1.28,
+      "wallSeconds": 13.999
+    },
+    {
+      "term": "pods",
+      "file": "09-pods.wav",
+      "durationSeconds": 0.72,
+      "wallSeconds": 13.475
+    },
+    {
+      "term": "Pending state",
+      "file": "10-pending-state.wav",
+      "durationSeconds": 0.84,
+      "wallSeconds": 12.605
+    },
+    {
+      "term": "autoscaling",
+      "file": "11-autoscaling.wav",
+      "durationSeconds": 1.04,
+      "wallSeconds": 12.735
+    },
+    {
+      "term": "node capacity",
+      "file": "12-node-capacity.wav",
+      "durationSeconds": 1.4,
+      "wallSeconds": 13.505
+    },
+    {
+      "term": "KEDA is doing exactly what it should: scaling the application layer to keep up.",
+      "file": "13-keda-is-doing-exactly-what-it-should-sca.wav",
+      "durationSeconds": 4.4,
+      "wallSeconds": 20.08
+    },
+    {
+      "term": "This is where Karpenter takes over. It sees pods that can't be scheduled because the cluster is out of room.",
+      "file": "14-this-is-where-karpenter-takes-over-it-se.wav",
+      "durationSeconds": 5.08,
+      "wallSeconds": 24.245
+    },
+    {
+      "term": "Both GPU nodes are full. Kubernetes cannot place them, so they sit there, Pending.",
+      "file": "15-both-gpu-nodes-are-full-kubernetes-canno.wav",
+      "durationSeconds": 4.56,
+      "wallSeconds": 21.311
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+id: art-inference-under-load-battleground
+type: battleground
+title: Resolve a GPU Capacity Incident Under Pressure
+experience_ref: exp-inference-under-load
+outcome_refs:
+  - out-inference-under-load-01
+  - out-inference-under-load-02
+  - out-inference-under-load-03
+capability_refs:
+  - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-model-serving-autoscaling-policy-design
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
+  - cap-ai-reliability-sre-incident-response-for-inference
+purpose: >
+  Interactive, executable operation of the experience's own live-like incident under a
+  simulated SLA clock - the learner acts on a real cluster state and the system's
+  resulting metrics (queue depth, p99 latency, Pending pod count) are the evidence of
+  success, not a conversation about what they would do. Distinct from the Lab (untimed,
+  constructs the mechanisms in isolation before they're live) and the Skill Evaluator
+  (conversational reasoning about a different variant, no system to actually operate).
+content_summary: >
+  The learner is dropped into the experience's own scenario mid-incident: GPU utilization
+  at 92%, KEDA already at its configured replica maximum, queue depth climbing, and the
+  paid-tier p99 latency SLA burning down. They must diagnose the bottleneck using the
+  same dashboards Act 5 modeled, correctly attribute it to GPU compute saturation (not a
+  scheduling or network problem), apply a mitigation that is actually feasible within the
+  current GPU quota ceiling, and watch the cluster's own metrics recover before the SLA
+  breach fires.
+estimated_duration_minutes: 25
+type_specific:
+  scenario_ref: exp-inference-under-load
+  success_conditions:
+    - Root cause is attributed to GPU compute saturation before any mitigation is attempted, using at least two corroborating signals.
+    - A mitigation is applied that is actually executable within the current GPU quota ceiling (not "scale pods further" or "request a quota increase now").
+    - Queue depth and p99 latency are observed to recover within the simulated SLA window after the mitigation is applied.
+    - At least one plausible-but-wrong path (tuning KEDA/scheduler configuration, assuming a network cause) is explicitly ruled out rather than skipped.
+  environment_requirements:
+    - A sandboxed cluster state (real or simulated) exposing GPU utilization, GPU memory, KEDA replica status, and queue-depth/latency metrics matching the experience's starting_state.
+    - A mechanism for the learner to apply a real mitigation (e.g. a rate-limit policy change) and observe its measured effect.
+  time_pressure: "Simulated SLA burn-down clock matching the experience's contractual p99 latency SLA - the incident is scored worse the longer root cause takes to establish, independent of whether the eventual mitigation is correct."

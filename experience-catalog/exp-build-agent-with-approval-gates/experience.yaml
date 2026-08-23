@@ -1,0 +1,102 @@
+id: exp-build-agent-with-approval-gates
+title: Build an Agent That Completes a Multi-Step Task With Approval Gates
+target_learner_profiles: [lp-5yr-ai-platform-engineer]
+target_capabilities:
+  - cap-llmops-agent-tool-orchestration
+prerequisites: []
+scenario: >
+  The platform team wants an internal agent that can perform routine infrastructure
+  tasks (e.g. restarting a stuck deployment, scaling a node pool within a preset range)
+  on request, without an engineer manually running each command - but only if
+  irreversible actions require explicit human approval first.
+business_context: >
+  A prior ungoverned internal script that let an LLM run shell commands directly caused
+  a near-miss when a malformed response deleted the wrong resource. Leadership will not
+  approve a production agent without a defined tool surface, execution boundaries, and
+  an approval gate in front of anything irreversible.
+technical_environment:
+  platform: An LLM-backed agent runtime calling internal infrastructure tools
+  infrastructure_summary: >
+    The agent has access to a small set of internal tools (check deployment status,
+    restart a deployment, scale a node pool within bounds, page an on-call engineer) and
+    must complete a multi-step task end to end, pausing for human approval before any
+    action that cannot be trivially undone.
+  key_services: [Tool-calling LLM API, Internal infrastructure APIs, Approval/notification channel]
+starting_state: >
+  No agent runtime exists yet. The available internal tools exist as separate APIs with
+  no unified schema, no orchestration loop, and no safety boundary. A first task has been
+  specified for the agent to complete: diagnose a Pending-pod alert and either restart
+  the affected deployment (reversible) or scale the node pool (harder to reverse under
+  cost constraints).
+learner_mission: >
+  Build a tool-calling agent that can complete the specified multi-step task end to end,
+  with defined tool schemas, an orchestration loop, enforced iteration/token budgets, and
+  a human-in-the-loop approval gate before the harder-to-reverse action.
+expected_investigation:
+  - Determine which of the two candidate actions (restart vs. scale) is actually reversible and which needs an approval gate, rather than gating everything or nothing uniformly.
+  - Check what happens when the model proposes a malformed tool call or a tool call to a tool that doesn't exist, before assuming the happy path is sufficient.
+  - Establish what a reasonable iteration cap and token budget look like for this task, so a stuck agent cannot loop indefinitely or run up unbounded cost.
+  - Consider what an indirect prompt-injection vector would look like if tool outputs (e.g. pod logs) are fed back into the model's context.
+expected_decisions:
+  - decision_point: Which orchestration tier does this task actually need?
+    options_considered:
+      - "Correct: a single agent with a bounded tool set and a propose/dispose loop is sufficient for this task; justify not reaching for multi-agent orchestration or a heavyweight planning/reflection layer that the task does not need."
+      - "Plausible but wrong: default to a multi-agent or heavy planning architecture because it is the more sophisticated pattern, adding cost and failure surface the task does not require."
+    sound_reasoning: >
+      The task is a bounded, few-step diagnostic-and-remediate flow; added orchestration
+      complexity (multiple agents, a planning/reflection loop) increases token cost,
+      latency, and failure modes without improving the outcome for a task this scoped -
+      complexity should be justified by the task, not assumed by default.
+  - decision_point: Where does the human approval gate belong?
+    options_considered:
+      - "Correct: gate the node-pool scaling action (harder to reverse, cost-impacting) behind explicit human approval; allow the deployment restart (cheaply reversible) to proceed autonomously within its bounds."
+      - "Plausible but wrong: gate every tool call behind approval, which defeats the purpose of automation, or gate none of them, which repeats the risk that caused the prior near-miss."
+    sound_reasoning: >
+      Gating everything makes the agent no faster than a human running each step
+      manually, while gating nothing reintroduces the exact risk (an unreviewed
+      irreversible action) that caused the prior incident; the gate belongs specifically
+      at the point where an action is hard to undo or has a real cost/blast-radius
+      impact, not applied uniformly.
+  - decision_point: How should a malformed or failed tool call be handled?
+    options_considered:
+      - "Correct: catch the malformed/failed call, return a structured error to the model so it can retry or choose a different tool, and cap the number of retries so the run terminates rather than looping."
+      - "Plausible but wrong: let an unhandled tool-call error crash the run, or silently retry indefinitely without a cap."
+    sound_reasoning: >
+      An agent that crashes on the first malformed call is unusable in practice, but one
+      that retries without a cap can loop indefinitely and burn tokens or hit the same
+      failing action repeatedly; returning a structured error the model can reason about,
+      bounded by a retry cap, is what makes the run both resilient and safely bounded.
+build_activities:
+  - Define tool schemas for each internal action (check status, restart, scale, page on-call), with strict/constrained calling where supported.
+  - Build the orchestration loop (model proposes a tool call, orchestrator validates and executes or rejects it, result is returned to the model).
+  - Implement an iteration cap and a token budget that terminate a run before it loops or overspends.
+  - Implement the human-in-the-loop approval gate in front of the node-pool scaling action, including what the agent does while waiting for approval.
+operational_activities:
+  - Run the agent against the specified task and confirm it reaches a correct diagnosis and either completes the reversible action autonomously or correctly pauses for approval.
+  - Trigger a malformed tool call deliberately and confirm the run recovers or terminates cleanly rather than crashing or looping.
+failure_modes:
+  - Building the tool surface with over-broad permissions (e.g. a generic "run this command" tool) instead of narrowly-scoped tools, recreating the exact risk that caused the prior incident.
+  - Omitting an iteration cap or token budget, allowing a stuck agent to loop or run up unbounded cost.
+  - Placing the approval gate on the wrong action (or on all/no actions) instead of reasoning about which action is actually hard to reverse.
+  - Feeding raw tool output (e.g. logs) back into the model's context without treating it as untrusted, creating an indirect prompt-injection path.
+constraints:
+  - The agent must never execute the node-pool scaling action without an explicit human approval step, regardless of how confident the model's proposal appears.
+  - Tool scope must be least-privilege - no tool may perform an action beyond what the specified task requires.
+  - The run must terminate (success, failure, or awaiting-approval state) within a bounded number of iterations - it must never be allowed to loop indefinitely.
+trade_offs:
+  - tension: Autonomy vs. safety boundary placement
+    choice_a: Let more actions proceed autonomously to maximize the agent's usefulness and speed.
+    choice_b: Gate more actions behind human approval to minimize blast radius, at the cost of slower end-to-end task completion.
+  - tension: Retry resilience vs. bounded runtime
+    choice_a: Allow the agent to retry a failed tool call multiple times to recover from transient errors.
+    choice_b: Fail fast after a small retry cap to guarantee the run terminates quickly and predictably.
+success_conditions:
+  - The agent completes the specified multi-step task end to end for the reversible path without human intervention.
+  - The agent correctly pauses and requests human approval before the node-pool scaling action, and does not proceed until approval is given.
+  - A malformed or failed tool call does not crash the run or cause an unbounded loop.
+evidence_of_competence:
+  - The tool schema definitions and the documented reasoning for which action was placed behind the approval gate.
+  - A trace of a full agent run showing the propose/dispose loop, including one intentionally-triggered tool-call failure and its recovery.
+  - The enforced iteration cap or token budget observed triggering during testing.
+progression_archetype: foundation-build
+outcome_refs: []

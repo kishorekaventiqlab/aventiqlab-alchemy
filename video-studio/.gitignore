@@ -3,3 +3,10 @@ out/
 .remotion/
 *.mp4
 public/audio/*.wav
+public/audio/**/*.wav
+public/audio/*.manifest.json
+public/audio/**/*.manifest.json
+tools/chatterbox/.venv/
+.env
+voices/**/*.wav
+!voices/README.md

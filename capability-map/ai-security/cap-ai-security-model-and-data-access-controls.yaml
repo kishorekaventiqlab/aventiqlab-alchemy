@@ -1,0 +1,79 @@
+id: cap-ai-security-model-and-data-access-controls
+name: Model & Data Access Controls
+domain: ai-security
+description: >
+  Defending an LLM-backed system against prompt injection and unauthorized tool action,
+  enforcing least-privilege access to models and data, and meeting data-governance
+  obligations (residency, retention, right-to-erasure) for both training data and the
+  vector indexes RAG systems depend on.
+skills:
+  - id: skl-ai-security-access-controls-01
+    name: Threat model fluency
+    verb: KNOW
+    statement: >
+      Knows the LLM-specific threat model - direct and indirect prompt injection,
+      jailbreaking, data exfiltration via tool use, PII leakage, supply-chain risk in
+      third-party models/datasets - and that prompt injection specifically has no
+      complete solution, only mitigations.
+    evidence:
+      - Correctly distinguishes direct from indirect prompt injection for a given
+        scenario and names why neither is fully solved by a filter alone.
+  - id: skl-ai-security-access-controls-02
+    name: Least-privilege tool and data-access design
+    verb: DESIGN
+    statement: >
+      Can design tool permissions and data access on a least-privilege basis, treating
+      the permission boundary - not a prompt-level instruction - as the real security
+      control.
+    evidence:
+      - Authored an access design in which a tool or data-access scope was narrowed
+        specifically to block a stated attack path, with the tradeoff against
+        convenience documented.
+  - id: skl-ai-security-access-controls-03
+    name: Governance control implementation
+    verb: BUILD
+    statement: >
+      Can implement data-governance controls for an LLM system - residency, retention,
+      and right-to-erasure - including erasure from a vector index, not just the
+      source-of-record database.
+    evidence:
+      - Shipped a deletion or retention control verified to remove a record from both
+        the source-of-record store and its corresponding vector-index entries.
+  - id: skl-ai-security-access-controls-04
+    name: Injection and exfiltration incident diagnosis
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose whether an anomalous LLM output or action resulted from a prompt
+      injection attempt, a jailbreak, or a legitimate but unexpected model behavior.
+    evidence:
+      - Root-caused an anomalous agent action or output to one of injection, jailbreak,
+        or benign model behavior, with supporting trace evidence.
+  - id: skl-ai-security-access-controls-05
+    name: Compliance posture communication
+    verb: EXPLAIN
+    statement: >
+      Can explain an LLM system's data-governance and access-control posture to a
+      non-security stakeholder (e.g. legal, a compliance reviewer) in terms they can
+      act on.
+    evidence:
+      - Delivered a compliance or security review summary that a non-specialist
+        stakeholder used to sign off on or block a launch.
+common_tools:
+  - Prompt-injection test suites / red-teaming tools
+  - Secrets and credential isolation (e.g. sandboxed tool execution, scoped API keys)
+  - Data-classification and retention tooling
+  - Vector-index deletion/erasure tooling
+beginner_indicators:
+  - Relies on a prompt-level instruction ("ignore malicious instructions") as the only
+    defense against prompt injection.
+intermediate_indicators:
+  - Implements least-privilege tool scopes and a working right-to-erasure control that
+    reaches the vector index, not just the source database.
+advanced_indicators:
+  - Diagnoses a live injection or exfiltration attempt from traces and designs an access
+    boundary that closes the specific path used.
+expert_architect_indicators:
+  - Sets org-wide standards for AI system access control and data governance applied
+    across multiple LLM-backed features. AI security is an emergent domain, so per the
+    experience-capability matrix even senior bands climb it more slowly than mature
+    domains.

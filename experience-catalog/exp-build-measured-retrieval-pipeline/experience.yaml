@@ -1,0 +1,98 @@
+id: exp-build-measured-retrieval-pipeline
+title: Build a Retrieval Pipeline with a Measured Baseline
+target_learner_profiles: [lp-5yr-ai-platform-engineer]
+target_capabilities:
+  - cap-llmops-retrieval-pipeline-construction
+prerequisites: []
+scenario: >
+  A product team wants an internal documentation Q&A assistant built on top of a RAG
+  pipeline, and has asked you to build the retrieval half - ingestion, chunking,
+  embedding, and retrieval - before any generation work begins.
+business_context: >
+  Nothing exists yet: no assistant, no corpus index, no quality baseline. Leadership has
+  seen RAG demos elsewhere fail quietly (confidently wrong answers) and wants retrieval
+  quality measured and documented before generation is layered on top, not assumed.
+technical_environment:
+  platform: A new RAG retrieval pipeline over an internal document corpus
+  infrastructure_summary: >
+    A mixed corpus of PDFs, HTML pages, and Markdown docs needs to be parsed, chunked,
+    embedded, and indexed; retrieval must support metadata-based access control from day
+    one, since some documents are team-restricted.
+  key_services: [Document store, Embedding service, Vector database, Lexical search index]
+starting_state: >
+  The raw document corpus exists in a shared drive with inconsistent formatting (some
+  PDFs are scanned images, some HTML pages are template-heavy, some Markdown files mix
+  prose and code blocks). No chunking, indexing, or evaluation exists yet. A small set of
+  example questions with known correct source passages has been collected for evaluation.
+learner_mission: >
+  Build an ingestion-to-retrieval pipeline for the corpus, choose and justify a chunking
+  strategy and an embedding/vector-store combination with a written ADR, and produce a
+  documented recall@k baseline against the labelled query set before any generation work
+  begins.
+expected_investigation:
+  - Sample the corpus to identify formatting hazards (scanned PDFs needing OCR, boilerplate-heavy HTML, code blocks inside Markdown) before picking a single parsing approach for all of it.
+  - Measure at least two chunking strategies against the labelled query set rather than picking one by convention.
+  - Check what happens to retrieval quality and index cost when metadata-based access control is applied at query time, not just at ingest time.
+  - Compare a lexical (e.g. BM25) baseline against a dense embedding retriever on the actual corpus rather than assuming dense retrieval wins by default.
+expected_decisions:
+  - decision_point: Which chunking strategy to adopt?
+    options_considered:
+      - "Correct: measure multiple chunking strategies (e.g. fixed-size vs. recursive/atomic) against the labelled query set on axes beyond recall alone - including re-embedding cost on document edits and whether tables/code blocks survive intact - then adopt the one with the best overall tradeoff."
+      - "Plausible but wrong: adopt the simplest fixed-size chunking strategy because it is the fastest to implement, without measuring it against an alternative on this corpus."
+    sound_reasoning: >
+      Recall alone can make a poor chunking strategy look adequate; a chunker that
+      scores well on recall but truncates every table or forces a full-document
+      re-embed on a one-line edit creates operational and quality problems that only
+      show up after generation is layered on top and users start asking about tables or
+      editing documents.
+  - decision_point: Which embedding model and vector store to select?
+    options_considered:
+      - "Correct: measure retrieval quality on this corpus specifically, and account for operational behavior under the metadata-based ACL filter (e.g. an approximate index degrading badly under a highly selective filter) before selecting."
+      - "Plausible but wrong: pick the top-ranked embedding model from a public leaderboard without validating it against this corpus's actual query patterns."
+    sound_reasoning: >
+      A leaderboard ranking reflects benchmark corpora, not this one; a model that wins
+      generically can lose to a simpler lexical baseline on a corpus where queries and
+      answers share vocabulary, and an index that performs well unfiltered can degrade
+      sharply once a restrictive ACL filter is applied at query time.
+  - decision_point: Should retrieval be dense-only, lexical-only, or hybrid?
+    options_considered:
+      - "Correct: measure a lexical baseline and a dense retriever separately on the labelled query set before deciding whether fusing them is worth the added latency and complexity."
+      - "Plausible but wrong: assume a hybrid retriever fusing lexical and dense results is always better and build the fusion layer without first measuring whether either retriever alone was already sufficient."
+    sound_reasoning: >
+      Fusion has both a latency and complexity cost, and its benefit depends on how far
+      apart the two retrievers' results actually are on this corpus - measuring each
+      one independently first prevents building an unnecessary fusion layer or missing
+      a case where dense retrieval alone underperforms an available lexical baseline.
+build_activities:
+  - Build a document ingestion and chunking pipeline that preserves a traceable link (offset/span) from each chunk back to its source document.
+  - Attach access-control metadata to chunks at ingestion time.
+  - Stand up a vector index and a lexical (e.g. BM25) index over the corpus.
+  - Build a retrieval service that queries both indexes and returns results within an enforced latency budget.
+operational_activities:
+  - Run the retrieval pipeline against the labelled query set and record recall@k (or an equivalent metric) as the documented baseline.
+  - Re-run the baseline after a chunking or embedding-model change to confirm whether it improved or regressed retrieval quality.
+failure_modes:
+  - Selecting an embedding model or chunking strategy based on a public benchmark or convention instead of measuring it on this corpus, producing a pipeline that looks reasonable but underperforms in practice.
+  - Building the retrieval pipeline without an access-control model from the start, requiring a disruptive retrofit once team-restricted documents are discovered.
+  - Skipping the recall@k baseline and moving straight to generation, leaving no way to later prove whether a regression is a retrieval problem or a generation problem.
+constraints:
+  - A subset of documents are team-restricted and must never be retrievable outside their owning team, even under approximate (non-exact) index search.
+  - The corpus includes scanned PDFs that plain text extraction will silently fail to read.
+  - The labelled query set is small; conclusions must be drawn carefully rather than over-generalized from a handful of examples.
+trade_offs:
+  - tension: Retrieval quality vs. chunking granularity
+    choice_a: Smaller, more atomic chunks that improve precision but risk losing surrounding context needed to answer multi-part questions.
+    choice_b: Larger chunks that preserve more context but dilute relevance signal and increase token cost per retrieved result.
+  - tension: Dense retrieval sophistication vs. operability under access control
+    choice_a: A dense approximate index that retrieves well unfiltered but may degrade unpredictably under a highly selective ACL filter.
+    choice_b: A simpler lexical index that is easier to reason about under filtering but may miss semantically related content that shares no vocabulary with the query.
+success_conditions:
+  - A working ingestion-to-retrieval pipeline exists, with chunks traceable back to source documents and access-control metadata enforced at query time.
+  - A written ADR documents the chosen chunking strategy and embedding/vector-store combination, backed by a measurement on this corpus.
+  - A recall@k (or equivalent) baseline is documented against the labelled query set, ready for a future generation-layer or regression comparison.
+evidence_of_competence:
+  - The ADR comparing chunking strategies and embedding/vector-store options with the measurements that justified the final choice.
+  - The documented recall@k baseline and the query set it was measured against.
+  - A demonstration that a restricted document is never returned to a query from outside its owning team.
+progression_archetype: foundation-build
+outcome_refs: []

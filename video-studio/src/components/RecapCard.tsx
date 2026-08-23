@@ -24,9 +24,9 @@ export const RecapCard: React.FC<{ items: string[]; durationInFrames: number }> 
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 16,
+          fontSize: 17,
           letterSpacing: 3,
-          color: theme.accent,
+          color: theme.accentStrong,
           fontWeight: 700,
         }}
       >
@@ -52,11 +52,12 @@ export const RecapCard: React.FC<{ items: string[]; durationInFrames: number }> 
               opacity,
               transform: `translateX(${x}px)`,
               fontFamily: theme.fontFamily,
-              fontSize: 28,
+              fontSize: 29,
+              fontWeight: 500,
               color: theme.text,
             }}
           >
-            <span style={{ color: theme.accent, fontWeight: 700 }}>{i + 1}.</span>
+            <span style={{ color: theme.accentStrong, fontWeight: 700 }}>{i + 1}.</span>
             <span>{item}</span>
           </div>
         );

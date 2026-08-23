@@ -11,8 +11,9 @@ capability_refs:
   - cap-ai-infrastructure-cluster-and-node-pool-provisioning
 purpose: >
   Untimed BUILD practice: construct the actual KEDA scaling policy, request-shedding
-  config, and an overflow-tier IaC sketch with no time pressure - this is
-  where they are first built correctly.
+  config, and an overflow-tier IaC sketch with no time pressure - this is where they are
+  first built correctly, before the Battleground asks the learner to operate a system
+  where these same mechanisms are already live and under pressure.
 content_summary: >
   A starter repo with a partially configured KEDA ScaledObject, an inference gateway
   missing its rate-limiting/shedding configuration, and a stub Terraform module for a

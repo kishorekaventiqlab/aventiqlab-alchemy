@@ -51,11 +51,11 @@ domains:
   - domain: mlops
     seq: 12
     status: authored
-    capability_ids: [cap-mlops-pipeline-orchestration]
+    capability_ids: [cap-mlops-pipeline-orchestration, cap-mlops-fine-tuning-and-adapter-lifecycle]
   - domain: llmops
     seq: 13
     status: authored
-    capability_ids: [cap-llmops-prompt-and-eval-pipelines]
+    capability_ids: [cap-llmops-prompt-and-eval-pipelines, cap-llmops-retrieval-pipeline-construction, cap-llmops-agent-tool-orchestration]
   - domain: ai-platform-engineering
     seq: 14
     status: stub
@@ -70,8 +70,8 @@ domains:
     capability_ids: [cap-ai-reliability-sre-incident-response-for-inference]
   - domain: ai-security
     seq: 17
-    status: stub
-    planned_capability_ids: [cap-ai-security-model-and-data-access-controls]
+    status: authored
+    capability_ids: [cap-ai-security-model-and-data-access-controls]
   - domain: capacity-engineering
     seq: 18
     status: stub

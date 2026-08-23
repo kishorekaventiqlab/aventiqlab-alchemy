@@ -41,15 +41,15 @@ Every `*_ref` / `*_refs` edge in the shipped Phase 0 content, and what it must r
 |---|---|---|
 | 5 learner profiles | `prerequisites[]` | An existing `lp-*` id (chain: staff-principal → 10yr → 7yr → 5yr → 3yr → none) |
 | 5 learner profiles | every `capability_refs[]` in the 5 expectation lists | An existing `cap-*` id under `/capability-map/` |
-| 11 capabilities | `domain` | One of the 21 enum values in `vocab.schema.json` |
-| 11 capabilities | `skills[].id` | Unique `skl-*` id within that capability file |
-| `experience-capability-matrix.yaml` | `capability_ref` (×11) | An existing `cap-*` id |
+| 15 capabilities | `domain` | One of the 21 enum values in `vocab.schema.json` |
+| 15 capabilities | `skills[].id` | Unique `skl-*` id within that capability file |
+| `experience-capability-matrix.yaml` | `capability_ref` (×15) | An existing `cap-*` id |
 | `curriculum-journeys.yaml` | `experience_ids[]` (×21 domains) | An existing `exp-*` id, or `[]` |
-| 15 experiences | `target_learner_profiles[]` | An existing `lp-*` id |
-| 15 experiences | `target_capabilities[]` | An existing `cap-*` id (never a stub domain's `planned_capability_ids`) |
-| 15 experiences | `prerequisites[]` | An existing `exp-*` id |
+| 19 experiences | `target_learner_profiles[]` | An existing `lp-*` id |
+| 19 experiences | `target_capabilities[]` | An existing `cap-*` id (never a stub domain's `planned_capability_ids`) |
+| 19 experiences | `prerequisites[]` | An existing `exp-*` id |
 | `exp-inference-under-load` | `outcome_refs[]` (3) | An existing `out-*` id under its own `outcomes/` |
-| 14 blueprint experiences | `outcome_refs` | `[]` (intentionally empty — not yet fully specified) |
+| 17 blueprint experiences | `outcome_refs` | `[]` (intentionally empty — not yet fully specified) |
 | 3 outcomes | `experience_ref` | `exp-inference-under-load` |
 | 3 outcomes | `learner_profile_refs[]` | An existing `lp-*` id |
 | 3 outcomes | `related_capabilities[]` | An existing `cap-*` id |

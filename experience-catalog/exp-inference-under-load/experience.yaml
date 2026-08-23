@@ -122,3 +122,74 @@ outcome_refs:
   - out-inference-under-load-01
   - out-inference-under-load-02
   - out-inference-under-load-03
+learner_problem: >
+  Why pod autoscaling is not enough for GPU workloads - and what actually has to happen
+  for a scaled-up application to get the compute it was promised.
+core_concept: >
+  Pod scaling and infrastructure scaling solve two different problems. KEDA answers "how
+  many application replicas do I need?" The Kubernetes scheduler answers "where can these
+  pods actually run?" Karpenter answers "do I have enough compute capacity to run them?"
+  A learner who conflates these three will misdiagnose "autoscaling is broken" when the
+  real state is "autoscaling worked correctly, and the layer above or below it didn't."
+mental_model:
+  - Traffic increases.
+  - KEDA increases pod replicas to handle the added application-layer demand.
+  - More pods now need to be scheduled onto GPU nodes.
+  - The Kubernetes scheduler checks whether any node has enough free GPU capacity.
+  - If yes, the new pods schedule and start serving traffic.
+  - If no, the new pods remain Pending - created, but not running anywhere.
+  - Karpenter observes unschedulable (Pending) demand and provisions suitable GPU capacity.
+  - A new GPU node joins the cluster.
+  - The previously Pending pods are scheduled onto the new node and start running.
+  - Queue depth and p99 latency recover as the newly-running pods pick up work.
+system_architecture:
+  - Users send requests.
+  - An ALB / ingress receives traffic and routes it into the cluster.
+  - A Kubernetes Service load-balances across the inference Deployment's pods.
+  - Inference pods run a vLLM / Triton model-serving process.
+  - Each pod's model-serving process runs on a GPU.
+  - KEDA watches an external metric (e.g. queue depth) and adjusts the Deployment's desired replica count.
+  - The Kubernetes scheduler places each new pod onto a node with sufficient free GPU capacity, or leaves it Pending if none exists.
+  - Karpenter watches for Pending pods it can't schedule and provisions new GPU nodes sized to fit them.
+prerequisite_knowledge:
+  - What a Kubernetes Deployment, Pod, and Node are, at a basic level.
+  - That a GPU is a finite, non-shareable-by-default resource a pod must be scheduled onto, not just a CPU/memory-like number.
+  - Basic familiarity with the idea of an autoscaler reacting to a metric (from exp-build-autoscaling-inference-platform).
+learning_sequence:
+  - stage: Architecture
+    focus: What exists in the system and who talks to whom - Users, ALB, Service, Pods, GPU, KEDA, Scheduler, Karpenter - before any failure is introduced.
+  - stage: Healthy operation
+    focus: The system running normally under moderate, then rising, traffic while KEDA scales pod replicas - establishing that pod-level scaling alone looks sufficient at first.
+  - stage: Failure
+    focus: KEDA continues creating replicas correctly, but new pods start showing as Pending because every GPU node is already full - the moment pod scaling and infrastructure capacity visibly diverge.
+  - stage: Node-level scaling
+    focus: Karpenter provisions a new GPU node in response to unschedulable demand; the node joins the cluster and the Pending pods transition to Running.
+  - stage: Expert reasoning
+    focus: Reusing the existing incident-diagnosis narration, now motivated by a mental model the learner already has, on a comparable-but-different scenario.
+  - stage: Recap
+    focus: A simple three-part summary - KEDA (pod demand), Karpenter (node capacity), Scheduler (placement) - restating the core concept as the final takeaway.
+key_takeaways:
+  - Pod scaling and infrastructure scaling solve different problems - one is not a substitute for the other.
+  - A pod stuck Pending is not evidence that autoscaling is broken; it's evidence that capacity, not replica count, is the constraint.
+  - KEDA never provisions nodes; Karpenter never creates replicas - each only acts within its own layer.
+  - Checking GPU utilization, KEDA's replica ceiling, and node capacity are three separate checks because they answer three separate questions.
+misconceptions:
+  - misconception: >-
+      "Autoscaling isn't working" is a single, undifferentiated failure.
+    correction: >
+      It's actually a chain with (at least) three distinct failure points - pod-level
+      scaling misconfigured, pod-level scaling correctly maxed out, or node-level capacity
+      exhausted - each with a different fix.
+  - misconception: If KEDA has room to scale further (hasn't hit maxReplicaCount), that guarantees new pods will run.
+    correction: >
+      KEDA creating a pod only requests scheduling - the Kubernetes scheduler still needs
+      a node with enough free GPU capacity, which KEDA has no visibility into or control over.
+  - misconception: Karpenter and KEDA do the same job at different layers, so scaling one is basically equivalent to scaling the other.
+    correction: >
+      They answer different questions entirely - KEDA decides how many replicas the
+      application needs; Karpenter decides whether the cluster has the compute to run
+      them. Neither can substitute for the other.
+evidence_of_understanding:
+  - Can state, unprompted, why a Pending pod is not the same failure as "autoscaling is broken."
+  - Can correctly attribute a described symptom to KEDA, the scheduler, or Karpenter as the responsible layer.
+  - Can explain the mental-model chain (traffic -> KEDA -> scheduler -> capacity check -> Karpenter -> recovery) without prompting.

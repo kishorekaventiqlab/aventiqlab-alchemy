@@ -1,0 +1,9 @@
+# chatterbox-tts's dependency resemble-perth (audio watermarking) still
+# imports pkg_resources, which setuptools>=81 no longer bundles by default -
+# without this pin, `import chatterbox` succeeds but
+# ChatterboxTTS.from_pretrained() crashes with
+# "TypeError: 'NoneType' object is not callable" the first time it tries to
+# construct the watermarker. Pin until resemble-perth drops pkg_resources.
+setuptools<81
+chatterbox-tts
+soundfile

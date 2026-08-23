@@ -14,7 +14,8 @@ purpose: >
   Builds the pre-requisite KNOW/UNDERSTAND foundation (GPU signal interpretation,
   autoscaling trigger signals, capacity ceilings, batching tradeoffs) as pure reference
   facts. It does not narrate a scenario or model reasoning - that is the Video's job -
-  and it carries no time pressure or graded execution - that is the Lab's job.
+  and it carries no time pressure or graded execution - that is the Lab's and
+  Battleground's job.
 content_summary: >
   A reference document covering: GPU utilization vs. memory utilization vs. SM
   occupancy; how KEDA and Cluster Autoscaler each react to different signals; what a GPU

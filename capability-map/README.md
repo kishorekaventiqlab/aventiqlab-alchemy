@@ -17,4 +17,4 @@ Each capability also carries four holistic **tier indicators** (`beginner_indica
 
 ## Status
 
-Phase 0 authors **11 of 21 domains** in full; the remaining 10 are reserved as stubs in `domain-index.yaml` with `planned_capability_ids` (not yet real, unreferenceable objects). This matches the instruction to build a strong, extensible foundation rather than overpopulate the taxonomy before it's been proven against real experiences. See `/docs/author-guide.md` for how to author a new capability, including turning a stub into a real one.
+Phase 0 authored **11 of 21 domains** in full at initial ship; **12 of 21** are authored as of the `ai-security` domain's first capability. The remaining 9 are reserved as stubs in `domain-index.yaml` with `planned_capability_ids` (not yet real, unreferenceable objects). This matches the instruction to build a strong, extensible foundation rather than overpopulate the taxonomy before it's been proven against real experiences. See `/docs/author-guide.md` for how to author a new capability, including turning a stub into a real one.

@@ -1,0 +1,74 @@
+id: cap-llmops-retrieval-pipeline-construction
+name: Retrieval Pipeline Construction
+domain: llmops
+description: >
+  Constructing a RAG retrieval pipeline from raw documents to a measured baseline -
+  ingestion and chunking strategy, embedding and vector store selection, and hybrid
+  retrieval - as a build capability distinct from operating or diagnosing one that
+  already exists.
+skills:
+  - id: skl-llmops-retrieval-construction-01
+    name: Chunking strategy selection
+    verb: KNOW
+    statement: >
+      Knows the tradeoffs between chunking strategies (fixed-size, recursive,
+      semantic/atomic) and why recall alone is an incomplete metric for choosing one.
+    evidence:
+      - Names at least one axis besides recall (e.g. re-embedding cost on document
+        edits, truncation of tables/code blocks) that changed a chunking decision.
+  - id: skl-llmops-retrieval-construction-02
+    name: Ingestion pipeline construction
+    verb: BUILD
+    statement: >
+      Can build a document ingestion and chunking pipeline that preserves an
+      offset/span contract back to the source document, with ACL metadata attached at
+      ingest time.
+    evidence:
+      - Shipped an ingestion pipeline whose chunks can be traced back to a source
+        document span and carry access-control metadata.
+  - id: skl-llmops-retrieval-construction-03
+    name: Embedding and vector store selection
+    verb: DESIGN
+    statement: >
+      Can select an embedding model and vector store for a corpus based on measured
+      retrieval quality and operational constraints (index size, filtering behavior
+      under ACLs), not a leaderboard ranking alone.
+    evidence:
+      - Authored an ADR selecting an embedding model/vector store combination backed by
+        a retrieval-quality measurement on the target corpus.
+  - id: skl-llmops-retrieval-construction-04
+    name: Hybrid retrieval and reranking construction
+    verb: BUILD
+    statement: >
+      Can build a hybrid retrieval pipeline that fuses lexical and dense retrieval
+      results and applies reranking under an enforced latency budget.
+    evidence:
+      - Shipped a retrieval pipeline with a measured latency budget per stage
+        (retrieval, fusion, rerank) and documented behavior when the budget is exceeded.
+  - id: skl-llmops-retrieval-construction-05
+    name: Retrieval quality baselining
+    verb: PROVE
+    statement: >
+      Can produce a documented recall@k (or equivalent) baseline against a labelled
+      query set that later regressions can be measured against.
+    evidence:
+      - Published a baseline retrieval-quality report other engineers cite when
+        evaluating a later change to the pipeline.
+common_tools:
+  - Document parsers (PDF/HTML/Markdown extraction)
+  - Embedding model APIs / local encoders (e.g. ONNX)
+  - Vector databases (e.g. pgvector, Pinecone)
+  - Lexical search (e.g. BM25) and rank-fusion (RRF)
+  - Cross-encoder reranking models
+beginner_indicators:
+  - Uses a default chunking size and embedding model without measuring retrieval
+    quality on the actual corpus.
+intermediate_indicators:
+  - Builds an ingestion and retrieval pipeline end to end and can explain why the
+    chosen chunking strategy was picked over alternatives.
+advanced_indicators:
+  - Selects embedding model and vector store based on a measured baseline specific to
+    the corpus, and builds hybrid retrieval with an enforced latency budget.
+expert_architect_indicators:
+  - Sets retrieval-pipeline construction standards (chunking, indexing, fusion
+    strategy) applied across multiple RAG-backed features.

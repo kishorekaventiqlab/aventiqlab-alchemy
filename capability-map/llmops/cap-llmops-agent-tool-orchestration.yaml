@@ -1,0 +1,78 @@
+id: cap-llmops-agent-tool-orchestration
+name: Agent & Tool-Use Orchestration
+domain: llmops
+description: >
+  Building an agent runtime that lets an LLM call tools to complete a multi-step task -
+  tool/function-calling contracts, the propose/dispose orchestration loop, and the
+  safety boundary (approval gates, least-privilege tool scope) needed before an agent
+  is allowed to take irreversible action.
+skills:
+  - id: skl-llmops-agent-orchestration-01
+    name: Tool-calling tier selection
+    verb: UNDERSTAND
+    statement: >
+      Understands the tiers from a single tool call to a multi-agent system, and can
+      justify why a given task needs (or doesn't need) planning, reflection, or
+      multiple agents rather than defaulting to the most complex tier.
+    evidence:
+      - Justified choosing a simpler orchestration tier over a more complex one for a
+        stated task, citing cost or reliability rather than convention.
+  - id: skl-llmops-agent-orchestration-02
+    name: Tool-calling service construction
+    verb: BUILD
+    statement: >
+      Can build a tool-calling service with defined tool schemas, an orchestration loop
+      (model proposes, orchestrator disposes), and retry/error handling for failed or
+      malformed tool calls.
+    evidence:
+      - Shipped a tool-calling service that completes a multi-step task and handles at
+        least one malformed-tool-call or tool-error case without crashing the run.
+  - id: skl-llmops-agent-orchestration-03
+    name: Agent run-state management
+    verb: BUILD
+    statement: >
+      Can implement iteration caps, token budgets, and termination conditions so an
+      agent run cannot loop or spend unboundedly.
+    evidence:
+      - Shipped an agent runtime with an enforced iteration cap or token budget that
+        was observed to trigger and terminate a run during testing.
+  - id: skl-llmops-agent-orchestration-04
+    name: Least-privilege tool and approval-gate design
+    verb: DESIGN
+    statement: >
+      Can design tool scopes on a least-privilege basis and place human-in-the-loop
+      approval gates in front of irreversible actions, treating prompt injection as an
+      unsolved risk rather than something a filter fully closes.
+    evidence:
+      - Authored a tool-permission design in which at least one irreversible action
+        requires explicit approval before execution, with the reasoning for that
+        boundary documented.
+  - id: skl-llmops-agent-orchestration-05
+    name: Agent failure diagnosis
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose why an agent run failed to complete a task - a tool-schema mismatch,
+      a runaway loop, an exhausted budget, or a bad plan - from a trace rather than
+      re-running and guessing.
+    evidence:
+      - Root-caused a failed or stalled agent run using its trace, with the failing
+        step identified.
+common_tools:
+  - Function/tool-calling model APIs
+  - MCP (Model Context Protocol)
+  - Agent orchestration frameworks (e.g. LangGraph) as a comparison point, not a default
+  - Sandboxing / egress-control mechanisms
+beginner_indicators:
+  - Wires a single tool call into a prompt without an orchestration loop, retry
+    handling, or a termination condition.
+intermediate_indicators:
+  - Builds a working tool-calling service that completes a multi-step task and handles
+    common tool-call errors.
+advanced_indicators:
+  - Adds iteration caps, token budgets, and least-privilege tool scoping; places
+    approval gates in front of irreversible actions.
+expert_architect_indicators:
+  - Sets org-wide standards for agent tool permissions and approval-gate placement
+    across multiple agent-backed features. Agent orchestration is an emergent
+    capability, so per the experience-capability matrix even senior bands climb it more
+    slowly than mature domains like Kubernetes.

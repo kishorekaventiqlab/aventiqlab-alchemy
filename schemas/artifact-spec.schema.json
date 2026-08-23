@@ -113,6 +113,34 @@
           }
         }
       }
+    },
+    {
+      "if": { "properties": { "type": { "const": "battleground" } } },
+      "then": {
+        "properties": {
+          "type_specific": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scenario_ref", "success_conditions", "environment_requirements", "time_pressure"],
+            "properties": {
+              "scenario_ref": {
+                "type": "string",
+                "description": "Identifies the incident/scenario the learner operates within - e.g. the experience's own id, or a named variant of it."
+              },
+              "success_conditions": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Observable system-state outcomes that prove success (e.g. 'Pending pods reach 0', 'p99 latency returns under SLA') - not a task checklist like source_code_lab's tasks[]."
+              },
+              "environment_requirements": { "type": "array", "items": { "type": "string" } },
+              "time_pressure": {
+                "type": "string",
+                "description": "How time pressure is modeled for this scenario (e.g. 'SLA breach in 15 simulated minutes', 'none - self-paced but scored on decision order'). Battleground scenarios are operated under pressure by definition, unlike the untimed source_code_lab; state 'none' explicitly rather than omitting this if a given instance has no clock."
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }

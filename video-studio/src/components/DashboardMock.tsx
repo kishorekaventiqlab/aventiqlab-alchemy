@@ -2,6 +2,7 @@ import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
 import { theme } from './theme';
 import { LineChart } from './LineChart';
+import { CameraFocus } from './CameraFocus';
 import type { DashboardPanel } from '../data/inferenceUnderLoadScript';
 
 export const DashboardMock: React.FC<{
@@ -9,7 +10,23 @@ export const DashboardMock: React.FC<{
   panels: DashboardPanel[];
   alert?: string;
   durationInFrames: number;
-}> = ({ serviceName, panels, alert, durationInFrames }) => {
+  // Optional camera push-in onto one panel by index, e.g. to match a script
+  // beat like "Dashboard zooms into the GPU utilization panel." Omit for a
+  // flat, non-zoomed dashboard shot.
+  focusPanelIndex?: number;
+  focusScale?: number;
+  focusStartFrame?: number;
+  focusHoldFrame?: number;
+}> = ({
+  serviceName,
+  panels,
+  alert,
+  durationInFrames,
+  focusPanelIndex,
+  focusScale = 1.22,
+  focusStartFrame = 20,
+  focusHoldFrame = 55,
+}) => {
   const frame = useCurrentFrame();
   const chartProgress = interpolate(
     frame,
@@ -22,11 +39,23 @@ export const DashboardMock: React.FC<{
   });
 
   const panelWidth = 520;
-  const panelHeight = 160;
+  const panelHeight = 170;
   const chartWidth = panelWidth - 40;
-  const chartHeight = 90;
+  const chartHeight = 96;
+  const panelGap = 20;
 
-  return (
+  // Focal point (as a 0-1 fraction of the full frame) of the target panel's
+  // center, so CameraFocus can push in on exactly that panel regardless of
+  // its position in the row.
+  const focal =
+    focusPanelIndex !== undefined
+      ? {
+          x: (60 + focusPanelIndex * (panelWidth + panelGap) + panelWidth / 2) / 1920,
+          y: (60 + 56 + panelHeight / 2) / 1080,
+        }
+      : { x: 0.5, y: 0.5 };
+
+  const content = (
     <div
       style={{
         position: 'absolute',
@@ -35,7 +64,7 @@ export const DashboardMock: React.FC<{
         right: 60,
         display: 'flex',
         flexDirection: 'column',
-        gap: 18,
+        gap: 20,
       }}
     >
       <div
@@ -48,8 +77,9 @@ export const DashboardMock: React.FC<{
         <div
           style={{
             fontFamily: theme.monoFontFamily,
-            fontSize: 20,
+            fontSize: 22,
             color: theme.textDim,
+            fontWeight: 600,
           }}
         >
           grafana / {serviceName}
@@ -58,11 +88,11 @@ export const DashboardMock: React.FC<{
           <div
             style={{
               fontFamily: theme.fontFamily,
-              fontSize: 18,
+              fontSize: 19,
               fontWeight: 700,
-              color: '#0b1220',
-              background: '#f97066',
-              padding: '8px 18px',
+              color: '#ffffff',
+              background: theme.danger,
+              padding: '9px 20px',
               borderRadius: 999,
               opacity: alertOpacity,
             }}
@@ -74,23 +104,29 @@ export const DashboardMock: React.FC<{
       <div
         style={{
           display: 'flex',
-          gap: 20,
+          gap: panelGap,
           flexWrap: 'wrap',
         }}
       >
-        {panels.map((panel) => (
+        {panels.map((panel, i) => (
           <div
             key={panel.label}
             style={{
               width: panelWidth,
               height: panelHeight,
               background: theme.panelBg,
-              border: `1px solid ${theme.panelBorder}`,
-              borderRadius: 12,
-              padding: 20,
+              border: `1px solid ${
+                focusPanelIndex === i ? theme.accent : theme.panelBorder
+              }`,
+              boxShadow:
+                focusPanelIndex === i
+                  ? '0 8px 24px rgba(29, 111, 214, 0.18)'
+                  : '0 2px 8px rgba(16, 24, 40, 0.06)',
+              borderRadius: 14,
+              padding: 22,
               display: 'flex',
               flexDirection: 'column',
-              gap: 8,
+              gap: 10,
             }}
           >
             <div
@@ -98,8 +134,9 @@ export const DashboardMock: React.FC<{
                 display: 'flex',
                 justifyContent: 'space-between',
                 fontFamily: theme.fontFamily,
-                fontSize: 16,
+                fontSize: 19,
                 color: theme.textDim,
+                fontWeight: 600,
               }}
             >
               <span>{panel.label}</span>
@@ -120,5 +157,21 @@ export const DashboardMock: React.FC<{
         ))}
       </div>
     </div>
+  );
+
+  if (focusPanelIndex === undefined) {
+    return content;
+  }
+
+  return (
+    <CameraFocus
+      focalX={focal.x}
+      focalY={focal.y}
+      targetScale={focusScale}
+      startFrame={focusStartFrame}
+      holdFrame={focusHoldFrame}
+    >
+      {content}
+    </CameraFocus>
   );
 };

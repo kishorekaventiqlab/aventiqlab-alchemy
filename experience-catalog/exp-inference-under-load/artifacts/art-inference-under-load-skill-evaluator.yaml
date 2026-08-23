@@ -16,9 +16,15 @@ capability_refs:
 purpose: >
   Open-ended evaluation of reasoning quality, transfer to a novel variant, and
   communication across all 3 outcomes - assesses judgment under variation, not
-  recall (Quiz) or hands-on execution (Lab). This is the source-of-truth
-  structure a future ASTRA conversation would eventually execute; no
-  conversational AI is implemented here.
+  recall (Quiz) or hands-on execution (Battleground/Lab). This is the
+  source-of-truth structure a future ASTRA conversation would eventually
+  execute; no conversational AI is implemented here.
+content_summary: >
+  A conversational evaluation of a GPU-saturation incident variant, different
+  from both the video's comparable-but-different scenario and the
+  Battleground's own incident - probing whether the learner can explain why
+  pod-level and node-level scaling solve different problems, and defend a
+  mitigation tradeoff aloud rather than just execute one.
 estimated_duration_minutes: 20
 type_specific:
   evaluator_ref: se-inference-under-load

@@ -1,0 +1,57 @@
+# Starter Helm values for the sentiment-analysis inference service.
+# This is the existing CPU-service chart's values file, not yet adapted for the
+# GPU-scheduled deployment described in the experience scenario.
+#
+# The shared GPU node pool ("gpu-inference") is tainted:
+#   kubectl describe node -l node-pool=gpu-inference | grep Taints
+#   Taints: node-pool=gpu-inference:NoSchedule
+#
+# Confirm this yourself before filling in the TODOs below - don't assume the value
+# shown in this comment matches your actual sandbox cluster.
+
+replicaCount: 1
+
+image:
+  repository: internal-registry/sentiment-analysis-model
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# TODO 1: This chart currently has no nodeSelector at all. Add one that targets the
+# shared GPU node pool. Check the node pool's actual label first:
+#   kubectl get nodes -l node-pool=gpu-inference --show-labels
+nodeSelector: {}
+
+# TODO 2: This chart currently has no tolerations, so it cannot schedule onto the
+# tainted GPU node pool at all. Add a toleration matching the taint you confirmed
+# above with `kubectl describe node`.
+tolerations: []
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+    # TODO 3: This chart currently requests no GPU at all - it was copied from a
+    # CPU-only service. Add a GPU resource limit. The container image for this model
+    # requires exactly 1 GPU.
+
+# TODO 4: No readiness probe is configured yet. The inference server exposes a real
+# health endpoint at GET /health on the service port, which returns 200 only once the
+# model has finished loading into memory (not just once the process has started).
+# An httpGet probe pointed at the wrong path (or missing entirely) will let Kubernetes
+# mark the pod Ready before the model can actually serve a request - configure it
+# correctly, with a reasonable initialDelaySeconds given model load time.
+readinessProbe: {}
+
+ingress:
+  enabled: true
+  className: alb
+  host: sentiment-analysis.internal.example.com
+  path: /
+  port: 8080

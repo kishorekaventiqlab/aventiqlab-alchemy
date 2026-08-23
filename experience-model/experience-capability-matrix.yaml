@@ -94,6 +94,36 @@ capabilities:
     notes:
       - "Slowest climb in the matrix, and never reaches Architect - reflects LLMOps being an emergent domain rather than a mature one like Kubernetes."
 
+  - capability_ref: cap-mlops-fine-tuning-and-adapter-lifecycle
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Runs a provided fine-tuning script end to end but cannot explain the dataset curation behind it." }
+      5yr: { proficiency_level: Beginner, behavior: "Assists with dataset curation and can run a tracked fine-tuning job under guidance, but does not yet own the promotion gate independently." }
+      7yr: { proficiency_level: Intermediate, behavior: "Independently curates a dataset, runs a tracked fine-tuning job, defines a promotion gate, and diagnoses whether a post-fine-tune regression is a data, training, or serving problem." }
+      10yr: { proficiency_level: Advanced, behavior: "Sets adapter registry, lineage, and promotion-gate standards referenced by more than one team, but delegates hands-on curation and training runs." }
+      staff-principal: { proficiency_level: Advanced, behavior: "Same delegation pattern as cap-mlops-pipeline-orchestration - architecture judgment here is exercised through Platform Architecture, not by personally deepening fine-tuning execution." }
+    notes:
+      - "Mirrors cap-mlops-pipeline-orchestration's delegation pattern at senior bands rather than climbing to Architect - a sibling capability in the same domain with the same lifecycle shape."
+
+  - capability_ref: cap-llmops-retrieval-pipeline-construction
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Follows a written runbook to run an existing ingestion pipeline; does not choose or justify a chunking strategy." }
+      5yr: { proficiency_level: Intermediate, behavior: "Independently builds an ingestion-to-retrieval pipeline and selects a chunking/embedding combination backed by a measurement on the target corpus." }
+      7yr: { proficiency_level: Advanced, behavior: "Diagnoses whether a retrieval-quality regression traces to chunking, embedding, or indexing changes, and builds hybrid retrieval under an enforced latency budget." }
+      10yr: { proficiency_level: Advanced, behavior: "Sets retrieval-pipeline construction standards (chunking, indexing, fusion strategy) referenced by more than one team." }
+      staff-principal: { proficiency_level: Advanced, behavior: "Judgment at this band is comparable to a 10-year engineer's - retrieval-pipeline construction is a still-maturing capability, not a differentiator at the top band yet." }
+    notes:
+      - "Never reaches Architect - like LLMOps eval pipelines, this is an emergent capability that hasn't matured into an architecture-level differentiator."
+
+  - capability_ref: cap-llmops-agent-tool-orchestration
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Wires a single tool call into a prompt without an orchestration loop or termination condition." }
+      5yr: { proficiency_level: Intermediate, behavior: "Independently builds a tool-calling service with an orchestration loop, retry handling, and enforced iteration/token budgets." }
+      7yr: { proficiency_level: Advanced, behavior: "Designs least-privilege tool scopes and approval-gate placement, and diagnoses failed agent runs from traces rather than re-running and guessing." }
+      10yr: { proficiency_level: Advanced, behavior: "Sets org-wide standards for agent tool permissions and approval-gate placement across multiple agent-backed features." }
+      staff-principal: { proficiency_level: Advanced, behavior: "Judgment at this band is comparable to a 10-year engineer's - agent orchestration is the newest capability in the matrix and has not yet produced an Architect-level differentiator." }
+    notes:
+      - "Slowest-maturing capability in the matrix alongside retrieval-pipeline construction - reflects agent orchestration being newer and less standardized than even LLMOps eval pipelines."
+
   - capability_ref: cap-ai-reliability-sre-incident-response-for-inference
     bands:
       3yr: { proficiency_level: Beginner, behavior: "Follows a runbook step-by-step; cannot adapt when the incident deviates." }
@@ -103,6 +133,16 @@ capabilities:
       staff-principal: { proficiency_level: Expert, behavior: "Sets company-wide reliability standards but is rarely the incident commander in practice." }
     notes:
       - "Jumps to Expert at 7yr, then plateaus - operational maturity in this capability peaks before formal seniority does."
+
+  - capability_ref: cap-ai-security-model-and-data-access-controls
+    bands:
+      3yr: { proficiency_level: Beginner, behavior: "Relies on a prompt-level instruction as the only defense against prompt injection; has not implemented an access-control boundary." }
+      5yr: { proficiency_level: Beginner, behavior: "Implements least-privilege tool scopes when instructed but does not yet independently threat-model a new agent surface." }
+      7yr: { proficiency_level: Intermediate, behavior: "Independently diagnoses an injection or exfiltration attempt from a trace and closes the specific untrusted-input path without disrupting a working safety boundary." }
+      10yr: { proficiency_level: Advanced, behavior: "Sets access-control and data-governance standards (including vector-index erasure) applied across multiple LLM-backed features." }
+      staff-principal: { proficiency_level: Advanced, behavior: "Judgment at this band is comparable to a 10-year engineer's - AI security is the newest domain in the matrix and has not yet produced an Architect-level differentiator." }
+    notes:
+      - "Never reaches Architect, like the other emergent LLM-era capabilities (LLMOps, agent orchestration, retrieval construction) - the domain was only just authored and hasn't matured into a system-design differentiator yet."
 
   - capability_ref: cap-platform-architecture-tradeoff-driven-system-design
     bands:

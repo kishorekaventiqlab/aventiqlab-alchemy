@@ -1,32 +1,61 @@
 id: art-inference-under-load-video
 type: video
-title: "Watching an Expert Diagnose a GPU Saturation Incident"
+title: "Why Pod Autoscaling Can Still Leave You Stuck"
 experience_ref: exp-inference-under-load
 outcome_refs:
   - out-inference-under-load-01
   - out-inference-under-load-02
 capability_refs:
   - cap-gpu-engineering-utilization-and-capacity-signals
+  - cap-kubernetes-workload-scaling-for-inference
+  - cap-ai-infrastructure-cluster-and-node-pool-provisioning
   - cap-ai-reliability-sre-incident-response-for-inference
 purpose: >
-  Models an expert's reasoning process, narrated out loud, on a comparable-but-different
-  incident - showing HOW to think through the diagnosis, not just the facts (Material)
-  and not the learner's own exact scenario.
+  Builds engineering judgment through the full ten-stage reasoning spine from
+  docs/video-artifact-constitution.md (Problem -> Stakes -> Curiosity -> Context/Mental
+  Model -> Options -> Trade-offs -> Investigation/Demonstration -> Decision -> Best
+  Practice -> Takeaway), rather than stating facts in sequence or opening cold on an
+  already-saturated incident. HPA is named and rejected as the obvious-but-insufficient
+  first instinct before KEDA and Karpenter emerge as the answer - the video never states
+  "KEDA is a Kubernetes event-driven autoscaler" as a definition; the technology is
+  introduced only as the resolution to a question the viewer has already been made to ask.
 content_summary: >
-  A screencast walkthrough of a senior engineer diagnosing a similar but not identical
-  GPU-saturation incident on a different service, narrating which dashboards they check
-  first and why, including a dead-end they deliberately rule out before committing to a
-  mitigation.
-estimated_duration_minutes: 12
+  A ten-stage animated explainer, narrative plan in content/video-narrative-plan.md. Opens
+  on a concrete failing GPU inference service (Problem), states the consequence chain up
+  to a paid-tier SLA breach (Stakes), poses the CPU-utilization contradiction that drives
+  the rest of the video (Curiosity), then answers it with the request-path and
+  KEDA/Scheduler/Karpenter architecture (Context/Mental Model). Names CPU-based HPA as the
+  rejected first instinct (Options), then a structured "solves / doesn't solve" comparison
+  of HPA vs. KEDA vs. Karpenter (Trade-offs). The traffic-climb -> KEDA-scales ->
+  Pending-pods -> Karpenter-provisions -> recovery sequence (Investigation/Demonstration)
+  carries the aha moment. A standalone statement crystallizes why KEDA and Karpenter run
+  together, not one instead of the other (Decision), followed by one memorable operational
+  rule (Best Practice). The investigation stage continues with the prior version's
+  expert-diagnosis sub-story on a comparable-but-different service, explicitly reframed as
+  applying the mental model the learner just built. Closes with a three-line recap
+  distinguishing KEDA / Karpenter / Scheduler by the question each answers (Takeaway).
+estimated_duration_minutes: 6
 type_specific:
-  format: screencast
+  format: animated-explainer
   script_outline:
-    - Open on a different GPU inference service showing early symptoms.
-    - Narrate checking the GPU utilization dashboard first, and explain why that's the first check.
-    - Narrate ruling out a network/ingress explanation using an ingress dashboard.
-    - Narrate confirming the queue-depth trend before deciding.
-    - Narrate choosing a shedding mitigation and explaining the tradeoff out loud.
+    - "Problem: a concrete failing situation - a GPU inference service's users are seeing slow responses despite pods scaling."
+    - "Stakes: the consequence chain (queue -> latency -> timeouts -> user-visible failure) against a real paid-tier SLA."
+    - "Curiosity: CPU is at 35%, nowhere near saturated - so why is the service still falling behind?"
+    - "Context/Mental Model: the request path (Users/ALB/Service/Pod/GPU) and the three control components (KEDA/Scheduler/Karpenter), introduced as the answer being assembled."
+    - "Options: CPU-based HPA named as the obvious, well-known, but insufficient first instinct."
+    - "Trade-offs: a structured HPA vs. KEDA vs. Karpenter comparison, each showing what it solves and what it does not."
+    - "Investigation/Demonstration: the traffic-climb -> KEDA-scales -> Pending-pods -> Karpenter-provisions -> recovery sequence, carrying the video's aha moment."
+    - "Decision: a standalone statement of why KEDA and Karpenter run together, not one instead of the other."
+    - "Best Practice: one memorable, actionable rule about diagnosing Pending pods."
+    - "Investigation (continued): the prior version's expert-diagnosis sub-story, reframed as applying the mental model just built, on a comparable-but-different service."
+    - "Takeaway: a three-line recap distinguishing KEDA / Karpenter / Scheduler by the question each answers."
   on_screen_demonstrations:
-    - Live Grafana dashboard navigation
-    - Reading a KEDA replica status via kubectl
-    - Applying a rate-limit configuration change
+    - Single-sentence statement cards (Problem/Stakes/Curiosity/Decision/Best Practice), color-coded by stage
+    - A structured "solves / doesn't solve" comparison card for Options and Trade-offs
+    - An animated architecture diagram with traffic-flow indicators and per-beat component highlighting
+    - Live-updating metric tiles (traffic, pods, nodes, GPU utilization, queue depth)
+    - GPU node capacity meters transitioning from healthy to FULL to a newly-provisioned node joining
+    - Dashed "Pending" pod states transitioning to a solid "Running" state
+    - Live Grafana dashboard navigation (reused from the prior version)
+    - Reading a KEDA replica status via kubectl (reused)
+    - Applying a rate-limit configuration change (reused)

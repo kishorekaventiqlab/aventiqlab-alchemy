@@ -15,12 +15,12 @@ Rendered view of [`curriculum-journeys.yaml`](curriculum-journeys.yaml). A journ
 | GPU Engineering | GPU Engineering Journey | Diagnose GPU Capacity Exhaustion → Optimize GPU Utilization → Operate an AI Inference Platform Under Load |
 | Model Serving | Model Serving Journey | Deploy an AI Inference Service → Build an Autoscaling Inference Platform → Diagnose Model-Serving Latency → Design Highly Available Model Serving |
 | Inference Engineering | Inference Engineering Journey | Optimize GPU Utilization |
-| MLOps | MLOps Journey | Roll Out a New Model Safely → Troubleshoot a Failing ML Pipeline |
-| LLMOps | LLMOps Journey | Operate an LLM Platform Under Traffic Growth → Diagnose a Broken RAG Pipeline |
+| MLOps | MLOps Journey | Roll Out a New Model Safely → Fine-Tune and Register a Production Adapter → Troubleshoot a Failing ML Pipeline |
+| LLMOps | LLMOps Journey | Build a Retrieval Pipeline with a Measured Baseline → Build an Agent That Completes a Multi-Step Task With Approval Gates → Operate an LLM Platform Under Traffic Growth → Diagnose a Broken RAG Pipeline |
 | AI Platform Engineering | AI Platform Engineering Journey | Design an Internal AI Platform for Multiple Teams |
 | Observability | Observability Journey | Diagnose Model-Serving Latency → Handle a Production AI Incident |
 | AI Reliability / SRE | AI Reliability / SRE Journey | Handle a Production AI Incident → Operate an AI Inference Platform Under Load |
-| AI Security | AI Security Journey | *(none yet — stub domain)* |
+| AI Security | AI Security Journey | Contain an Indirect Prompt-Injection Incident in a Production Agent |
 | Capacity Engineering | Capacity Engineering Journey | Diagnose GPU Capacity Exhaustion |
 | Cost Engineering | Cost Engineering Journey | Reduce AI Platform Infrastructure Cost |
 | Distributed AI Systems | Distributed AI Systems Journey | *(none yet — stub domain)* |

@@ -45,6 +45,17 @@ build_expectations:
     capability_refs:
       - cap-kubernetes-workload-scaling-for-inference
       - cap-model-serving-autoscaling-policy-design
+  - statement: >
+      Can build a retrieval pipeline (ingestion, chunking, embedding/vector-store
+      selection) with a documented recall@k baseline against a labelled query set.
+    verbs: [BUILD]
+    capability_refs: [cap-llmops-retrieval-pipeline-construction]
+  - statement: >
+      Can build a tool-calling agent that completes a bounded multi-step task with
+      enforced iteration/token budgets and a human approval gate before any
+      irreversible action.
+    verbs: [BUILD]
+    capability_refs: [cap-llmops-agent-tool-orchestration]
 operational_expectations:
   - statement: >
       Independently operates GPU utilization and queue-depth dashboards to classify a

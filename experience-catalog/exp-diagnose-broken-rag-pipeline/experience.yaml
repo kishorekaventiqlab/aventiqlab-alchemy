@@ -3,7 +3,8 @@ title: Diagnose a Broken RAG Pipeline
 target_learner_profiles: [lp-7yr-mlops-lead]
 target_capabilities:
   - cap-llmops-prompt-and-eval-pipelines
-prerequisites: []
+  - cap-llmops-retrieval-pipeline-construction
+prerequisites: [exp-build-measured-retrieval-pipeline]
 scenario: >
   Users of an internal documentation Q&A assistant have started reporting answers that
   are confidently wrong or irrelevant to their question.

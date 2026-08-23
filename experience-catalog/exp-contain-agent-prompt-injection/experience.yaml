@@ -1,0 +1,100 @@
+id: exp-contain-agent-prompt-injection
+title: Contain an Indirect Prompt-Injection Incident in a Production Agent
+target_learner_profiles: [lp-7yr-mlops-lead]
+target_capabilities:
+  - cap-ai-security-model-and-data-access-controls
+prerequisites: [exp-build-agent-with-approval-gates]
+scenario: >
+  The internal infrastructure agent - already live and gated per its original design -
+  is reported to have attempted an unexpected node-pool scaling action that a reviewing
+  engineer did not recognize as related to the ticket it was working on, and the
+  approval gate is the only reason it did not execute.
+business_context: >
+  Security wants to know whether this was a model quirk or an actual attack before
+  deciding whether to pause the agent company-wide; the agent's tool surface includes
+  reading pod logs, and pod logs are partially operator-controlled (a user-supplied
+  request ID appears in application log lines the agent reads as part of its
+  diagnosis step).
+technical_environment:
+  platform: The tool-calling agent built in exp-build-agent-with-approval-gates
+  infrastructure_summary: >
+    The agent reads pod logs as part of its diagnostic flow and had proposed a
+    node-pool scaling action that the approval gate correctly intercepted. The full
+    request trace (prompt, tool calls, tool outputs, proposed action) is available for
+    this run.
+  key_services: [Tool-calling LLM API, Internal infrastructure APIs, Approval/notification channel, Log aggregation]
+starting_state: >
+  A trace exists for the flagged run: the agent read a pod's application logs as part of
+  diagnosing a Pending-pod alert, then proposed a node-pool scaling action unrelated to
+  the alert's actual root cause. No prior incident of this kind has occurred. The
+  approval gate correctly paused execution and no scaling action was taken.
+learner_mission: >
+  Determine from the trace whether the proposed action resulted from a prompt-injection
+  attempt embedded in the log content, a model reasoning error, or legitimate but
+  surprising behavior, and close the specific access path if it was an injection.
+expected_investigation:
+  - Read the full trace in order (prompt, retrieved log content, tool calls, proposed action) rather than starting from the proposed action and working backward.
+  - Check whether the log content the agent read contains text that resembles an instruction rather than genuine application log output.
+  - Determine whether the user-supplied request ID field was the actual injection vector, given that it is the one operator-controlled value flowing into agent context.
+  - Confirm whether the agent's tool scope would have allowed the proposed action to execute if the approval gate had not been in place.
+expected_decisions:
+  - decision_point: Was this an indirect prompt injection, a reasoning error, or legitimate behavior?
+    options_considered:
+      - "Correct: trace the proposed action back through the tool outputs the agent read, and confirm whether the log content contains instruction-like text embedded in the operator-controlled request-ID field - the classic indirect-injection pattern of untrusted data re-entering the model's context as if it were a directive."
+      - "Plausible but wrong: conclude it was a one-off model reasoning error and take no action beyond noting it, without checking whether the log content itself contained an embedded instruction."
+    sound_reasoning: >
+      Indirect prompt injection through data the agent reads (not the prompt the
+      operator wrote) is the harder-to-see attack path precisely because the trace
+      looks like the model just made a mistake; without checking the actual content of
+      what the agent read, a real injection gets misclassified as a benign quirk and
+      the vector stays open.
+  - decision_point: How should the injection vector be closed?
+    options_considered:
+      - "Correct: treat log content (and any other tool output) as untrusted input, and either sanitize/strip instruction-like patterns from it before it enters the model's context or restrict which fields of a log line the agent is allowed to read - while accepting that this reduces but does not eliminate the risk, since prompt injection has no complete fix."
+      - "Plausible but wrong: consider the incident closed because the approval gate already caught it, without also narrowing the untrusted-input path that made the injection possible in the first place."
+    sound_reasoning: >
+      The approval gate is a safety net for consequences, not a fix for the underlying
+      vector - relying on it alone means every future injection attempt still reaches
+      the point of proposing an action and depends on a human catching it every time;
+      narrowing what untrusted content can reach the model's context reduces how often
+      the gate has to catch something in the first place.
+  - decision_point: Should the agent be paused company-wide while this is investigated?
+    options_considered:
+      - "Correct: keep the agent running with the approval gate in place (which already worked as designed) while narrowing the specific untrusted-input path, rather than pausing a system whose safety boundary functioned correctly."
+      - "Plausible but wrong: pause the agent company-wide immediately, treating the fact that an injection was attempted as equivalent to the safety boundary having failed."
+    sound_reasoning: >
+      The approval gate performed exactly as designed - it caught the action before
+      execution - so the incident demonstrates the layered design working, not failing;
+      a blanket pause treats a contained near-miss the same as an actual breach and
+      creates unnecessary disruption without addressing the actual gap, which is the
+      untrusted-input path, not the approval gate.
+build_activities:
+  - Implement sanitization or field-scoping on the log content the agent reads, so instruction-like text in operator-controlled fields cannot reach the model's context unmodified.
+  - Add a detection check that flags when a proposed tool action is unrelated to the stated task, as a second layer beyond the approval gate.
+operational_activities:
+  - Re-run the same diagnostic scenario with a deliberately crafted injection attempt in the request-ID field and confirm the sanitization prevents it from influencing the proposed action.
+  - Document the incident and the closed vector for the security review.
+failure_modes:
+  - Misclassifying an actual indirect-injection attempt as a random model error because the trace was read starting from the proposed action rather than from the untrusted input forward.
+  - Treating the approval gate alone as sufficient and leaving the untrusted-input path open, so the same vector can be attempted repeatedly.
+  - Pausing the entire agent system in response to a contained near-miss, disrupting a safety boundary that worked as intended.
+constraints:
+  - The agent's core diagnostic capability (reading logs to investigate Pending-pod alerts) must remain functional after the fix - the fix must narrow the injection surface without breaking the legitimate use of log content.
+  - The investigation must use only the existing trace and reproducible testing - it must not assume access to the original attacker (if any) or additional logging that wasn't already being captured.
+trade_offs:
+  - tension: Input sanitization strictness vs. diagnostic completeness
+    choice_a: Aggressively strip or restrict log content the agent can read, reducing injection surface but potentially hiding information relevant to a real diagnosis.
+    choice_b: Preserve full log content for diagnostic completeness, accepting a wider injection surface that depends more heavily on the approval gate as the sole safety net.
+  - tension: Response proportionality vs. caution
+    choice_a: Keep the agent live with a narrowed vector, trusting the approval gate's demonstrated effectiveness.
+    choice_b: Pause the agent while the fix is validated, at the cost of losing its automation value during the pause.
+success_conditions:
+  - The proposed action is correctly attributed to an indirect prompt injection via the operator-controlled log field, a reasoning error, or legitimate behavior, with trace evidence supporting the conclusion.
+  - If an injection is confirmed, the specific untrusted-input path is narrowed and a reproduction of the same attempt no longer influences the agent's proposed action.
+  - The approval gate's role in preventing actual harm is documented as part of the incident record, distinct from whether the injection vector itself was closed.
+evidence_of_competence:
+  - The trace analysis identifying the specific field and content that caused the proposed action.
+  - Before/after test results showing the same crafted injection attempt no longer succeeds after the fix.
+  - The incident record documenting root cause, the layered-defense reasoning for keeping the agent live, and the closed vector.
+progression_archetype: advanced-troubleshoot
+outcome_refs: []

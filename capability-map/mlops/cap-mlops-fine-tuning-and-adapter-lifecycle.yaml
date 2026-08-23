@@ -1,0 +1,73 @@
+id: cap-mlops-fine-tuning-and-adapter-lifecycle
+name: Fine-Tuning & Adapter Lifecycle
+domain: mlops
+description: >
+  Adapting a base model to a task via parameter-efficient fine-tuning (LoRA/QLoRA),
+  treating dataset curation as the majority of the work, and operating the resulting
+  adapter as a versioned, evaluated artifact through a registry rather than a one-off
+  training run.
+skills:
+  - id: skl-mlops-fine-tuning-lifecycle-01
+    name: Adaptation-approach fluency
+    verb: KNOW
+    statement: >
+      Knows when fine-tuning is the right adaptation approach versus prompting or RAG,
+      and why dataset curation - not the training run itself - is typically most of the
+      effort.
+    evidence:
+      - Correctly recommends against fine-tuning for a stated scenario where prompting
+        or RAG would resolve the need more cheaply, citing the dataset-curation cost of
+        the fine-tuning alternative.
+  - id: skl-mlops-fine-tuning-lifecycle-02
+    name: Fine-tuning job construction
+    verb: BUILD
+    statement: >
+      Can build a LoRA/QLoRA fine-tuning job with experiment tracking, from a curated
+      dataset to a trained adapter.
+    evidence:
+      - Shipped a fine-tuning job that produced a trained adapter with a tracked
+        experiment run (hyperparameters, loss curve, eval score) attached.
+  - id: skl-mlops-fine-tuning-lifecycle-03
+    name: Adapter registry operation
+    verb: OPERATE
+    statement: >
+      Can register, version, and track lineage for an adapter, and serve multiple
+      adapters against a shared base model.
+    evidence:
+      - Operated an adapter registry entry through at least one version bump with
+        lineage back to its training data and base model version intact.
+  - id: skl-mlops-fine-tuning-lifecycle-04
+    name: Promotion-gate evaluation
+    verb: DESIGN
+    statement: >
+      Can design an evaluation gate an adapter must pass before promotion to serving,
+      distinct from the base model's own evaluation suite.
+    evidence:
+      - Authored an adapter promotion gate that blocked or approved a candidate adapter
+        based on a documented eval threshold.
+  - id: skl-mlops-fine-tuning-lifecycle-05
+    name: Regression diagnosis after fine-tuning
+    verb: TROUBLESHOOT
+    statement: >
+      Can diagnose whether a quality regression after a fine-tune traces to the dataset,
+      the training configuration, or a serving-side adapter mismatch.
+    evidence:
+      - Root-caused a post-fine-tune quality regression to one of dataset, training
+        config, or serving mismatch, with supporting evidence.
+common_tools:
+  - PEFT / LoRA / QLoRA libraries
+  - Experiment tracking (e.g. MLflow, Weights & Biases)
+  - Adapter/model registries
+  - Multi-adapter serving runtimes (e.g. vLLM with LoRA adapters)
+beginner_indicators:
+  - Runs a fine-tuning script end to end with a provided dataset but cannot explain why
+    the dataset was curated the way it was.
+intermediate_indicators:
+  - Independently curates a dataset, runs a tracked fine-tuning job, and registers the
+    resulting adapter with lineage.
+advanced_indicators:
+  - Designs a promotion gate for adapters and diagnoses whether a post-fine-tune
+    regression is a data, training, or serving problem.
+expert_architect_indicators:
+  - Sets org-wide standards for adapter registry structure, lineage tracking, and
+    promotion gates applied across multiple fine-tuned features.

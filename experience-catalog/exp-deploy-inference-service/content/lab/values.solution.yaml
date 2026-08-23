@@ -1,0 +1,49 @@
+# Solution - do not open until you've attempted values.yaml yourself.
+# Assumes `kubectl describe node` confirmed the taint as node-pool=gpu-inference:NoSchedule
+# and `kubectl get nodes --show-labels` confirmed the matching label as
+# node-pool=gpu-inference. If your sandbox cluster's actual taint/label differ,
+# match those instead - the point of this exercise is checking, not memorizing this file.
+
+replicaCount: 1
+
+image:
+  repository: internal-registry/sentiment-analysis-model
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+nodeSelector:
+  node-pool: gpu-inference
+
+tolerations:
+  - key: node-pool
+    operator: Equal
+    value: gpu-inference
+    effect: NoSchedule
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+    nvidia.com/gpu: 1
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 3
+
+ingress:
+  enabled: true
+  className: alb
+  host: sentiment-analysis.internal.example.com
+  path: /
+  port: 8080

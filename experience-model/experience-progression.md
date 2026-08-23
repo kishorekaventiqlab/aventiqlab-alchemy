@@ -18,6 +18,9 @@ This progression is not a strict per-learner sequence (a 5yr engineer might do a
 |---|---|---|
 | `exp-deploy-inference-service` | foundation-build | 3yr |
 | `exp-build-autoscaling-inference-platform` | foundation-build | 5yr |
+| `exp-build-measured-retrieval-pipeline` | foundation-build | 5yr |
+| `exp-build-agent-with-approval-gates` | foundation-build | 5yr |
+| `exp-fine-tune-and-register-adapter` | foundation-build | 7yr |
 | `exp-roll-out-model-safely` | intermediate-operate | 5yr |
 | `exp-operate-llm-platform-under-traffic-growth` | intermediate-operate | 5yr, 7yr |
 | `exp-inference-under-load` | advanced-troubleshoot | 5yr, 7yr |
@@ -26,6 +29,7 @@ This progression is not a strict per-learner sequence (a 5yr engineer might do a
 | `exp-troubleshoot-failing-ml-pipeline` | advanced-troubleshoot | 5yr, 7yr |
 | `exp-diagnose-broken-rag-pipeline` | advanced-troubleshoot | 7yr |
 | `exp-handle-production-ai-incident` | advanced-troubleshoot | 7yr |
+| `exp-contain-agent-prompt-injection` | advanced-troubleshoot | 7yr |
 | `exp-optimize-gpu-utilization` | expert-optimize | 7yr, 10yr |
 | `exp-reduce-ai-platform-cost` | expert-optimize | 7yr, 10yr |
 | `exp-design-multi-tenant-ai-infrastructure` | architect-design | 10yr, staff-principal |

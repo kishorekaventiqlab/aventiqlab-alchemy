@@ -42,10 +42,14 @@ journeys:
     experience_ids: [exp-optimize-gpu-utilization]
   - domain: mlops
     journey_title: MLOps Journey
-    experience_ids: [exp-roll-out-model-safely, exp-troubleshoot-failing-ml-pipeline]
+    experience_ids: [exp-roll-out-model-safely, exp-fine-tune-and-register-adapter, exp-troubleshoot-failing-ml-pipeline]
   - domain: llmops
     journey_title: LLMOps Journey
-    experience_ids: [exp-operate-llm-platform-under-traffic-growth, exp-diagnose-broken-rag-pipeline]
+    experience_ids:
+      - exp-build-measured-retrieval-pipeline
+      - exp-build-agent-with-approval-gates
+      - exp-operate-llm-platform-under-traffic-growth
+      - exp-diagnose-broken-rag-pipeline
   - domain: ai-platform-engineering
     journey_title: AI Platform Engineering Journey
     experience_ids: [exp-design-internal-ai-platform-for-teams]
@@ -57,7 +61,7 @@ journeys:
     experience_ids: [exp-handle-production-ai-incident, exp-inference-under-load]
   - domain: ai-security
     journey_title: AI Security Journey
-    experience_ids: []
+    experience_ids: [exp-contain-agent-prompt-injection]
   - domain: capacity-engineering
     journey_title: Capacity Engineering Journey
     experience_ids: [exp-diagnose-gpu-capacity-exhaustion]

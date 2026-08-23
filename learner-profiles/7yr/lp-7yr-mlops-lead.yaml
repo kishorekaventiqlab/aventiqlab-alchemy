@@ -42,6 +42,11 @@ build_expectations:
       one-off pipelines.
     verbs: [BUILD]
     capability_refs: [cap-mlops-pipeline-orchestration]
+  - statement: >
+      Curates a dataset, runs a tracked fine-tuning job, and defines a promotion-gate
+      evaluation an adapter must pass before it is registered and served.
+    verbs: [BUILD]
+    capability_refs: [cap-mlops-fine-tuning-and-adapter-lifecycle]
 operational_expectations:
   - statement: >
       Leads SLA-window mitigation across multiple services during a simultaneous
@@ -56,6 +61,12 @@ troubleshooting_expectations:
     capability_refs:
       - cap-ai-reliability-sre-incident-response-for-inference
       - cap-platform-architecture-tradeoff-driven-system-design
+  - statement: >
+      Diagnoses an anomalous agent action as an indirect prompt-injection attempt versus
+      a reasoning error from a request trace, and closes the specific untrusted-input
+      path without disrupting a working approval-gate boundary.
+    verbs: [TROUBLESHOOT]
+    capability_refs: [cap-ai-security-model-and-data-access-controls]
 architecture_expectations:
   - statement: >
       Authors an autoscaling and capacity policy that is implemented and holds up under

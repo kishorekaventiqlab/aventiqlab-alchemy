@@ -85,6 +85,65 @@
     "outcome_refs": {
       "type": "array",
       "items": { "$ref": "./common/vocab.schema.json#/$defs/out_id" }
+    },
+    "learner_problem": {
+      "type": "string",
+      "description": "Optional. The single-sentence problem framing this experience teaches the learner to answer (e.g. 'why pod autoscaling is not enough for GPU workloads'). Distinct from scenario/learner_mission, which describe a specific situation - this states the transferable question."
+    },
+    "core_concept": {
+      "type": "string",
+      "description": "Optional. The one core conceptual distinction this experience is built around, stated plainly enough to be the experience's single takeaway if a learner remembered nothing else."
+    },
+    "mental_model": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional. An ordered causal chain (each entry one step) the learner should be able to reproduce afterward - e.g. 'traffic increases' -> 'KEDA increases pod replicas' -> 'scheduler checks node capacity' -> 'insufficient capacity -> pods Pending' -> 'Karpenter provisions a node' -> 'pods schedule'."
+    },
+    "system_architecture": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional. An ordered list of the components the learner must be able to name and place before the scenario makes sense (e.g. Users, ALB, Service, Pods, Model Server, GPU, KEDA, Scheduler, Karpenter)."
+    },
+    "prerequisite_knowledge": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional. What the learner must already know (distinct from target_learner_profiles/prerequisites, which are learner-band and experience-graph references) for this experience's teaching content to land."
+    },
+    "learning_sequence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stage", "focus"],
+        "properties": {
+          "stage": { "type": "string" },
+          "focus": { "type": "string" }
+        }
+      },
+      "description": "Optional. The named stages this experience's teaching content walks through in order (e.g. architecture -> healthy operation -> failure -> node-level scaling -> expert reasoning -> recap), each with what that stage is responsible for teaching."
+    },
+    "key_takeaways": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional. The short list of statements a learner should be able to make unprompted after finishing this experience."
+    },
+    "misconceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["misconception", "correction"],
+        "properties": {
+          "misconception": { "type": "string" },
+          "correction": { "type": "string" }
+        }
+      },
+      "description": "Optional. Specific wrong mental models learners commonly bring to this topic, paired with the correction - distinct from expected_decisions' plausible-but-wrong options, which are scenario-specific rather than general misconceptions."
+    },
+    "evidence_of_understanding": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional. Observable signs a learner has actually internalized core_concept/mental_model - distinct from evidence_of_competence, which is scenario-specific proof of having completed the mission."
     }
   }
 }

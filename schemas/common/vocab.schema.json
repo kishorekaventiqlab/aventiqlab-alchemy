@@ -19,7 +19,8 @@
     },
     "artifact_type": {
       "type": "string",
-      "enum": ["material", "video", "source_code_lab", "quiz", "skill_evaluator"]
+      "description": "battleground is distinct from skill_evaluator: battleground is an interactive, executable, scenario-based experience where the learner operates/troubleshoots/builds/modifies a system and success is determined by observable system state; skill_evaluator is a conversational assessment (the future ASTRA) where the learner explains reasoning and trade-offs through Q&A.",
+      "enum": ["material", "video", "source_code_lab", "quiz", "skill_evaluator", "battleground"]
     },
     "independence_level": {
       "type": "string",

@@ -1,5 +1,5 @@
 import React from 'react';
-import { interpolate, useCurrentFrame } from 'remotion';
+import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { theme } from './theme';
 
 export const TitleCard: React.FC<{ title: string; subtitle: string }> = ({
@@ -7,12 +7,22 @@ export const TitleCard: React.FC<{ title: string; subtitle: string }> = ({
   subtitle,
 }) => {
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
   const opacity = interpolate(frame, [0, 15], [0, 1], {
     extrapolateRight: 'clamp',
   });
   const rise = interpolate(frame, [0, 20], [24, 0], {
     extrapolateRight: 'clamp',
   });
+  // A gentle scale-in on the title itself (a small "camera push-in" on the
+  // card as a whole) rather than a static, motionless card.
+  const scale = spring({
+    frame,
+    fps,
+    config: { damping: 200, mass: 1, stiffness: 80 },
+    durationInFrames: 25,
+  });
+  const titleScale = 0.96 + 0.04 * scale;
 
   return (
     <div
@@ -26,15 +36,15 @@ export const TitleCard: React.FC<{ title: string; subtitle: string }> = ({
         gap: 28,
         padding: '0 140px',
         textAlign: 'center',
-        background: `radial-gradient(circle at 50% 40%, #16233f 0%, ${theme.bg} 70%)`,
+        background: `radial-gradient(circle at 50% 38%, ${theme.bgGradientStart} 0%, ${theme.bg} 75%)`,
       }}
     >
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 13,
+          fontSize: 14,
           letterSpacing: 4,
-          color: theme.accent,
+          color: theme.accentStrong,
           fontWeight: 700,
           opacity,
         }}
@@ -44,11 +54,11 @@ export const TitleCard: React.FC<{ title: string; subtitle: string }> = ({
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 56,
+          fontSize: 58,
           fontWeight: 700,
           color: theme.text,
           opacity,
-          transform: `translateY(${rise}px)`,
+          transform: `translateY(${rise}px) scale(${titleScale})`,
         }}
       >
         {title}
@@ -56,7 +66,8 @@ export const TitleCard: React.FC<{ title: string; subtitle: string }> = ({
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 24,
+          fontSize: 25,
+          fontWeight: 500,
           color: theme.textDim,
           opacity,
           maxWidth: 900,

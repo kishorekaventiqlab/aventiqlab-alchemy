@@ -12,8 +12,7 @@ function chunkSentences(text: string): string[] {
 export const CaptionBar: React.FC<{
   text: string;
   durationInFrames: number;
-  speakerLabel?: string;
-}> = ({ text, durationInFrames, speakerLabel = 'NARRATION' }) => {
+}> = ({ text, durationInFrames }) => {
   const frame = useCurrentFrame();
   const chunks = chunkSentences(text);
   const perChunk = durationInFrames / chunks.length;
@@ -35,32 +34,22 @@ export const CaptionBar: React.FC<{
         right: 60,
         bottom: 48,
         display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
+        justifyContent: 'center',
       }}
     >
       <div
         style={{
-          fontFamily: theme.fontFamily,
-          fontSize: 14,
-          letterSpacing: 2,
-          color: theme.accent,
-          fontWeight: 700,
-          opacity: 0.9,
-        }}
-      >
-        {speakerLabel}
-      </div>
-      <div
-        style={{
           background: theme.captionBg,
-          border: `1px solid ${theme.panelBorder}`,
-          borderRadius: 10,
-          padding: '18px 24px',
+          border: `1px solid ${theme.captionBorder}`,
+          borderRadius: 12,
+          padding: '20px 26px',
           fontFamily: theme.fontFamily,
-          fontSize: 30,
+          fontSize: 32,
+          fontWeight: 500,
           lineHeight: 1.4,
           color: theme.text,
+          textAlign: 'center',
+          boxShadow: '0 8px 24px rgba(16, 24, 40, 0.10)',
           opacity,
         }}
       >

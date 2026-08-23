@@ -1,0 +1,148 @@
+# Real quiz content for art-deploy-inference-service-quiz.yaml (question_count: 8,
+# question_types: [multiple-choice, scenario-judgment], passing_threshold_percent: 80).
+# Checks the KNOW/UNDERSTAND content from content/material.md before the learner
+# is trusted with the Lab.
+artifact_ref: art-deploy-inference-service-quiz
+passing_threshold_percent: 80
+questions:
+  - id: q1
+    type: multiple-choice
+    material_section: "Taints, tolerations, and node selectors"
+    prompt: >
+      A node has a taint with effect NoSchedule. What is the minimum required for a pod
+      to be allowed to schedule on that node?
+    options:
+      a: A node selector matching the node's labels
+      b: A toleration matching the taint's key, value, and effect
+      c: A higher pod priority than other pods
+      d: Nothing - taints only affect already-running pods
+    correct: b
+    explanation: >
+      A taint repels pods unless they carry a matching toleration. A node selector is a
+      separate mechanism that decides where to place a pod among the nodes it's already
+      allowed on - it doesn't grant permission to bypass a taint.
+
+  - id: q2
+    type: scenario-judgment
+    material_section: "Taints, tolerations, and node selectors"
+    prompt: >
+      A pod has the correct toleration for a GPU node pool's taint but no node selector.
+      What is the most likely outcome?
+    options:
+      a: The pod will always schedule on the GPU node pool
+      b: The pod will fail validation and never be created
+      c: The pod is allowed on the GPU pool but may schedule on any other untainted node instead
+      d: The pod will schedule on the GPU pool but with zero replicas
+    correct: c
+    explanation: >
+      A toleration only grants permission to land on a tainted node - it does not
+      instruct the scheduler to prefer that node. Without a node selector or affinity
+      rule, the pod can end up on any untainted node with capacity, which for a
+      GPU-dependent workload usually means it starts and then fails at runtime.
+
+  - id: q3
+    type: multiple-choice
+    material_section: "Taints, tolerations, and node selectors"
+    prompt: >
+      A pod is stuck in Pending. `kubectl describe pod` shows: "3 node(s) had untolerated
+      taint {workload-type: gpu}, 3 node(s) didn't match Pod's node affinity/selector."
+      What does this message tell you?
+    options:
+      a: The cluster has no nodes at all
+      b: All 6 nodes rejected the pod, for two different reasons across two groups of nodes
+      c: The pod's container image failed to pull
+      d: The pod was rejected due to insufficient CPU only
+    correct: b
+    explanation: >
+      This is a scheduling-only failure with two distinct causes across two node groups
+      - one set rejected on the taint (no matching toleration), the other on the node
+      selector/affinity rule. Reading the exact message avoids guessing which of the two
+      is the actual problem.
+
+  - id: q4
+    type: multiple-choice
+    material_section: "The NVIDIA device plugin"
+    prompt: >
+      What does the NVIDIA device plugin do?
+    options:
+      a: It compiles CUDA kernels for the running container
+      b: It discovers GPUs on a node and advertises them to Kubernetes as an allocatable resource
+      c: It automatically writes tolerations onto GPU-requesting pods
+      d: It replaces the Kubernetes scheduler for GPU workloads
+    correct: b
+    explanation: >
+      The device plugin's job is discovery and advertisement - it makes `nvidia.com/gpu`
+      show up as a schedulable resource with a count, the same way CPU and memory
+      already are. It does not modify pod specs or replace the scheduler.
+
+  - id: q5
+    type: scenario-judgment
+    material_section: "The NVIDIA device plugin"
+    prompt: >
+      A pod correctly tolerates a GPU node's taint and has a matching node selector, but
+      `kubectl describe node` shows no `nvidia.com/gpu` entry under Allocatable on that
+      node. What should you conclude?
+    options:
+      a: The chart's toleration is written incorrectly
+      b: The node selector label is misspelled
+      c: The device plugin isn't successfully advertising GPUs on that node, independent of the chart
+      d: The pod needs a higher resource limit
+    correct: c
+    explanation: >
+      If the resource doesn't appear in Allocatable at all, no amount of correcting the
+      pod's toleration, selector, or resource request will fix scheduling - the gap is
+      one layer lower, in whether the device plugin is running and registering GPUs on
+      that specific node.
+
+  - id: q6
+    type: multiple-choice
+    material_section: "The NVIDIA device plugin"
+    prompt: >
+      How should a GPU resource request typically be expressed in a pod spec using the
+      standard NVIDIA device plugin?
+    options:
+      a: As a fractional value under resources.requests, e.g. 0.5
+      b: "As a whole-number value under resources.limits, e.g. nvidia.com/gpu: 1"
+      c: As an annotation on the Deployment metadata
+      d: As an environment variable read by the container at runtime
+    correct: b
+    explanation: >
+      GPU resources via the standard device plugin are specified as whole-number limits
+      - fractional GPU requests aren't supported through this mechanism and require a
+      different approach entirely (e.g. MIG or time-slicing).
+
+  - id: q7
+    type: multiple-choice
+    material_section: "Running vs. healthy"
+    prompt: >
+      A pod shows STATUS: Running and its readiness probe is passing. What does this
+      combination confirm?
+    options:
+      a: The service is definitely producing correct inference responses
+      b: The container process started and is responding to whatever check the readiness probe performs
+      c: The model has finished loading into GPU memory
+      d: The service has been load-tested successfully
+    correct: b
+    explanation: >
+      Running plus a passing readiness probe only confirms what the probe itself checks
+      - if the probe is shallow (e.g. just an HTTP connection check), it can report
+      Ready while the service is still returning errors or empty responses to real
+      requests.
+
+  - id: q8
+    type: scenario-judgment
+    material_section: "Running vs. healthy"
+    prompt: >
+      You've just deployed a new inference service. The pod is Running and the readiness
+      probe passes. What is the most reliable way to confirm the deployment actually
+      works before declaring it done?
+    options:
+      a: Wait 5 minutes and re-check pod status
+      b: Send a real inference request and verify the response is correct
+      c: "Check that the Helm release shows STATUS: deployed"
+      d: Confirm the container image hash matches what was pushed to the registry
+    correct: b
+    explanation: >
+      Pod status, Helm release status, and image hash all confirm something happened as
+      expected at their own layer, but none of them confirm the service is actually
+      serving valid responses. Only a real request/response pair closes that gap.

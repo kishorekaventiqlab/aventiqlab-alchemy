@@ -6,7 +6,8 @@
   "scripts": {
     "start": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts",
-    "still": "remotion still src/index.ts"
+    "still": "remotion still src/index.ts",
+    "generate:audio": "tsx scripts/generate-audio.ts"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -17,7 +18,9 @@
   "devDependencies": {
     "@types/react": "^18.3.12",
     "@types/node": "^22.10.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "tsx": "^4.23.12",
+    "dotenv": "^17.3.1"
   },
   "allowScripts": {
     "esbuild@0.28.1": true

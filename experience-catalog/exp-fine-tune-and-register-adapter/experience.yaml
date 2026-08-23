@@ -1,0 +1,97 @@
+id: exp-fine-tune-and-register-adapter
+title: Fine-Tune and Register a Production Adapter
+target_learner_profiles: [lp-7yr-mlops-lead]
+target_capabilities:
+  - cap-mlops-fine-tuning-and-adapter-lifecycle
+prerequisites: [exp-deploy-inference-service]
+scenario: >
+  A support-ticket triage feature's base model performs adequately in general but
+  consistently mis-classifies tickets that use the company's internal product
+  terminology, and the product team wants a fine-tuned adapter rather than a prompt
+  workaround.
+business_context: >
+  Prompt-engineering attempts to fix the terminology confusion have plateaued; the
+  product team wants measurable improvement without swapping the base model or losing
+  the ability to roll back to prompt-only behavior if the adapter underperforms.
+technical_environment:
+  platform: A LoRA/QLoRA fine-tuning pipeline over an existing base model
+  infrastructure_summary: >
+    The base model is already served in production. A candidate dataset of
+    internally-labelled support tickets exists but has not been curated or deduplicated.
+    An adapter registry and multi-adapter serving runtime are available but not yet used
+    by this feature.
+  key_services: [Base model serving runtime, Fine-tuning job runner, Experiment tracking, Adapter registry]
+starting_state: >
+  A raw labelled dataset of 12,000 support tickets exists, collected over 18 months with
+  inconsistent labelling guidelines across that period. No fine-tuning job, evaluation
+  gate, or adapter registry entry exists yet for this feature.
+learner_mission: >
+  Curate the dataset, run a tracked fine-tuning job to produce a candidate adapter,
+  define and apply a promotion-gate evaluation the adapter must pass before serving, and
+  register the resulting adapter with lineage back to its training data and base model
+  version.
+expected_investigation:
+  - Audit the raw dataset for label inconsistency (e.g. guideline changes over the 18-month collection window) before treating it as ready to train on.
+  - Determine what evaluation the candidate adapter needs to pass that the base model's own evaluation suite does not already cover.
+  - Check whether the fine-tuning job's hyperparameters and data split are being tracked in a way that lets a later regression be traced back to this specific run.
+  - Confirm the serving runtime can run the new adapter alongside the base model's existing adapters without conflict.
+expected_decisions:
+  - decision_point: Should the full 12,000-ticket dataset be used as-is, or curated first?
+    options_considered:
+      - "Correct: audit for label-guideline drift across the collection window, deduplicate, and hold out a clean, representative evaluation split before training - treating curation as the majority of the effort rather than a formality before the 'real' work of training."
+      - "Plausible but wrong: use the full raw dataset as-is to maximize training data volume, assuming more data outweighs label inconsistency."
+    sound_reasoning: >
+      A dataset collected under inconsistent labelling guidelines will teach the model
+      inconsistent decision boundaries; volume does not compensate for systematic label
+      noise, and an evaluation split drawn from the same uncurated pool will silently
+      overstate how well the adapter actually performs on current labelling standards.
+  - decision_point: What gate must the adapter pass before it can serve production traffic?
+    options_considered:
+      - "Correct: define a promotion-gate evaluation specific to the terminology-confusion cases the fine-tune was meant to fix, in addition to a check that the adapter has not regressed the base model's general-case performance."
+      - "Plausible but wrong: promote the adapter based on the training loss curve alone, without an evaluation gate that checks its production task performance."
+    sound_reasoning: >
+      A converged training loss says the model fit the training data, not that it
+      improved the target failure mode or avoided regressing everything else the base
+      model already handled correctly - only a task-specific evaluation gate can confirm
+      both.
+  - decision_point: How should the adapter be registered for lineage?
+    options_considered:
+      - "Correct: register the adapter with a version tied to both its exact training dataset snapshot and the base model version it was trained against, so a later regression can be traced to a specific combination."
+      - "Plausible but wrong: register only the adapter file itself without recording which dataset snapshot or base model version produced it."
+    sound_reasoning: >
+      Without lineage tying the adapter to a specific dataset snapshot and base model
+      version, a future quality regression cannot be distinguished from a base-model
+      upgrade, a re-run on updated data, or the adapter itself - lineage is what makes
+      the registry entry useful for troubleshooting later, not just for storage.
+build_activities:
+  - Curate the labelled dataset (deduplicate, audit for label-guideline drift, hold out a clean evaluation split).
+  - Build and run a tracked LoRA/QLoRA fine-tuning job producing a candidate adapter.
+  - Define and implement a promotion-gate evaluation specific to the target failure mode plus a general-regression check.
+operational_activities:
+  - Register the resulting adapter in the adapter registry with lineage to its training dataset snapshot and base model version.
+  - Serve the registered adapter alongside the base model's existing adapters and confirm no serving-side conflict.
+failure_modes:
+  - Training on the raw, uncurated dataset and mistaking a converged loss curve for evidence of production readiness.
+  - Promoting the adapter without a task-specific evaluation gate, missing a regression on cases the base model previously handled correctly.
+  - Registering the adapter without lineage to its exact training data and base model version, making a future regression untraceable to its cause.
+constraints:
+  - The feature must be able to roll back to prompt-only (no adapter) behavior if the fine-tuned adapter underperforms after promotion.
+  - The evaluation split must not share any tickets with the training split, even after deduplication.
+  - The adapter must serve alongside at least one other adapter already running against the same base model without a serving conflict.
+trade_offs:
+  - tension: Dataset size vs. curation rigor
+    choice_a: Use the full 18-month dataset for maximum training volume, accepting more label-guideline inconsistency.
+    choice_b: Restrict training to a smaller, more recently and consistently labelled subset, accepting less data in exchange for cleaner labels.
+  - tension: Promotion-gate strictness vs. iteration speed
+    choice_a: A strict promotion gate that blocks marginal improvements until they clear a high bar, slowing iteration.
+    choice_b: A looser gate that promotes marginal improvements quickly, risking a slow accumulation of small regressions across versions.
+success_conditions:
+  - The candidate adapter passes a documented promotion-gate evaluation on the target failure mode without regressing the base model's general-case performance.
+  - The adapter is registered with lineage to its exact training dataset snapshot and base model version.
+  - The feature can roll back to prompt-only behavior without redeploying the base model.
+evidence_of_competence:
+  - The dataset curation audit documenting what label inconsistency was found and how it was resolved.
+  - The promotion-gate evaluation results (before/after on the target failure mode and the general-regression check).
+  - The adapter registry entry showing lineage to its training data snapshot and base model version.
+progression_archetype: foundation-build
+outcome_refs: []

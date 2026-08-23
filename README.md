@@ -23,9 +23,9 @@ The architecture is **experience-driven**: `Learner -> Capability -> Experience 
 | Directory | Contents |
 |---|---|
 | [`/learner-profiles/`](learner-profiles/) | 5 learner bands (3yr, 5yr, 7yr, 10yr, staff-principal), each defining what they already know/can do and what they're expected to KNOW, UNDERSTAND, BUILD, OPERATE, DESIGN, TROUBLESHOOT, EXPLAIN, and PROVE. |
-| [`/capability-map/`](capability-map/) | 21 capability domains (11 authored, 10 reserved as stubs), hierarchy Domain → Capability → Skill → Evidence. |
+| [`/capability-map/`](capability-map/) | 21 capability domains (12 authored, 9 reserved as stubs) holding 15 capability files, hierarchy Domain → Capability → Skill → Evidence. |
 | [`/experience-model/`](experience-model/) | The experience×capability matrix, the 5 progression archetypes, and curriculum journeys — cross-cutting views over the catalog. |
-| [`/experience-catalog/`](experience-catalog/) | 15 experiences: 1 fully-specified reference experience plus outcomes and all 5 artifacts, and 14 blueprint-only experiences spanning the capability map. |
+| [`/experience-catalog/`](experience-catalog/) | 19 experiences: 2 fully-specified experiences (each with outcomes, all 5 artifact specs, and real produced content) and 17 blueprint-only experiences spanning the capability map. |
 | [`/artifact-model/`](artifact-model/) | The conceptual purpose of each of the five learning artifacts (Material, Video, Lab, Quiz, Skill Evaluator) and how they stay non-duplicative. |
 | [`/skill-evaluator/`](skill-evaluator/) | The source-of-truth structure for reasoning/judgment evaluation — the future ASTRA conversation's eventual script, not a live implementation. |
 | [`/schemas/`](schemas/) | JSON Schema for all 6 core object types plus the shared controlled vocabulary. |
@@ -34,7 +34,7 @@ The architecture is **experience-driven**: `Learner -> Capability -> Experience 
 ## Where to start
 
 - New to the model? Read [`/docs/glossary-and-vocabularies.md`](docs/glossary-and-vocabularies.md) first — the 8-verb taxonomy and 5-tier proficiency scale are used everywhere.
-- Want to see the whole model proven end-to-end on one example? Read `exp-inference-under-load` in [`/experience-catalog/`](experience-catalog/) — the one experience with outcomes, all 6 artifacts, and a skill evaluator fully worked out.
+- Want to see the whole model proven end-to-end on a real example? Read `exp-inference-under-load` (advanced-troubleshoot, with a fully rendered video) or `exp-deploy-inference-service` (foundation-build, video script only) in [`/experience-catalog/`](experience-catalog/) — both have outcomes, all 5 artifacts, and a skill evaluator fully worked out.
 - Ready to add content? Read [`/docs/author-guide.md`](docs/author-guide.md).
 - Adding or changing anything? Validate it — [`/docs/validation-guide.md`](docs/validation-guide.md).
 
