@@ -3,11 +3,25 @@
 Phase 2 task AL2 (see `aventiqlab-platform/docs/content-studio-phase2-tracker.md`).
 Authorized by [ADR-0001](adr/0001-content-studio-generation-pipeline-supersedes-llm-deferral.md).
 
-**Status: PLAN — not yet built.** This document is for review before any code is
-written. It covers the service skeleton, auth, error envelope, and first deploy
-target that AL3 (`/v1/generate`), AL5 (`/v1/render`), and AL6
-(`/v1/artifacts/sign`) will sit on. It does **not** cover the endpoints
-themselves, the S3 bucket (AL7), or render/TTS compute (AL5/AL9).
+**Status: BUILT on branch `phase2/al2-service-foundation`** (commit `4f3787a`),
+per this plan as approved. Code + IaC + tests only — no deploy (per-repo deploy
+roles not provisioned this phase). It covers the service skeleton, auth, error
+envelope, and first deploy target that AL3 (`/v1/generate`), AL5 (`/v1/render`),
+and AL6 (`/v1/artifacts/sign`) will sit on. It does **not** cover the endpoints
+themselves, the S3 bucket (AL7 — infra written, see
+[AL7 plan](content-studio-al7-bucket-plan.md)), or render/TTS compute (AL5/AL9).
+
+**As-built notes vs. this plan:**
+- Test runner: `node --import tsx --test` (Node 20.20 lacks
+  `--experimental-strip-types`; that's 22.6+). Glob expanded via `find` (Node 20
+  `--test` glob support is 21+).
+- `tsx` is the local dev/start runner (hoisted to the root workspace
+  `node_modules`).
+- Full typecheck uses `tsconfig.all.json` (includes tests + scripts);
+  `tsconfig.json` is the build config (`src` only, excludes `*.test.ts`).
+- 23 `node:test` cases pass; typecheck clean; smoke-tested locally end to end
+  (`/health` → `{status:ok}`, `/v1/whoami` no-token → 401 envelope, valid token →
+  `{sub}`, garbage token → 401 envelope, unknown route → `validation_failed`).
 
 ---
 
