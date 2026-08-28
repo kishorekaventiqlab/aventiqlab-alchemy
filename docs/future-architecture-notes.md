@@ -2,6 +2,8 @@
 
 This page describes what comes **after** Phase 0. None of it is built in this repository — it exists so the eventual automation has a written target, and so nobody mistakes a schema field name here for a hint that the automation already exists.
 
+> **Update (2026-08-29):** the "later phase" for the Learning IR → Artifact JSON → Content Artifact stages and for LLM/OpenRouter integration is now defined. See [`docs/adr/0001-content-studio-generation-pipeline-supersedes-llm-deferral.md`](adr/0001-content-studio-generation-pipeline-supersedes-llm-deferral.md): alchemy builds `POST /v1/generate` (live-model artifact generation) and `POST /v1/render` (spec-driven `video-studio`) for the ASTRA Content Studio pipeline. The deferral language below still accurately describes **Phase 0**, but no longer constrains the repo's overall direction.
+
 ## The full conceptual flow
 
 ```

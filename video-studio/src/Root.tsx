@@ -10,6 +10,11 @@ import {
   FPS as DEPLOY_INFERENCE_SERVICE_FPS,
   TOTAL_DURATION_FRAMES as DEPLOY_INFERENCE_SERVICE_FRAMES,
 } from './data/deployInferenceServiceScript';
+import { HowLlmsGenerateText } from './compositions/HowLlmsGenerateText';
+import {
+  FPS as HOW_LLMS_GENERATE_TEXT_FPS,
+  TOTAL_DURATION_FRAMES as HOW_LLMS_GENERATE_TEXT_FRAMES,
+} from './data/howLlmsGenerateTextScript';
 
 // One <Composition> per experience Video artifact. Add the next one here as
 // each experience's content/video-script.md is written (see
@@ -30,6 +35,14 @@ export const RemotionRoot: React.FC = () => {
         component={DeployInferenceService}
         durationInFrames={DEPLOY_INFERENCE_SERVICE_FRAMES}
         fps={DEPLOY_INFERENCE_SERVICE_FPS}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="how-llms-generate-text-video"
+        component={HowLlmsGenerateText}
+        durationInFrames={HOW_LLMS_GENERATE_TEXT_FRAMES}
+        fps={HOW_LLMS_GENERATE_TEXT_FPS}
         width={1920}
         height={1080}
       />

@@ -41,3 +41,5 @@ The architecture is **experience-driven**: `Learner -> Capability -> Experience 
 ## Explicitly out of scope for Phase 0
 
 ASTRA, ATLAS, any LLM or OpenRouter integration, a web application, the AventiqLab instructor portal, backend infrastructure, AWS or any cloud services, video/TTS generation, databases, and authentication. This repository defines the blueprint those systems would eventually consume — it does not implement any of them.
+
+> **Beyond Phase 0 (2026-08-29):** alchemy is now building the ASTRA Content Studio generation pipeline (`POST /v1/generate` + `POST /v1/render`) as its automation Phase 1 — a deployable service with live-model artifact generation and a spec-driven `video-studio`. This supersedes the LLM/OpenRouter deferral above for work outside Phase 0. See [`docs/adr/0001-content-studio-generation-pipeline-supersedes-llm-deferral.md`](docs/adr/0001-content-studio-generation-pipeline-supersedes-llm-deferral.md).

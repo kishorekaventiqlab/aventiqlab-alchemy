@@ -7,8 +7,8 @@ import { Audio, Sequence, staticFile, interpolate } from 'remotion';
 // title card, and any other narration-free gaps).
 export type NarrationInterval = { startSeconds: number; endSeconds: number };
 
-const DUCK_VOLUME = 0.35; // relative to the bed's own quiet baseline (bed is already mixed at -18dBFS)
-const RAISED_VOLUME = 1.0;
+const DUCK_VOLUME = 0.12; // under narration - kept low so the music never competes with speech
+const RAISED_VOLUME = 0.35; // narration-free stretches (e.g. title card) - still a background bed, not a foreground track
 const TRANSITION_SECONDS = 0.6; // fade time in/out of a duck, avoids an audible volume "pump"
 
 const volumeAtSeconds = (tSec: number, narrationIntervals: NarrationInterval[]): number => {
