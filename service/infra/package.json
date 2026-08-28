@@ -1,0 +1,26 @@
+{
+  "name": "@aventiqlab/alchemy-service-infra",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CDK (TypeScript) for alchemy's Content Studio service — AL2 (request-service Lambda + Function URL) and AL7 (the content bucket).",
+  "bin": {
+    "alchemy-infra": "bin/app.ts"
+  },
+  "scripts": {
+    "synth": "cdk synth",
+    "diff": "cdk diff",
+    "deploy": "cdk deploy",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.170.0",
+    "constructs": "^10.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "aws-cdk": "^2.170.0",
+    "tsx": "^4.23.12",
+    "typescript": "^5.7.2"
+  }
+}
