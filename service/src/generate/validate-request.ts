@@ -47,12 +47,6 @@ export function validateGenerateRequest(body: unknown): ValidatedRequest {
     }
     throw new ServiceError("unsupported_type", `Unknown artifact_type "${at}".`);
   }
-  if (at === "video") {
-    throw new ServiceError(
-      "unsupported_type",
-      "`video` generation is not available yet — it depends on the video/v1 per-beat schema (AL8).",
-    );
-  }
   if (!isAl3SupportedType(at)) {
     throw new ServiceError("unsupported_type", `artifact_type "${at}" is not supported.`);
   }

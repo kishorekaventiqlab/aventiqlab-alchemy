@@ -7,8 +7,8 @@
 export const V1_ARTIFACT_TYPES = ["material", "video", "source_code_lab", "quiz", "skill_evaluator"] as const;
 export type V1ArtifactType = (typeof V1_ARTIFACT_TYPES)[number];
 
-/** Types AL3 generates today. `video` waits on AL8 (the video/v1 per-beat schema). */
-export const AL3_SUPPORTED_TYPES = ["material", "source_code_lab", "quiz", "skill_evaluator"] as const;
+/** Types AL3 generates. `video` landed with AL8 (the video/v1 per-beat schema). */
+export const AL3_SUPPORTED_TYPES = ["material", "source_code_lab", "quiz", "skill_evaluator", "video"] as const;
 export type Al3SupportedType = (typeof AL3_SUPPORTED_TYPES)[number];
 
 export function isAl3SupportedType(t: string): t is Al3SupportedType {
@@ -21,6 +21,7 @@ export const SCHEMA_VERSION: Record<Al3SupportedType, string> = {
   source_code_lab: "source-code-lab/v1",
   quiz: "quiz/v1",
   skill_evaluator: "skill-evaluator/v1",
+  video: "video/v1",
 };
 
 /** Request body — contract §7.1. */

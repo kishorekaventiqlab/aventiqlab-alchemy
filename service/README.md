@@ -8,7 +8,8 @@ only by astra (contract §7). Authorized by
 |---|---|---|
 | **AL2** | built | Fastify app, JWT auth, error envelope, `GET /health`, `GET /v1/whoami` |
 | **AL7** | built | the content bucket construct + grant helpers (`infra/lib/content-bucket.ts`) |
-| **AL3** | built (4 types) | `POST /v1/generate` — material/quiz/source_code_lab/skill_evaluator via OpenRouter. `video` → `unsupported_type` (waits on AL8). |
+| **AL3** | built (5 types) | `POST /v1/generate` — material/quiz/source_code_lab/skill_evaluator/**video** via OpenRouter. |
+| **AL8** | schema | `docs/video-v1-schema.md` + `src/generate/video-schema.ts` + `src/lib/video-stage-coverage.ts` (the shared stage-coverage lib). |
 | **AL6** | built | `POST /v1/artifacts/sign` — proxied presigned S3 GET (OQ-6), `artifact_expired` for aged-out scratch |
 | AL5 | planned | `POST /v1/render` — spec-driven video-studio render + mechanical QA |
 
@@ -38,8 +39,13 @@ src/
     selfcheck.ts    ajv + arithmetic checks before returning (astra stays authoritative)
     preview.ts      derive the §5.5 preview from content (no 2nd model call)
     store.ts        S3 writes: attempt-N.json (CD-1) + attempt-N.error.json (CD-2)
-    generator.ts    orchestrator (no astra-style retry loop)
+    generator.ts    orchestrator (no astra-style retry loop; fills video hashes)
     schemas.ts      per-type deliverable JSON Schemas
+    video-schema.ts video/v1 JSON Schema (AL8)
+    video-hash.ts   pinned narration_hash + spec_hash formulas (AL8 §1.5/§5)
+  lib/
+    video-stage-coverage.ts  the shared stage-coverage validator (AL8 OQ-5 —
+                             pure, versioned, publishable; astra vendors it)
   artifacts/        AL6 — POST /v1/artifacts/sign
     sign-route.ts   the route (behind requireServiceAuth)
     pointer.ts      parse + validate s3:// (bucket / prefix / experience_id / traversal)

@@ -183,12 +183,11 @@ test("the built prompt passes the untrusted context inside the wrapper, and prio
 
 // ---- Request validation & unsupported types --------------------------
 
-test("video -> unsupported_type (blocked on AL8)", async () => {
+test("battleground -> unsupported_type (video is now supported)", async () => {
   const { app } = await appWith(VALID_CONTENT.material);
-  const res = await authedPost(app, body("video"));
+  const res = await authedPost(app, body("battleground"));
   assert.equal(res.statusCode, 422);
   assert.equal(res.json().error.code, "unsupported_type");
-  assert.match(res.json().error.message, /AL8/);
   await app.close();
 });
 

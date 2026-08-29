@@ -8,6 +8,7 @@ import { DELIVERABLE_SCHEMA } from "./schemas.js";
 import { buildPrompt } from "./prompts.js";
 import { selfCheck } from "./selfcheck.js";
 import { derivePreview } from "./preview.js";
+import { narrationHash, specHash } from "./video-hash.js";
 import { SCHEMA_VERSION, type Al3SupportedType, type GenerateRequest, type GenerateResponse } from "./types.js";
 import type { ModelClient } from "./openrouter.js";
 import type { ArtifactStore } from "./store.js";
@@ -55,7 +56,17 @@ export async function generateArtifact(
     throw e;
   }
 
-  const check = selfCheck(type, content);
+  // Work on a copy — never mutate the parsed model output in place.
+  const working = structuredClone(content) as Record<string, unknown>;
+
+  // For video: alchemy computes the pinned hashes (the model is told not to).
+  // Done BEFORE self-check so the schema's `narration_hash`/`spec_hash` patterns
+  // validate against real values, not model guesses.
+  if (type === "video") {
+    fillVideoHashes(working);
+  }
+
+  const check = selfCheck(type, working);
   if (!check.ok) {
     const e = new ServiceError(
       "generation_failed",
@@ -65,7 +76,7 @@ export async function generateArtifact(
     throw e;
   }
 
-  const contentObj = content as Record<string, unknown>;
+  const contentObj = working;
   const preview = derivePreview(type, contentObj);
 
   const envelope = {
@@ -103,6 +114,20 @@ export async function generateArtifact(
 function extractRaw(err: ServiceError): string | null {
   const d = err.internalDetail as { raw2?: string; raw?: string } | undefined;
   return d?.raw2 ?? d?.raw ?? null;
+}
+
+/**
+ * Set each beat's narration_hash (§1.5) and the top-level spec_hash (§5) on a
+ * generated video_spec, overwriting anything the model produced. alchemy owns
+ * these values; the pinned formulas live in video-hash.ts.
+ */
+function fillVideoHashes(spec: Record<string, unknown>): void {
+  const voice = spec.voice ?? {};
+  const beats = Array.isArray(spec.beats) ? (spec.beats as Array<Record<string, unknown>>) : [];
+  for (const b of beats) {
+    b.narration_hash = narrationHash(String(b.narration ?? ""), voice);
+  }
+  spec.spec_hash = specHash(spec as never);
 }
 
 async function safeWriteError(

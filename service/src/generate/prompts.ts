@@ -6,7 +6,7 @@
 import type { Al3SupportedType, LearningContext } from "./types.js";
 import { renderContextBlock } from "./context.js";
 
-export const PROMPT_VERSION = "al3-2026-08-29";
+export const PROMPT_VERSION = "al3-2026-08-29b";
 
 const COMMON_SYSTEM = [
   "You generate exactly one learning artifact for the AventiqLab AI/ML Platform Engineering curriculum.",
@@ -54,6 +54,31 @@ const TYPE_INSTRUCTIONS: Record<Al3SupportedType, string> = {
     "- scoring_dimensions[].dimension is one of KNOWLEDGE, REASONING, APPLICATION, TROUBLESHOOTING, TRADE_OFF_ANALYSIS, COMMUNICATION, ENGINEERING_JUDGMENT. The weight_percent values across all scoring_dimensions MUST sum to exactly 100.",
     "- proficiency_levels[].level and pass_conditions.minimum_level are one of Beginner, Intermediate, Advanced, Expert, Architect. Provide all five levels.",
     "- Build follow_up_question_paths and misconception_indicators from the context's expected_decisions and failure_modes.",
+  ].join("\n"),
+
+  video: [
+    "Your job: the video/v1 Video Specification (video_spec) - a worked engineering-reasoning video, NOT a narrated reference doc. format is always \"animated-explainer\".",
+    "",
+    "NARRATIVE (docs/video-artifact-constitution.md): the beats must move through the reasoning spine IN ORDER - problem -> stakes -> curiosity -> context_mental_model -> options -> trade_offs -> investigation_demonstration -> decision -> best_practice -> takeaway. For target_duration_class \"standard\", every REQUIRED-tier stage (problem, curiosity, context_mental_model, investigation_demonstration, decision, best_practice) MUST appear as a beat's `stage`. Never introduce a technology by definition - it arrives as the answer to a question the viewer was made to ask.",
+    "",
+    "PER BEAT, produce IN THIS ORDER:",
+    "1. `visual` FIRST - the structured payload for that beat's `visual.kind`:",
+    "   - title:     { kind:\"title\", title, subtitle }",
+    "   - statement: { kind:\"statement\", eyebrow, eyebrow_color (accent|danger|warning|success), statement, support? }  -- for problem/stakes/curiosity/decision/best_practice",
+    "   - architecture: { kind:\"architecture\", nodes[]{node_kind (users|alb|service|pod|gpu|keda|scheduler|karpenter|node), label, sublabel, x (0-1920), y (0-1080)}, edges[]{from_index, to_index, flowing?}, highlight_index? }  -- keep nodes inside the 1920x1080 frame with margin",
+    "   - optionsCompare: { kind:\"optionsCompare\", options[]{name, solves, does_not_solve?, favored?} }  -- 1 option for the `options` stage, 2-3 for `trade_offs`",
+    "   - investigation: { kind:\"investigation\", keyframes[]{t, traffic, pod_count, gpu_pct, queue_depth, nodes[]{id,label,fill_percent,full?,incoming?}, pending_pods[], resolved_pods[], traffic_color?, gpu_color?}, segments[]{t, narration_ref, highlight_index?} }  -- ONE container beat, narration \"\"",
+    "   - investigation_segment: { kind:\"investigation_segment\", of_container (the container beat id), segment_index }  -- one beat PER narrated moment of the investigation; THIS beat carries the real narration",
+    "   - dashboard: { kind:\"dashboard\", service_name, alert?, panels[]{label, unit, color, points[], flat?}, focus_panel_index? }",
+    "   - terminal: { kind:\"terminal\", lines[]{kind (prompt|output), text}, focus_line_index? }",
+    "   - editor: { kind:\"editor\", filename, lines[]{kind (existing|added|comment|placeholder), text}, focus_line_index? }",
+    "   - recap: { kind:\"recap\", items[] (3-5 short lines) }  -- the takeaway stage",
+    "2. `on_screen` - a 1-2 sentence PROSE description of what that beat's `visual` shows (elements, state, what's emphasized). It must faithfully describe the `visual` you just wrote - a reviewer compares it against the rendered frame.",
+    "3. `narration` - the VERBATIM spoken words for that beat. One engineer explaining to another. No markup, no 'CAPTION:', no stage directions. A silent title beat has narration \"\".",
+    "4. `target_duration_sec` - your estimate of the spoken length (~ words / 2.5). For an `investigation` container beat, the sum of its segments' targets.",
+    "5. `id` - \"beat-01\", \"beat-02\", ... zero-padded, optionally a slug (\"beat-07-investigation\"). Unique. `narration_ref` in an investigation segment points at that segment beat's own id.",
+    "",
+    "DO NOT set `narration_hash` or `spec_hash` - alchemy computes those. Set `schema_version` to \"video/v1\", echo `experience_id`, set `voice` to {provider:\"chatterbox-v3\", voice_id:\"default\", params:{exaggeration:0.5, cfg_weight:0.5}}, and set `estimated_duration_minutes` and `target_duration_class`.",
   ].join("\n"),
 };
 
