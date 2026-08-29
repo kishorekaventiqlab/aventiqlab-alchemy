@@ -7,7 +7,9 @@
     "start": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts",
     "still": "remotion still src/index.ts",
-    "generate:audio": "tsx scripts/generate-audio.ts"
+    "generate:audio": "tsx scripts/generate-audio.ts",
+    "test": "node --import tsx --test $(find src -name '*.test.ts')",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "react": "^18.3.1",
