@@ -76,16 +76,26 @@ export class AlchemyContentStudioStack extends Stack {
         // env -> SM precedence). Pass the ARN, not the value.
         ALCHEMY_SERVICE_JWT_SECRET_ARN: jwtSecret.secretArn,
         ALCHEMY_SERVICE_JWT_SECRET_JSON_KEY: "ALCHEMY_SERVICE_JWT_SECRET",
+        // AL3 persists generated artifacts here; AL6 validates + signs pointers
+        // against this bucket name.
+        ALCHEMY_CONTENT_BUCKET: content.bucket.bucketName,
+        // OPENROUTER_API_KEY_ARN is added when the secret value is provisioned
+        // (AL10-adjacent). Until then /v1/generate returns not_configured.
       },
     });
 
     jwtSecret.grantRead(service);
 
-    // S3 grants are wired by the tasks that need them, not here:
-    //   AL3 -> content.grantGeneratedWrite(service) + content.grantReadForPresign(service)
-    //   AL5 -> content.grantRendersWrite(renderRole) + content.grantPromoteToProduced(renderRole)
-    // The ContentBucket construct (AL7) exposes them; nothing is attached yet.
-    void content;
+    // The request Lambda serves /v1/generate (AL3) and /v1/artifacts/sign (AL6):
+    //   AL3 -> write generated artifacts
+    //   AL6 -> HeadObject + presign a GET across all three prefixes
+    // A presigned URL grants exactly the signer's GetObject, so grantReadForPresign
+    // is both AL3's read grant and AL6's presign capability.
+    content.grantGeneratedWrite(service);
+    content.grantReadForPresign(service);
+    // Still unattached (AL5 wires these to its render compute role, not here):
+    //   content.grantRendersWrite(renderRole)
+    //   content.grantPromoteToProduced(renderRole)
 
     const fnUrl = service.addFunctionUrl({
       authType: FunctionUrlAuthType.NONE, // JWT preHandler is the gate

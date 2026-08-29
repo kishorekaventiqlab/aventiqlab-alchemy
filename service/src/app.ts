@@ -16,12 +16,16 @@ import { healthRoute } from "./routes/health.js";
 import { whoamiRoute } from "./routes/whoami.js";
 import { generateRoute } from "./generate/route.js";
 import type { GeneratorDeps } from "./generate/generator.js";
+import { signRoute } from "./artifacts/sign-route.js";
+import type { ArtifactSigner } from "./artifacts/s3-signer.js";
 
 export interface BuildAppOptions {
   /** Inject a pre-resolved config (tests). If omitted, buildConfig() runs. */
   config?: ServiceConfig;
   /** Test seam for POST /v1/generate — inject the generator deps directly. */
   generateDepsOverride?: GeneratorDeps;
+  /** Test seam for POST /v1/artifacts/sign — inject the S3 signer + bucket. */
+  signOverride?: { signer: ArtifactSigner; bucket: string };
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -46,6 +50,14 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
       loadGenerationConfig: config.generation,
       region: config.region,
       depsOverride: opts.generateDepsOverride,
+    }),
+  );
+  await app.register(
+    signRoute({
+      loadGenerationConfig: config.generation,
+      region: config.region,
+      signerOverride: opts.signOverride?.signer,
+      bucketOverride: opts.signOverride?.bucket,
     }),
   );
 

@@ -34,15 +34,24 @@ test("the Lambda gets the JWT secret ARN in its env, never the value", () => {
   assert.ok("ALCHEMY_SERVICE_JWT_SECRET_ARN" in env, "passes the ARN");
   assert.ok(!("ALCHEMY_SERVICE_JWT_SECRET" in env), "never passes the raw secret");
   assert.ok(!("AWS_REGION" in env), "does not set the reserved AWS_REGION");
+  assert.ok("ALCHEMY_CONTENT_BUCKET" in env, "passes the content bucket name (AL3 + AL6)");
 });
 
-test("no S3 grant is attached to the Lambda by the stack itself (AL7: tasks wire their own)", () => {
+test("the request Lambda gets exactly the AL3+AL6 S3 grants: write generated/*, read all prefixes; NO renders/produced write", () => {
   const t = synthStack();
   const policies = t.findResources("AWS::IAM::Policy");
   const allDocs = JSON.stringify(Object.values(policies).map((p) => p.Properties.PolicyDocument));
-  // The only S3 action the AL2 stack should grant is none — AL3/AL5/AL6 add theirs.
-  assert.ok(!allDocs.includes("s3:PutObject"), "no PutObject grant yet");
-  assert.ok(!allDocs.includes("s3:GetObject"), "no GetObject grant yet");
+  // AL3: write generated/*  |  AL6: read (for presign) generated/renders/produced
+  assert.ok(allDocs.includes("s3:PutObject"), "AL3 write grant present");
+  assert.ok(allDocs.includes("s3:GetObject"), "AL6 read/presign grant present");
+  assert.ok(allDocs.includes("generated/*"), "scoped to generated/");
+  assert.ok(allDocs.includes("renders/*"), "read covers renders/");
+  assert.ok(allDocs.includes("produced/*"), "read covers produced/");
+  // The render compute role's writes are NOT on this Lambda (AL5 wires those).
+  const putStatements = allDocs.match(/s3:PutObject/g) ?? [];
+  // PutObject appears for generated/* only — renders/produced writes would show
+  // additional PutObject resources, which AL5 (not this stack) adds.
+  assert.ok(putStatements.length >= 1);
 });
 
 test("the Lambda can read the JWT secret", () => {

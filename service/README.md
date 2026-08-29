@@ -9,8 +9,8 @@ only by astra (contract §7). Authorized by
 | **AL2** | built | Fastify app, JWT auth, error envelope, `GET /health`, `GET /v1/whoami` |
 | **AL7** | built | the content bucket construct + grant helpers (`infra/lib/content-bucket.ts`) |
 | **AL3** | built (4 types) | `POST /v1/generate` — material/quiz/source_code_lab/skill_evaluator via OpenRouter. `video` → `unsupported_type` (waits on AL8). |
+| **AL6** | built | `POST /v1/artifacts/sign` — proxied presigned S3 GET (OQ-6), `artifact_expired` for aged-out scratch |
 | AL5 | planned | `POST /v1/render` — spec-driven video-studio render + mechanical QA |
-| AL6 | planned | `POST /v1/artifacts/sign` — presigned S3 GET, `artifact_expired` |
 
 ## Layout
 
@@ -40,7 +40,12 @@ src/
     store.ts        S3 writes: attempt-N.json (CD-1) + attempt-N.error.json (CD-2)
     generator.ts    orchestrator (no astra-style retry loop)
     schemas.ts      per-type deliverable JSON Schemas
-infra/              CDK (TS) — AL2 Lambda + Function URL, AL7 bucket
+  artifacts/        AL6 — POST /v1/artifacts/sign
+    sign-route.ts   the route (behind requireServiceAuth)
+    pointer.ts      parse + validate s3:// (bucket / prefix / experience_id / traversal)
+    s3-signer.ts    HeadObject + presigned GET (the mockable S3 seam)
+    content-type.ts suffix -> mime fallback
+infra/              CDK (TS) — AL2 Lambda + Function URL, AL7 bucket, AL3/AL6 grants
 Dockerfile          Lambda container image
 ```
 
