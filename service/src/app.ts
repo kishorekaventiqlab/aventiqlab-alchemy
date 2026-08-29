@@ -14,10 +14,14 @@ import authPlugin from "./auth/plugin.js";
 import { jwtVerifierFromConfig } from "./auth/jwt.js";
 import { healthRoute } from "./routes/health.js";
 import { whoamiRoute } from "./routes/whoami.js";
+import { generateRoute } from "./generate/route.js";
+import type { GeneratorDeps } from "./generate/generator.js";
 
 export interface BuildAppOptions {
   /** Inject a pre-resolved config (tests). If omitted, buildConfig() runs. */
   config?: ServiceConfig;
+  /** Test seam for POST /v1/generate — inject the generator deps directly. */
+  generateDepsOverride?: GeneratorDeps;
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -37,6 +41,13 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
 
   await app.register(healthRoute);
   await app.register(whoamiRoute);
+  await app.register(
+    generateRoute({
+      loadGenerationConfig: config.generation,
+      region: config.region,
+      depsOverride: opts.generateDepsOverride,
+    }),
+  );
 
   return app;
 }

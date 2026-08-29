@@ -25,7 +25,31 @@ export interface ServiceConfig {
   /** Local HTTP port (ignored under Lambda). */
   port: number;
   nodeEnv: string;
+  /** AL3 generation config. Resolved lazily — see loadGenerationConfig(). */
+  generation: GenerationConfigLoader;
 }
+
+export interface GenerationConfig {
+  /** OpenRouter API key. Value comes later (ops); the PATH is what AL3 builds. */
+  openRouterApiKey: string;
+  /** OpenRouter base URL (OpenAI-compatible). */
+  openRouterBaseUrl: string;
+  /** Model id per artifact type (env-overridable, so tuning needs no redeploy). */
+  modelByType: Record<string, string>;
+  /** Default model when a per-type override is absent. */
+  defaultModel: string;
+  /** The S3 bucket for generated artifacts (AL7). */
+  contentBucket: string;
+  /** Milliseconds before a model call is abandoned as model_provider_timeout. */
+  modelTimeoutMs: number;
+}
+
+/**
+ * Generation config is resolved on first use (not at startup) so the service
+ * still boots for /health + /v1/whoami without OPENROUTER_API_KEY set. A
+ * missing key surfaces as `not_configured` on the first /v1/generate call.
+ */
+export type GenerationConfigLoader = () => Promise<GenerationConfig>;
 
 const CONTRACT_ISSUER = "aventiqlab-astra";
 const CONTRACT_AUDIENCE = "aventiqlab-alchemy";
@@ -117,6 +141,41 @@ export async function buildConfig(): Promise<ServiceConfig> {
     logLevel: process.env.LOG_LEVEL || "info",
     port: intFromEnv("PORT", 3000),
     nodeEnv: process.env.NODE_ENV || "development",
+    generation: () => loadGenerationConfig(region),
+  };
+}
+
+/**
+ * Resolve generation config on demand. Throws ConfigError (-> not_configured)
+ * if OPENROUTER_API_KEY / the content bucket can't be resolved.
+ */
+export async function loadGenerationConfig(region: string): Promise<GenerationConfig> {
+  const openRouterApiKey = await resolveSecret({
+    envVar: "OPENROUTER_API_KEY",
+    arnEnvVar: "OPENROUTER_API_KEY_ARN",
+    secretJsonKey: process.env.OPENROUTER_API_KEY_JSON_KEY || undefined,
+    region,
+  });
+
+  const contentBucket = process.env.ALCHEMY_CONTENT_BUCKET;
+  if (!contentBucket) {
+    throw new ConfigError("ALCHEMY_CONTENT_BUCKET is not set — the AL7 bucket name is required for /v1/generate.");
+  }
+
+  const defaultModel = process.env.OPENROUTER_MODEL_DEFAULT || "anthropic/claude-sonnet-4";
+
+  return {
+    openRouterApiKey,
+    openRouterBaseUrl: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
+    defaultModel,
+    modelByType: {
+      material: process.env.OPENROUTER_MODEL_MATERIAL || defaultModel,
+      quiz: process.env.OPENROUTER_MODEL_QUIZ || defaultModel,
+      source_code_lab: process.env.OPENROUTER_MODEL_SOURCE_CODE_LAB || defaultModel,
+      skill_evaluator: process.env.OPENROUTER_MODEL_SKILL_EVALUATOR || defaultModel,
+    },
+    contentBucket,
+    modelTimeoutMs: intFromEnv("OPENROUTER_TIMEOUT_MS", 120_000),
   };
 }
 

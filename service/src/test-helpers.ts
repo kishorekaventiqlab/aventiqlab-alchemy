@@ -16,6 +16,12 @@ export const TEST_CONFIG: ServiceConfig = {
   logLevel: "silent",
   port: 0,
   nodeEnv: "test",
+  // Default: generation config resolution fails (no key) -> not_configured.
+  // Tests that exercise /v1/generate pass a generateDepsOverride to buildApp
+  // instead, so this loader is never actually called for those.
+  generation: async () => {
+    throw new Error("OPENROUTER_API_KEY not set in tests — use generateDepsOverride");
+  },
 };
 
 export interface MintOptions {

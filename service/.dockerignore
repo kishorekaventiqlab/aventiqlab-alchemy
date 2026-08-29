@@ -4,6 +4,7 @@ dist
 cdk.out
 **/*.test.ts
 src/test-helpers.ts
+src/generate/fixtures.ts
 scripts
 .env
 .env.local

@@ -6,11 +6,11 @@ only by astra (contract §7). Authorized by
 
 | Task | Status | What it adds |
 |---|---|---|
-| **AL2** (this) | built | Fastify app, JWT auth, error envelope, `GET /health`, `GET /v1/whoami` |
-| AL3 | planned | `POST /v1/generate` — one artifact's content via OpenRouter |
+| **AL2** | built | Fastify app, JWT auth, error envelope, `GET /health`, `GET /v1/whoami` |
+| **AL7** | built | the content bucket construct + grant helpers (`infra/lib/content-bucket.ts`) |
+| **AL3** | built (4 types) | `POST /v1/generate` — material/quiz/source_code_lab/skill_evaluator via OpenRouter. `video` → `unsupported_type` (waits on AL8). |
 | AL5 | planned | `POST /v1/render` — spec-driven video-studio render + mechanical QA |
 | AL6 | planned | `POST /v1/artifacts/sign` — presigned S3 GET, `artifact_expired` |
-| AL7 | infra written | the content bucket (`infra/lib/content-bucket.ts`) |
 
 ## Layout
 
@@ -29,6 +29,17 @@ src/
   routes/
     health.ts       GET /health   (unauthed)
     whoami.ts        GET /v1/whoami (authed stub)
+  generate/         AL3 — POST /v1/generate
+    route.ts        the route (behind requireServiceAuth)
+    validate-request.ts  §7.1 body checks; version from context.schema_version (CD-4)
+    openrouter.ts   OpenRouter via the openai SDK; one reparse; §9 error mapping
+    context.ts      renders the §5.4 Learning IR as UNTRUSTED delimited text (CD-3)
+    prompts.ts      versioned per-type prompt templates
+    selfcheck.ts    ajv + arithmetic checks before returning (astra stays authoritative)
+    preview.ts      derive the §5.5 preview from content (no 2nd model call)
+    store.ts        S3 writes: attempt-N.json (CD-1) + attempt-N.error.json (CD-2)
+    generator.ts    orchestrator (no astra-style retry loop)
+    schemas.ts      per-type deliverable JSON Schemas
 infra/              CDK (TS) — AL2 Lambda + Function URL, AL7 bucket
 Dockerfile          Lambda container image
 ```
