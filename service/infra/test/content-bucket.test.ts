@@ -67,9 +67,37 @@ test("lifecycle: generated/ and renders/ expire at scratchRetentionDays; produce
           NoncurrentVersionExpiration: { NoncurrentDays: 30 },
           Status: "Enabled",
         }),
+        Match.objectLike({
+          Id: "expire-tts-cache",
+          Prefix: "tts-cache/",
+          ExpirationInDays: 90,
+          Status: "Enabled",
+        }),
       ]),
     },
   });
+});
+
+test("AL5/CD-21: tts-cache/ expires at a fixed 90 days regardless of scratchRetentionDays", () => {
+  const t = synth(7).template(); // a different scratchRetentionDays
+  const buckets = t.findResources("AWS::S3::Bucket");
+  const rules = Object.values(buckets)[0]!.Properties.LifecycleConfiguration.Rules as Array<Record<string, unknown>>;
+  const ttsRule = rules.find((r) => r.Prefix === "tts-cache/");
+  assert.ok(ttsRule, "tts-cache/ rule exists");
+  assert.equal(ttsRule!.ExpirationInDays, 90, "tts-cache/ is not tied to scratchRetentionDays");
+});
+
+test("grantTtsCache grants read+write scoped to tts-cache/*, not the whole bucket", () => {
+  const { stack, bucket, template } = synth();
+  const role = new Role(stack, "AL5Role", { assumedBy: new ServicePrincipal("ecs-tasks.amazonaws.com") });
+  bucket.grantTtsCache(role);
+  const t = template();
+  const policies = t.findResources("AWS::IAM::Policy");
+  const doc = JSON.stringify(Object.values(policies)[0]!.Properties.PolicyDocument);
+  assert.ok(doc.includes("s3:GetObject"));
+  assert.ok(doc.includes("s3:PutObject"));
+  assert.ok(doc.includes("tts-cache/*"));
+  assert.ok(!doc.includes("generated/*"));
 });
 
 test("produced/ lifecycle rule has NO object expiration", () => {

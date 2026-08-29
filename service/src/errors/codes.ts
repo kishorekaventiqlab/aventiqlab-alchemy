@@ -28,6 +28,10 @@ export const ERROR_CODES = {
   generation_failed: { httpStatus: 502, retryable: true },
   /** AL5: the render pipeline failed. */
   render_failed: { httpStatus: 502, retryable: true },
+  /** AL5: unknown render_job_id (or one belonging to a different experience). */
+  render_job_not_found: { httpStatus: 404, retryable: false },
+  /** AL5: a render is already in progress for this experience, or a call is out of pipeline order. */
+  invalid_pipeline_state: { httpStatus: 409, retryable: false },
   /** transient OpenRouter/model outage. */
   model_provider_unavailable: { httpStatus: 503, retryable: true },
   /** model call timed out. */

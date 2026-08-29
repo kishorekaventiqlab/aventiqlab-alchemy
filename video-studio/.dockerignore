@@ -1,0 +1,7 @@
+node_modules
+out
+tools/chatterbox/.venv
+public/audio
+**/*.test.ts
+.env
+.env.local

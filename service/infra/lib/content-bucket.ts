@@ -35,6 +35,8 @@ export const PREFIX = {
   generated: "generated/",
   renders: "renders/",
   produced: "produced/",
+  /** AL5 / CD-21: content-addressed TTS cache, keyed on narration_hash. */
+  ttsCache: "tts-cache/",
 } as const;
 
 export interface ContentBucketProps {
@@ -85,6 +87,17 @@ export class ContentBucket extends Construct {
           noncurrentVersionExpiration: Duration.days(30),
           abortIncompleteMultipartUploadAfter: Duration.days(7),
         },
+        {
+          // tts-cache/* (CD-21): expire an entry 90 days after it was last
+          // accessed. A narration_hash that stops appearing in specs is dead
+          // audio. S3 lifecycle can't do "last access", so approximate with
+          // creation age — a re-put on a cache hit is cheap and refreshes it.
+          id: "expire-tts-cache",
+          prefix: PREFIX.ttsCache,
+          expiration: Duration.days(90),
+          abortIncompleteMultipartUploadAfter: Duration.days(7),
+          noncurrentVersionExpiration: Duration.days(7),
+        },
       ],
     });
   }
@@ -122,5 +135,16 @@ export class ContentBucket extends Construct {
     this.bucket.grantRead(grantee, `${PREFIX.generated}*`);
     this.bucket.grantRead(grantee, `${PREFIX.renders}*`);
     return this.bucket.grantRead(grantee, `${PREFIX.produced}*`);
+  }
+
+  /** AL5 render compute: read + write the content-addressed TTS cache (CD-21). */
+  grantTtsCache(grantee: IGrantable): Grant {
+    this.bucket.grantRead(grantee, `${PREFIX.ttsCache}*`);
+    return this.bucket.grantPut(grantee, `${PREFIX.ttsCache}*`);
+  }
+
+  /** AL5 render compute: read a stashed request + prior attempts (renders/*). */
+  grantRendersRead(grantee: IGrantable): Grant {
+    return this.bucket.grantRead(grantee, `${PREFIX.renders}*`);
   }
 }

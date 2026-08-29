@@ -22,6 +22,10 @@ export const TEST_CONFIG: ServiceConfig = {
   generation: async () => {
     throw new Error("OPENROUTER_API_KEY not set in tests — use generateDepsOverride");
   },
+  // Same idea: render tests pass renderOverride / promoteOverride to buildApp.
+  render: async () => {
+    throw new Error("render config not set in tests — use renderOverride");
+  },
 };
 
 export interface MintOptions {

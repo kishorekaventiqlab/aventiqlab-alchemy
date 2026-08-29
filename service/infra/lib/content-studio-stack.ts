@@ -1,17 +1,15 @@
 /**
- * AL2 + AL7 stack.
+ * AL2 + AL7 + AL5 stack.
  *
  * AL2: the request-service Lambda (container image of ../.. — the Fastify app
  * via src/lambda.ts) behind a Function URL. AuthType NONE at the edge — the
  * JWT preHandler is the actual gate.
  *
- * AL7: the content bucket (see content-bucket.ts) — lifecycle, encryption,
- * public-access block, versioning, and the reusable grant* helpers. No grant
- * is attached to a principal here; the consuming task wires its own.
+ * AL7: the content bucket (see content-bucket.ts).
  *
- * NOT in this stack yet: AL5 render compute (Fargate/Batch — its own construct),
- * the OPENROUTER_API_KEY secret wiring (AL3), API Gateway (only if we outgrow
- * the Function URL).
+ * AL5: the render-job DynamoDB table + the one-shot Fargate render worker
+ * (see render-compute.ts). The Lambda does POST /v1/render (202 + RunTask) +
+ * GET /v1/render/{id} + POST /v1/artifacts/promote; the Fargate task renders.
  *
  * Nothing here is deployed as part of Phase 2 — `cdk deploy` is a later,
  * explicitly-authorized step (per-repo deploy roles are not yet provisioned).
@@ -27,6 +25,7 @@ import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import { ContentBucket } from "./content-bucket.js";
+import { RenderCompute } from "./render-compute.js";
 
 export class AlchemyContentStudioStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
@@ -86,16 +85,36 @@ export class AlchemyContentStudioStack extends Stack {
 
     jwtSecret.grantRead(service);
 
-    // The request Lambda serves /v1/generate (AL3) and /v1/artifacts/sign (AL6):
+    // The request Lambda serves /v1/generate (AL3), /v1/artifacts/sign (AL6),
+    // POST+GET /v1/render (AL5), and POST /v1/artifacts/promote (AL5):
     //   AL3 -> write generated artifacts
     //   AL6 -> HeadObject + presign a GET across all three prefixes
     // A presigned URL grants exactly the signer's GetObject, so grantReadForPresign
     // is both AL3's read grant and AL6's presign capability.
     content.grantGeneratedWrite(service);
     content.grantReadForPresign(service);
-    // Still unattached (AL5 wires these to its render compute role, not here):
-    //   content.grantRendersWrite(renderRole)
-    //   content.grantPromoteToProduced(renderRole)
+    // AL5 promote: HeadObject (covered by grantReadForPresign) + CopyObject's
+    // write half into produced/*.
+    content.grantProducedWrite(service);
+    // AL5 POST /v1/render stashes the request body under renders/*.
+    content.grantRendersWrite(service);
+
+    // ---- AL5: render compute (job table + Fargate worker) -----------------
+    const renderCompute = new RenderCompute(this, "Render", {
+      content,
+      serviceSecret: jwtSecret,
+      jobTtlDays: 30,
+    });
+    renderCompute.grantLambdaJobAccess(service);
+    service.addToRolePolicy(renderCompute.runTaskStatement);
+    service.addToRolePolicy(renderCompute.passRoleStatement);
+
+    service.addEnvironment("ALCHEMY_RENDER_JOBS_TABLE", renderCompute.jobsTable.tableName);
+    service.addEnvironment("ALCHEMY_RENDER_ECS_CLUSTER", renderCompute.cluster.clusterArn);
+    service.addEnvironment("ALCHEMY_RENDER_TASK_DEFINITION", renderCompute.taskDefinitionArn);
+    service.addEnvironment("ALCHEMY_RENDER_CONTAINER_NAME", renderCompute.containerName);
+    service.addEnvironment("ALCHEMY_RENDER_SUBNETS", renderCompute.subnetIds.join(","));
+    service.addEnvironment("ALCHEMY_RENDER_SECURITY_GROUPS", renderCompute.securityGroupIds.join(","));
 
     const fnUrl = service.addFunctionUrl({
       authType: FunctionUrlAuthType.NONE, // JWT preHandler is the gate
@@ -104,5 +123,7 @@ export class AlchemyContentStudioStack extends Stack {
     new CfnOutput(this, "ServiceUrl", { value: fnUrl.url });
     new CfnOutput(this, "ContentBucketName", { value: content.bucket.bucketName });
     new CfnOutput(this, "ServiceJwtSecretArn", { value: jwtSecret.secretArn });
+    new CfnOutput(this, "RenderJobsTableName", { value: renderCompute.jobsTable.tableName });
+    new CfnOutput(this, "RenderEcsClusterArn", { value: renderCompute.cluster.clusterArn });
   }
 }

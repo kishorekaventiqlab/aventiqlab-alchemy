@@ -18,6 +18,11 @@ import { generateRoute } from "./generate/route.js";
 import type { GeneratorDeps } from "./generate/generator.js";
 import { signRoute } from "./artifacts/sign-route.js";
 import type { ArtifactSigner } from "./artifacts/s3-signer.js";
+import { renderRoute } from "./render/route.js";
+import { promoteRoute } from "./render/promote-route.js";
+import type { RenderJobStore } from "./render/job-store.js";
+import type { RenderLauncher } from "./render/launcher.js";
+import type { PromoteS3 } from "./render/promote-route.js";
 
 export interface BuildAppOptions {
   /** Inject a pre-resolved config (tests). If omitted, buildConfig() runs. */
@@ -26,6 +31,10 @@ export interface BuildAppOptions {
   generateDepsOverride?: GeneratorDeps;
   /** Test seam for POST /v1/artifacts/sign — inject the S3 signer + bucket. */
   signOverride?: { signer: ArtifactSigner; bucket: string };
+  /** Test seam for POST/GET /v1/render — inject the job store + task launcher. */
+  renderOverride?: { store: RenderJobStore; launcher: RenderLauncher };
+  /** Test seam for POST /v1/artifacts/promote. */
+  promoteOverride?: { s3: PromoteS3; bucket: string };
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -58,6 +67,20 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
       region: config.region,
       signerOverride: opts.signOverride?.signer,
       bucketOverride: opts.signOverride?.bucket,
+    }),
+  );
+  await app.register(
+    renderRoute({
+      loadRenderConfig: config.render,
+      region: config.region,
+      override: opts.renderOverride,
+    }),
+  );
+  await app.register(
+    promoteRoute({
+      loadRenderConfig: config.render,
+      region: config.region,
+      override: opts.promoteOverride,
     }),
   );
 

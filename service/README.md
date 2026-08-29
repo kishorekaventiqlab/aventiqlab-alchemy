@@ -11,7 +11,7 @@ only by astra (contract §7). Authorized by
 | **AL3** | built (5 types) | `POST /v1/generate` — material/quiz/source_code_lab/skill_evaluator/**video** via OpenRouter. |
 | **AL8** | schema | `docs/video-v1-schema.md` + `src/generate/video-schema.ts` + `src/lib/video-stage-coverage.ts` (the shared stage-coverage lib). |
 | **AL6** | built | `POST /v1/artifacts/sign` — proxied presigned S3 GET (OQ-6), `artifact_expired` for aged-out scratch |
-| AL5 | planned | `POST /v1/render` — spec-driven video-studio render + mechanical QA |
+| **AL5 (+AL9)** | built | async `POST /v1/render` + `GET /v1/render/{id}` (CD-17) + `POST /v1/artifacts/promote` (CD-18). One-shot Fargate render worker in `video-studio/src/render/`. |
 
 ## Layout
 
@@ -51,8 +51,39 @@ src/
     pointer.ts      parse + validate s3:// (bucket / prefix / experience_id / traversal)
     s3-signer.ts    HeadObject + presigned GET (the mockable S3 seam)
     content-type.ts suffix -> mime fallback
-infra/              CDK (TS) — AL2 Lambda + Function URL, AL7 bucket, AL3/AL6 grants
-Dockerfile          Lambda container image
+  render/           AL5 — async POST/GET /v1/render + POST /v1/artifacts/promote
+    types.ts        request/response + RenderJob (DynamoDB) shapes
+    route.ts        POST /v1/render (202 + RunTask) + GET /v1/render/{id} (poll)
+    promote-route.ts POST /v1/artifacts/promote (CD-18) — CopyObject to produced/
+    plan-rerender.ts planReRender() — pure fn, vision_qa_feedback routing (CD-20)
+    job-store.ts    the render-job store (DynamoDB `alchemy-render-jobs`)
+    launcher.ts     stash the request to S3 + ecs:RunTask the render worker
+    cache-plan.ts   which narration units are TTS-cache hits/misses
+    id.ts           ULID render_job_id generator
+infra/              CDK (TS) — AL2 Lambda + Function URL, AL7 bucket, AL5 render
+                    compute (DynamoDB + Fargate task), AL3/AL5/AL6 grants
+Dockerfile          Lambda container image (request service)
+```
+
+The **render worker** itself (the Fargate task's code) lives in
+`video-studio/src/render/` — it needs the video-studio render toolchain
+(`loadVideoSpec`, Remotion, Chatterbox), not the Lambda's Fastify app:
+
+```
+video-studio/src/render/
+  renderJob.ts      runRenderJob() — the orchestration, every I/O step injected
+  worker.ts         the Fargate entrypoint (reads env, wires the real steps)
+  s3AudioCache.ts   the tts-cache/{narration_hash}.wav S3 cache (CD-21)
+  subprocess.ts     remotion render / ffmpeg poster / ffprobe / validate-render.ts
+  beatRegen.ts      the single-beat narration_flaw regen (OpenRouter)
+  videoHash.ts      narration_hash / spec_hash (a hand-kept copy of the
+                    service's video-hash.ts — contract §3.8)
+  jobUpdater.ts     the worker's write-only view of the job record
+video-studio/src/audio/synthesize.ts   synthesizeAudioPlan() — the reusable
+                                        audio-synthesis core; generate-audio.ts
+                                        is now a thin wrapper over it
+video-studio/Dockerfile.render          AL9 — video-studio + a Chatterbox V3
+                                        CPU venv, weights pre-pulled at build
 ```
 
 ## Local dev

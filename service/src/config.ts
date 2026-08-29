@@ -27,7 +27,30 @@ export interface ServiceConfig {
   nodeEnv: string;
   /** AL3 generation config. Resolved lazily — see loadGenerationConfig(). */
   generation: GenerationConfigLoader;
+  /** AL5 render orchestration config. Resolved lazily — see loadRenderConfig(). */
+  render: RenderConfigLoader;
 }
+
+export interface RenderConfig {
+  /** The AL7 bucket (generated/renders/produced/tts-cache). */
+  contentBucket: string;
+  /** DynamoDB table for render jobs (AL5 §3). */
+  renderJobsTable: string;
+  /** ECS cluster ARN/name the render worker task runs in. */
+  ecsCluster: string;
+  /** The render worker task definition family:revision (or family). */
+  renderTaskDefinition: string;
+  /** Subnets for the Fargate task ENI. */
+  subnets: string[];
+  /** Security groups for the Fargate task ENI. */
+  securityGroups: string[];
+  /** Container name inside the task def (for RunTask overrides). */
+  renderContainerName: string;
+  /** Days a render job record lives (DynamoDB TTL). */
+  jobTtlDays: number;
+}
+
+export type RenderConfigLoader = () => Promise<RenderConfig>;
 
 export interface GenerationConfig {
   /** OpenRouter API key. Value comes later (ops); the PATH is what AL3 builds. */
@@ -142,6 +165,31 @@ export async function buildConfig(): Promise<ServiceConfig> {
     port: intFromEnv("PORT", 3000),
     nodeEnv: process.env.NODE_ENV || "development",
     generation: () => loadGenerationConfig(region),
+    render: () => loadRenderConfig(),
+  };
+}
+
+/**
+ * Resolve render orchestration config on demand. Throws ConfigError
+ * (-> not_configured) if a required value is missing. Only POST /v1/render and
+ * POST /v1/artifacts/promote need this — /health, /v1/whoami, /v1/generate,
+ * /v1/artifacts/sign boot without it.
+ */
+export async function loadRenderConfig(): Promise<RenderConfig> {
+  const need = (name: string): string => {
+    const v = process.env[name];
+    if (!v) throw new ConfigError(`${name} is not set — required for /v1/render.`);
+    return v;
+  };
+  return {
+    contentBucket: need("ALCHEMY_CONTENT_BUCKET"),
+    renderJobsTable: need("ALCHEMY_RENDER_JOBS_TABLE"),
+    ecsCluster: need("ALCHEMY_RENDER_ECS_CLUSTER"),
+    renderTaskDefinition: need("ALCHEMY_RENDER_TASK_DEFINITION"),
+    subnets: need("ALCHEMY_RENDER_SUBNETS").split(",").map((s) => s.trim()).filter(Boolean),
+    securityGroups: need("ALCHEMY_RENDER_SECURITY_GROUPS").split(",").map((s) => s.trim()).filter(Boolean),
+    renderContainerName: process.env.ALCHEMY_RENDER_CONTAINER_NAME || "render",
+    jobTtlDays: intFromEnv("ALCHEMY_RENDER_JOB_TTL_DAYS", 30),
   };
 }
 

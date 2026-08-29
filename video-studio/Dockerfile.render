@@ -1,0 +1,55 @@
+# AL5/AL9 — the one-shot Fargate render worker image.
+#
+# Bundles: video-studio (Node/Remotion) + headless Chromium (via
+# @remotion/renderer's own download) + ffmpeg/ffprobe + a Chatterbox V3 CPU
+# Python venv with weights pre-pulled at build time (AL9 — keeps the exact
+# voice, zero per-use cost, offline; see docs/content-studio-al5-render-plan.md §5).
+#
+# Built from the video-studio/ directory (CDK:
+# ContainerImage.fromAsset("../../video-studio", { file: "Dockerfile.render" })
+# from service/infra/lib/render-compute.ts).
+FROM node:20-bookworm AS base
+
+# ffmpeg/ffprobe for poster extraction + duration probing; Python for Chatterbox;
+# Chromium deps for Remotion's headless render.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    python3.11 python3.11-venv python3-pip \
+    ca-certificates curl \
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 \
+    libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 \
+    fonts-liberation \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# ---- Chatterbox V3 CPU venv (AL9) ----------------------------------------
+COPY tools/chatterbox/requirements.txt tools/chatterbox/requirements.txt
+RUN python3.11 -m venv /app/tools/chatterbox/.venv \
+    && /app/tools/chatterbox/.venv/bin/pip install --upgrade pip \
+    && /app/tools/chatterbox/.venv/bin/pip install --index-url https://download.pytorch.org/whl/cpu torch torchaudio \
+    && /app/tools/chatterbox/.venv/bin/pip install -r tools/chatterbox/requirements.txt
+
+COPY tools/chatterbox/synthesize.py tools/chatterbox/synthesize.py
+
+# Pre-pull the model weights so the first render doesn't wait on a HuggingFace
+# download (AL9 plan §5). Runs a throwaway synthesis to force the download +
+# cache into the image layer.
+ENV HF_HOME=/app/.cache/huggingface
+RUN /app/tools/chatterbox/.venv/bin/python tools/chatterbox/synthesize.py \
+      --text "warm the cache" --output /tmp/warm.wav --device cpu || true
+
+# ---- Node / video-studio -------------------------------------------------
+COPY package.json package-lock.json* ./
+RUN npm install --no-audit --no-fund
+COPY . .
+
+ENV CHATTERBOX_PYTHON=/app/tools/chatterbox/.venv/bin/python
+ENV CHATTERBOX_DEVICE=cpu
+ENV NODE_ENV=production
+
+# Remotion needs its own Chromium; this pre-downloads it into the image so a
+# render doesn't pay for it.
+RUN npx remotion browser ensure || true
+
+CMD ["npx", "tsx", "src/render/worker.ts"]
