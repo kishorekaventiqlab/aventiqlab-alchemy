@@ -6,11 +6,12 @@ only by astra (contract §7). Authorized by
 
 | Task | Status | What it adds |
 |---|---|---|
-| **AL2** (this) | built | Fastify app, JWT auth, error envelope, `GET /health`, `GET /v1/whoami` |
-| AL3 | planned | `POST /v1/generate` — one artifact's content via OpenRouter |
-| AL5 | planned | `POST /v1/render` — spec-driven video-studio render + mechanical QA |
-| AL6 | planned | `POST /v1/artifacts/sign` — presigned S3 GET, `artifact_expired` |
-| AL7 | infra written | the content bucket (`infra/lib/content-bucket.ts`) |
+| **AL2** | built | Fastify app, JWT auth, error envelope, `GET /health`, `GET /v1/whoami` |
+| **AL7** | built | the content bucket construct + grant helpers (`infra/lib/content-bucket.ts`) |
+| **AL3** | built (5 types) | `POST /v1/generate` — material/quiz/source_code_lab/skill_evaluator/**video** via OpenRouter. |
+| **AL8** | schema | `docs/video-v1-schema.md` + `src/generate/video-schema.ts` + `src/lib/video-stage-coverage.ts` (the shared stage-coverage lib). |
+| **AL6** | built | `POST /v1/artifacts/sign` — proxied presigned S3 GET (OQ-6), `artifact_expired` for aged-out scratch |
+| **AL5 (+AL9)** | built | async `POST /v1/render` + `GET /v1/render/{id}` (CD-17) + `POST /v1/artifacts/promote` (CD-18). One-shot Fargate render worker in `video-studio/src/render/`. |
 
 ## Layout
 
@@ -29,8 +30,60 @@ src/
   routes/
     health.ts       GET /health   (unauthed)
     whoami.ts        GET /v1/whoami (authed stub)
-infra/              CDK (TS) — AL2 Lambda + Function URL, AL7 bucket
-Dockerfile          Lambda container image
+  generate/         AL3 — POST /v1/generate
+    route.ts        the route (behind requireServiceAuth)
+    validate-request.ts  §7.1 body checks; version from context.schema_version (CD-4)
+    openrouter.ts   OpenRouter via the openai SDK; one reparse; §9 error mapping
+    context.ts      renders the §5.4 Learning IR as UNTRUSTED delimited text (CD-3)
+    prompts.ts      versioned per-type prompt templates
+    selfcheck.ts    ajv + arithmetic checks before returning (astra stays authoritative)
+    preview.ts      derive the §5.5 preview from content (no 2nd model call)
+    store.ts        S3 writes: attempt-N.json (CD-1) + attempt-N.error.json (CD-2)
+    generator.ts    orchestrator (no astra-style retry loop; fills video hashes)
+    schemas.ts      per-type deliverable JSON Schemas
+    video-schema.ts video/v1 JSON Schema (AL8)
+    video-hash.ts   pinned narration_hash + spec_hash formulas (AL8 §1.5/§5)
+  lib/
+    video-stage-coverage.ts  the shared stage-coverage validator (AL8 OQ-5 —
+                             pure, versioned, publishable; astra vendors it)
+  artifacts/        AL6 — POST /v1/artifacts/sign
+    sign-route.ts   the route (behind requireServiceAuth)
+    pointer.ts      parse + validate s3:// (bucket / prefix / experience_id / traversal)
+    s3-signer.ts    HeadObject + presigned GET (the mockable S3 seam)
+    content-type.ts suffix -> mime fallback
+  render/           AL5 — async POST/GET /v1/render + POST /v1/artifacts/promote
+    types.ts        request/response + RenderJob (DynamoDB) shapes
+    route.ts        POST /v1/render (202 + RunTask) + GET /v1/render/{id} (poll)
+    promote-route.ts POST /v1/artifacts/promote (CD-18) — CopyObject to produced/
+    plan-rerender.ts planReRender() — pure fn, vision_qa_feedback routing (CD-20)
+    job-store.ts    the render-job store (DynamoDB `alchemy-render-jobs`)
+    launcher.ts     stash the request to S3 + ecs:RunTask the render worker
+    cache-plan.ts   which narration units are TTS-cache hits/misses
+    id.ts           ULID render_job_id generator
+infra/              CDK (TS) — AL2 Lambda + Function URL, AL7 bucket, AL5 render
+                    compute (DynamoDB + Fargate task), AL3/AL5/AL6 grants
+Dockerfile          Lambda container image (request service)
+```
+
+The **render worker** itself (the Fargate task's code) lives in
+`video-studio/src/render/` — it needs the video-studio render toolchain
+(`loadVideoSpec`, Remotion, Chatterbox), not the Lambda's Fastify app:
+
+```
+video-studio/src/render/
+  renderJob.ts      runRenderJob() — the orchestration, every I/O step injected
+  worker.ts         the Fargate entrypoint (reads env, wires the real steps)
+  s3AudioCache.ts   the tts-cache/{narration_hash}.wav S3 cache (CD-21)
+  subprocess.ts     remotion render / ffmpeg poster / ffprobe / validate-render.ts
+  beatRegen.ts      the single-beat narration_flaw regen (OpenRouter)
+  videoHash.ts      narration_hash / spec_hash (a hand-kept copy of the
+                    service's video-hash.ts — contract §3.8)
+  jobUpdater.ts     the worker's write-only view of the job record
+video-studio/src/audio/synthesize.ts   synthesizeAudioPlan() — the reusable
+                                        audio-synthesis core; generate-audio.ts
+                                        is now a thin wrapper over it
+video-studio/Dockerfile.render          AL9 — video-studio + a Chatterbox V3
+                                        CPU venv, weights pre-pulled at build
 ```
 
 ## Local dev

@@ -15,13 +15,19 @@ import {
   FPS as HOW_LLMS_GENERATE_TEXT_FPS,
   TOTAL_DURATION_FRAMES as HOW_LLMS_GENERATE_TEXT_FRAMES,
 } from './data/howLlmsGenerateTextScript';
+import { SpecVideoComposition } from './spec/specComposition';
 
 // One <Composition> per experience Video artifact. Add the next one here as
 // each experience's content/video-script.md is written (see
 // /experience-catalog/<exp>/content/video-script.md for the source script).
+//
+// `spec-video` (AL4) is the generic, spec-driven composition ASTRA Content
+// Studio's /v1/render drives — it takes a video/v1 video_spec via inputProps
+// rather than a hand-authored beat file.
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      <SpecVideoComposition />
       <Composition
         id="inference-under-load-video"
         component={InferenceUnderLoad}

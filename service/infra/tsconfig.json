@@ -12,5 +12,5 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["bin", "lib"]
+  "include": ["bin", "lib", "test"]
 }

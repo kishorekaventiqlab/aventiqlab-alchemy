@@ -39,7 +39,35 @@ const parseArgs = (argv: string[]) => {
       positional.push(argv[i]);
     }
   }
-  return { mp4Path: positional[0], dataFileName: args.data, manifestPath: args.manifest };
+  return {
+    mp4Path: positional[0],
+    dataFileName: args.data,
+    // AL5: a JSON dump of AL4's retimed LoadedVideo — the Content Studio render
+    // path uses this instead of importing a src/data/*.ts file.
+    beatsJsonPath: args.beats,
+    manifestPath: args.manifest,
+  };
+};
+
+type FlatBeat = { audioFile: string; allocatedSeconds: number };
+
+/** Flatten a beat list (with investigation `segments`) to per-narration-unit windows. */
+const flattenBeats = (
+  rawBeats: { duration?: number; audioFile?: string; segments?: { audioFile: string; t: number }[] }[],
+): FlatBeat[] => {
+  const flat: FlatBeat[] = [];
+  for (const beat of rawBeats) {
+    if (beat.segments) {
+      for (let i = 0; i < beat.segments.length; i++) {
+        const seg = beat.segments[i];
+        const nextT = beat.segments[i + 1]?.t ?? beat.duration ?? 0;
+        flat.push({ audioFile: seg.audioFile, allocatedSeconds: nextT - seg.t });
+      }
+    } else if (beat.audioFile) {
+      flat.push({ audioFile: beat.audioFile, allocatedSeconds: beat.duration ?? 0 });
+    }
+  }
+  return flat;
 };
 
 const findFfprobe = (): string => {
@@ -90,9 +118,13 @@ const rmsAt = (ffmpeg: string, mp4Path: string, startSeconds: number, durationSe
 };
 
 async function main() {
-  const { mp4Path: mp4PathArg, dataFileName, manifestPath: manifestPathArg } = parseArgs(process.argv.slice(2));
+  const { mp4Path: mp4PathArg, dataFileName, beatsJsonPath, manifestPath: manifestPathArg } = parseArgs(
+    process.argv.slice(2),
+  );
   if (!mp4PathArg) {
-    console.error("Usage: npx tsx scripts/validate-render.ts <path-to.mp4> [--data <dataFileName>] [--manifest <path>]");
+    console.error(
+      "Usage: npx tsx scripts/validate-render.ts <path-to.mp4> [--data <dataFileName> | --beats <loaded-video.json>] [--manifest <path>]",
+    );
     process.exitCode = 1;
     return;
   }
@@ -140,20 +172,30 @@ async function main() {
     detail: rmsResults.map((r) => `t=${r.t}s RMS=${r.rms.toFixed(0)}`).join(", "),
   });
 
-  if (dataFileName) {
+  // Resolve the expected total + per-beat windows from either --data (a
+  // src/data/*.ts file, the hand-authored path) or --beats (a JSON dump of
+  // AL4's retimed LoadedVideo, the Content Studio render path).
+  let expectedDuration: number | undefined;
+  let flatBeats: FlatBeat[] = [];
+
+  if (beatsJsonPath) {
+    const p = resolve(repoRoot, beatsJsonPath);
+    if (existsSync(p)) {
+      const loaded = JSON.parse(readFileSync(p, "utf-8")) as {
+        totalDurationSeconds?: number;
+        beats?: { duration?: number; audioFile?: string; segments?: { audioFile: string; t: number }[] }[];
+      };
+      expectedDuration = loaded.totalDurationSeconds;
+      flatBeats = flattenBeats(loaded.beats ?? []);
+    } else {
+      console.warn(`--beats file not found at ${p}, skipping duration + per-beat checks.`);
+    }
+  } else if (dataFileName) {
     const dataFilePath = join(repoRoot, "src/data", `${dataFileName}.ts`);
     if (existsSync(dataFilePath)) {
       const mod = (await import(pathToFileURL(dataFilePath).href)) as { [key: string]: unknown };
       const totalDurationKey = Object.keys(mod).find((k) => k.startsWith("TOTAL_DURATION_SECONDS"));
-      const expectedDuration = totalDurationKey ? (mod[totalDurationKey] as number) : undefined;
-      if (expectedDuration) {
-        const diff = Math.abs(durationSeconds - expectedDuration);
-        checks.push({
-          name: "Video duration matches script's TOTAL_DURATION_SECONDS",
-          pass: diff < 1,
-          detail: `expected ${expectedDuration}s, got ${durationSeconds.toFixed(2)}s (diff ${diff.toFixed(2)}s)`,
-        });
-      }
+      expectedDuration = totalDurationKey ? (mod[totalDurationKey] as number) : undefined;
 
       const beatsExportName = Object.keys(mod).find((key) => {
         const value = mod[key];
@@ -162,54 +204,50 @@ async function main() {
       const rawBeats = beatsExportName
         ? (mod[beatsExportName] as { duration?: number; audioFile?: string; segments?: { audioFile: string; t: number }[] }[])
         : [];
+      flatBeats = flattenBeats(rawBeats);
+    }
+  }
 
-      // Flatten investigation-style segments the same way generate-audio.ts does.
-      const flatBeats: { audioFile: string; allocatedSeconds: number }[] = [];
-      for (const beat of rawBeats) {
-        if (beat.segments) {
-          for (let i = 0; i < beat.segments.length; i++) {
-            const seg = beat.segments[i];
-            const nextT = beat.segments[i + 1]?.t ?? beat.duration ?? 0;
-            flatBeats.push({ audioFile: seg.audioFile, allocatedSeconds: nextT - seg.t });
-          }
-        } else if (beat.audioFile) {
-          flatBeats.push({ audioFile: beat.audioFile, allocatedSeconds: beat.duration ?? 0 });
-        }
-      }
+  if (expectedDuration) {
+    const diff = Math.abs(durationSeconds - expectedDuration);
+    checks.push({
+      name: "Video duration matches script's TOTAL_DURATION_SECONDS",
+      pass: diff < 1,
+      detail: `expected ${expectedDuration}s, got ${durationSeconds.toFixed(2)}s (diff ${diff.toFixed(2)}s)`,
+    });
+  }
 
-      if (manifestPathArg) {
-        const manifestPath = resolve(repoRoot, manifestPathArg);
-        if (existsSync(manifestPath)) {
-          const manifest = JSON.parse(readFileSync(manifestPath, "utf-8")) as {
-            entries: { audioPath: string; durationSeconds: number }[];
-          };
-          const byPath = new Map(manifest.entries.map((e) => [e.audioPath, e.durationSeconds]));
+  if (manifestPathArg) {
+    const manifestPath = resolve(repoRoot, manifestPathArg);
+    if (existsSync(manifestPath)) {
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf-8")) as {
+        entries: { audioPath: string; durationSeconds: number }[];
+      };
+      const byPath = new Map(manifest.entries.map((e) => [e.audioPath, e.durationSeconds]));
 
-          const missing = flatBeats.filter((b) => !byPath.has(b.audioFile));
-          checks.push({
-            name: "Every beat's audio file exists in the manifest",
-            pass: missing.length === 0,
-            detail: missing.length === 0 ? "all present" : `missing: ${missing.map((b) => b.audioFile).join(", ")}`,
-          });
+      const missing = flatBeats.filter((b) => !byPath.has(b.audioFile));
+      checks.push({
+        name: "Every beat's audio file exists in the manifest",
+        pass: missing.length === 0,
+        detail: missing.length === 0 ? "all present" : `missing: ${missing.map((b) => b.audioFile).join(", ")}`,
+      });
 
-          const overflowing = flatBeats.filter((b) => {
-            const actual = byPath.get(b.audioFile);
-            return actual !== undefined && actual + 0.5 > b.allocatedSeconds; // +0.5s lead-in, matching the render's own convention
-          });
-          checks.push({
-            name: "No beat's narration exceeds its allocated time window (no cutoff/overlap)",
-            pass: overflowing.length === 0,
-            detail:
-              overflowing.length === 0
-                ? "all within budget"
-                : overflowing
-                    .map((b) => `${b.audioFile}: audio+leadin=${(byPath.get(b.audioFile)! + 0.5).toFixed(2)}s > window=${b.allocatedSeconds.toFixed(2)}s`)
-                    .join("; "),
-          });
-        } else {
-          console.warn(`Manifest not found at ${manifestPath}, skipping per-beat timing checks.`);
-        }
-      }
+      const overflowing = flatBeats.filter((b) => {
+        const actual = byPath.get(b.audioFile);
+        return actual !== undefined && actual + 0.5 > b.allocatedSeconds; // +0.5s lead-in, matching the render's own convention
+      });
+      checks.push({
+        name: "No beat's narration exceeds its allocated time window (no cutoff/overlap)",
+        pass: overflowing.length === 0,
+        detail:
+          overflowing.length === 0
+            ? "all within budget"
+            : overflowing
+                .map((b) => `${b.audioFile}: audio+leadin=${(byPath.get(b.audioFile)! + 0.5).toFixed(2)}s > window=${b.allocatedSeconds.toFixed(2)}s`)
+                .join("; "),
+      });
+    } else {
+      console.warn(`Manifest not found at ${manifestPath}, skipping per-beat timing checks.`);
     }
   }
 

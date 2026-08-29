@@ -5,8 +5,21 @@ Authorized by [ADR-0001](adr/0001-content-studio-generation-pipeline-supersedes-
 sits on the service foundation from
 [AL2](content-studio-service-foundation-plan.md).
 
-**Status: PLAN — not yet built.** Contract references: v1.3 §7.1–7.3, §5.5, §5.4,
-§9. This is alchemy's **first live model integration** (AL1's ADR un-defers it).
+**Status: BUILT (4 non-video types) on branch `phase2/al3-generate`.** Contract
+references: v1.3 §7.1–7.3, §5.5, §5.4, §9, + CD-1..CD-5. This is alchemy's
+**first live model integration** (AL1's ADR un-defers it).
+
+**As-built:** `service/src/generate/` — `route.ts` (POST /v1/generate behind
+`requireServiceAuth`), `validate-request.ts` (CD-4: version read from
+`learning_context.schema_version`), `openrouter.ts` (`openai` SDK, base-URL
+override, `maxRetries: 0`, one JSON reparse, §9 error mapping), `context.ts`
+(CD-3: untrusted `<learning_context>` wrapper, tag/fence defusing), `prompts.ts`
+(versioned per-type templates, `PROMPT_VERSION`), `selfcheck.ts` (ajv + the
+arithmetic checks), `preview.ts` (derived, no 2nd model call), `store.ts`
+(CD-1 envelope + CD-2 `attempt-N.error.json`), `generator.ts` (orchestrator, no
+astra-style loop), `schemas.ts` (per-type deliverable JSON Schemas).
+`video`/`battleground` → `unsupported_type`. 23 tests (mocked OpenRouter, no
+live calls); typecheck + build clean.
 
 ---
 

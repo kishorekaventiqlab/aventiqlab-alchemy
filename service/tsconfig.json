@@ -17,5 +17,5 @@
     "sourceMap": true
   },
   "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "src/test-helpers.ts"]
+  "exclude": ["src/**/*.test.ts", "src/test-helpers.ts", "src/generate/fixtures.ts"]
 }

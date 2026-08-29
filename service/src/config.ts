@@ -25,7 +25,54 @@ export interface ServiceConfig {
   /** Local HTTP port (ignored under Lambda). */
   port: number;
   nodeEnv: string;
+  /** AL3 generation config. Resolved lazily — see loadGenerationConfig(). */
+  generation: GenerationConfigLoader;
+  /** AL5 render orchestration config. Resolved lazily — see loadRenderConfig(). */
+  render: RenderConfigLoader;
 }
+
+export interface RenderConfig {
+  /** The AL7 bucket (generated/renders/produced/tts-cache). */
+  contentBucket: string;
+  /** DynamoDB table for render jobs (AL5 §3). */
+  renderJobsTable: string;
+  /** ECS cluster ARN/name the render worker task runs in. */
+  ecsCluster: string;
+  /** The render worker task definition family:revision (or family). */
+  renderTaskDefinition: string;
+  /** Subnets for the Fargate task ENI. */
+  subnets: string[];
+  /** Security groups for the Fargate task ENI. */
+  securityGroups: string[];
+  /** Container name inside the task def (for RunTask overrides). */
+  renderContainerName: string;
+  /** Days a render job record lives (DynamoDB TTL). */
+  jobTtlDays: number;
+}
+
+export type RenderConfigLoader = () => Promise<RenderConfig>;
+
+export interface GenerationConfig {
+  /** OpenRouter API key. Value comes later (ops); the PATH is what AL3 builds. */
+  openRouterApiKey: string;
+  /** OpenRouter base URL (OpenAI-compatible). */
+  openRouterBaseUrl: string;
+  /** Model id per artifact type (env-overridable, so tuning needs no redeploy). */
+  modelByType: Record<string, string>;
+  /** Default model when a per-type override is absent. */
+  defaultModel: string;
+  /** The S3 bucket for generated artifacts (AL7). */
+  contentBucket: string;
+  /** Milliseconds before a model call is abandoned as model_provider_timeout. */
+  modelTimeoutMs: number;
+}
+
+/**
+ * Generation config is resolved on first use (not at startup) so the service
+ * still boots for /health + /v1/whoami without OPENROUTER_API_KEY set. A
+ * missing key surfaces as `not_configured` on the first /v1/generate call.
+ */
+export type GenerationConfigLoader = () => Promise<GenerationConfig>;
 
 const CONTRACT_ISSUER = "aventiqlab-astra";
 const CONTRACT_AUDIENCE = "aventiqlab-alchemy";
@@ -117,6 +164,66 @@ export async function buildConfig(): Promise<ServiceConfig> {
     logLevel: process.env.LOG_LEVEL || "info",
     port: intFromEnv("PORT", 3000),
     nodeEnv: process.env.NODE_ENV || "development",
+    generation: () => loadGenerationConfig(region),
+    render: () => loadRenderConfig(),
+  };
+}
+
+/**
+ * Resolve render orchestration config on demand. Throws ConfigError
+ * (-> not_configured) if a required value is missing. Only POST /v1/render and
+ * POST /v1/artifacts/promote need this — /health, /v1/whoami, /v1/generate,
+ * /v1/artifacts/sign boot without it.
+ */
+export async function loadRenderConfig(): Promise<RenderConfig> {
+  const need = (name: string): string => {
+    const v = process.env[name];
+    if (!v) throw new ConfigError(`${name} is not set — required for /v1/render.`);
+    return v;
+  };
+  return {
+    contentBucket: need("ALCHEMY_CONTENT_BUCKET"),
+    renderJobsTable: need("ALCHEMY_RENDER_JOBS_TABLE"),
+    ecsCluster: need("ALCHEMY_RENDER_ECS_CLUSTER"),
+    renderTaskDefinition: need("ALCHEMY_RENDER_TASK_DEFINITION"),
+    subnets: need("ALCHEMY_RENDER_SUBNETS").split(",").map((s) => s.trim()).filter(Boolean),
+    securityGroups: need("ALCHEMY_RENDER_SECURITY_GROUPS").split(",").map((s) => s.trim()).filter(Boolean),
+    renderContainerName: process.env.ALCHEMY_RENDER_CONTAINER_NAME || "render",
+    jobTtlDays: intFromEnv("ALCHEMY_RENDER_JOB_TTL_DAYS", 30),
+  };
+}
+
+/**
+ * Resolve generation config on demand. Throws ConfigError (-> not_configured)
+ * if OPENROUTER_API_KEY / the content bucket can't be resolved.
+ */
+export async function loadGenerationConfig(region: string): Promise<GenerationConfig> {
+  const openRouterApiKey = await resolveSecret({
+    envVar: "OPENROUTER_API_KEY",
+    arnEnvVar: "OPENROUTER_API_KEY_ARN",
+    secretJsonKey: process.env.OPENROUTER_API_KEY_JSON_KEY || undefined,
+    region,
+  });
+
+  const contentBucket = process.env.ALCHEMY_CONTENT_BUCKET;
+  if (!contentBucket) {
+    throw new ConfigError("ALCHEMY_CONTENT_BUCKET is not set — the AL7 bucket name is required for /v1/generate.");
+  }
+
+  const defaultModel = process.env.OPENROUTER_MODEL_DEFAULT || "anthropic/claude-sonnet-4";
+
+  return {
+    openRouterApiKey,
+    openRouterBaseUrl: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
+    defaultModel,
+    modelByType: {
+      material: process.env.OPENROUTER_MODEL_MATERIAL || defaultModel,
+      quiz: process.env.OPENROUTER_MODEL_QUIZ || defaultModel,
+      source_code_lab: process.env.OPENROUTER_MODEL_SOURCE_CODE_LAB || defaultModel,
+      skill_evaluator: process.env.OPENROUTER_MODEL_SKILL_EVALUATOR || defaultModel,
+    },
+    contentBucket,
+    modelTimeoutMs: intFromEnv("OPENROUTER_TIMEOUT_MS", 120_000),
   };
 }
 
