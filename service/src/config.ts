@@ -1,0 +1,123 @@
+/**
+ * Config + secret resolution for the alchemy Content Studio service.
+ *
+ * Precedence for every secret:
+ *   1. explicit env var (local dev, CI)
+ *   2. AWS Secrets Manager, resolved once at startup by name/ARN
+ *   3. fail closed — buildConfig() throws; there is no default and no dev bypass
+ *
+ * Mirrors how astra loads ASTRA_SERVICE_JWT_SECRET from `astra/service-secrets`
+ * (aventiqlab-platform/docs/aventiqlab-integration.md §Authentication).
+ */
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+
+export interface ServiceConfig {
+  /** HS256 shared secret for verifying astra -> alchemy service tokens (contract §2.3). */
+  jwtSecret: string;
+  /** Expected `iss` claim on inbound tokens. */
+  jwtIssuer: string;
+  /** Expected `aud` claim on inbound tokens. */
+  jwtAudience: string;
+  /** Clock-skew leeway, seconds, applied to exp/iat/nbf. */
+  jwtClockToleranceSec: number;
+  region: string;
+  logLevel: string;
+  /** Local HTTP port (ignored under Lambda). */
+  port: number;
+  nodeEnv: string;
+}
+
+const CONTRACT_ISSUER = "aventiqlab-astra";
+const CONTRACT_AUDIENCE = "aventiqlab-alchemy";
+
+class ConfigError extends Error {
+  readonly code = "not_configured";
+}
+
+let secretsClient: SecretsManagerClient | undefined;
+
+async function resolveSecret(params: {
+  envVar: string;
+  arnEnvVar: string;
+  secretJsonKey?: string;
+  region: string;
+}): Promise<string> {
+  const direct = process.env[params.envVar];
+  if (direct && direct.length > 0) return direct;
+
+  const secretRef = process.env[params.arnEnvVar];
+  if (!secretRef) {
+    throw new ConfigError(
+      `Missing secret: set ${params.envVar} directly, or ${params.arnEnvVar} to a Secrets Manager name/ARN.`,
+    );
+  }
+
+  secretsClient ??= new SecretsManagerClient({ region: params.region });
+  const res = await secretsClient.send(new GetSecretValueCommand({ SecretId: secretRef }));
+  const raw = res.SecretString;
+  if (!raw) {
+    throw new ConfigError(`Secrets Manager entry ${secretRef} has no SecretString.`);
+  }
+
+  if (!params.secretJsonKey) return raw;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new ConfigError(
+      `Secrets Manager entry ${secretRef} is not JSON; expected a JSON object with key "${params.secretJsonKey}".`,
+    );
+  }
+  const value =
+    typeof parsed === "object" && parsed !== null
+      ? (parsed as Record<string, unknown>)[params.secretJsonKey]
+      : undefined;
+  if (typeof value !== "string") {
+    throw new ConfigError(
+      `Secrets Manager entry ${secretRef} has no string key "${params.secretJsonKey}".`,
+    );
+  }
+  return value;
+}
+
+function intFromEnv(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (raw === undefined || raw === "") return fallback;
+  const n = Number.parseInt(raw, 10);
+  if (Number.isNaN(n)) throw new ConfigError(`${name} must be an integer, got "${raw}".`);
+  return n;
+}
+
+/**
+ * Resolve all config + secrets. Call once at startup. Throws ConfigError
+ * (code: "not_configured") if anything required is missing.
+ */
+export async function buildConfig(): Promise<ServiceConfig> {
+  const region = process.env.AWS_REGION ?? "ap-south-1";
+
+  const jwtSecret = await resolveSecret({
+    envVar: "ALCHEMY_SERVICE_JWT_SECRET",
+    arnEnvVar: "ALCHEMY_SERVICE_JWT_SECRET_ARN",
+    // If the SM entry is a JSON blob (astra's `service-secrets` shape), pull this key.
+    secretJsonKey: process.env.ALCHEMY_SERVICE_JWT_SECRET_JSON_KEY || "ALCHEMY_SERVICE_JWT_SECRET",
+    region,
+  });
+
+  if (jwtSecret.length < 32) {
+    throw new ConfigError("ALCHEMY_SERVICE_JWT_SECRET is shorter than 32 chars — refusing to start.");
+  }
+
+  return {
+    jwtSecret,
+    jwtIssuer: process.env.ALCHEMY_JWT_ISSUER || CONTRACT_ISSUER,
+    jwtAudience: process.env.ALCHEMY_JWT_AUDIENCE || CONTRACT_AUDIENCE,
+    jwtClockToleranceSec: intFromEnv("ALCHEMY_JWT_CLOCK_TOLERANCE_SEC", 30),
+    region,
+    logLevel: process.env.LOG_LEVEL || "info",
+    port: intFromEnv("PORT", 3000),
+    nodeEnv: process.env.NODE_ENV || "development",
+  };
+}
+
+export { ConfigError };

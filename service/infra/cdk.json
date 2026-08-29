@@ -1,0 +1,11 @@
+{
+  "app": "tsx bin/app.ts",
+  "context": {
+    "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/aws-iam:minimizePolicies": true,
+    "alchemy:account": "880636108741",
+    "alchemy:region": "ap-south-1",
+    "alchemy:scratchRetentionDays": 30
+  }
+}
