@@ -1,8 +1,9 @@
 # `video/v1` — the Video Specification schema
 
-**Status: DRAFT for joint alchemy + astra review.** Phase 2 task AL8.
-alchemy owns this file (`video-studio` is alchemy's); astra co-authors via the
-platform coordinator. This is the unblocker for AL3's video path, AL4, and AL5.
+**Status: CONVERGED — alchemy + astra.** Phase 2 task AL8. alchemy owns this
+file (`video-studio` is alchemy's); astra co-authored via the platform
+coordinator and has signed off on all 7 open questions (§7). This is the
+unblocker for AL3's video path, AL4, and AL5.
 
 **Contract references:** v1.3 §7.2 (`/v1/generate` video `content`), §7.4
 (`/v1/render` `video_spec`), §5.5 (Gate-1 preview), §3.8 (`video/v1` tag), CD-5
@@ -135,9 +136,19 @@ visual payload for the renderer:
 
 ### 1.5 `narration_hash` — the TTS cache key
 
-- `narration_hash = sha256(narration_text + " " + canonical_json(resolved_voice))`
-  where `resolved_voice` = the top-level `voice` object (a per-beat voice
-  override, if we ever add one, folds in here).
+**Exact formula** (pinned — astra reload/dumps the spec for its per-cycle S3
+snapshot and MUST compute the identical hash):
+
+```
+input          = narration_text + "\n" + json.dumps(voice, sort_keys=True, separators=(",", ":"))
+narration_hash = "sha256:" + hexdigest( sha256( input.encode("utf-8") ) )
+```
+
+- `voice` is the top-level `voice` object, serialized with **sorted keys** and
+  **no whitespace**. A per-beat voice override (v1.1, if ever) is merged over
+  the global `voice` before this serialization.
+- Empty-narration case (a silent `title` beat, OQ-3): `narration_text = ""`, so
+  `input = "\n" + <serialized voice>` — a real hash, not degenerate.
 - This is the key for the content-hash TTS cache the pipeline architecture
   already specifies (astra's architecture HTML). On render cycle N+1: for each
   beat, if `narration_hash` matches a cached entry, **reuse the wav** — skip the
@@ -180,8 +191,13 @@ needs structured data. **The spec carries both, and they must not drift:**
 - Vision QA `pacing_issue` = actual beat duration deviates *hard* from
   `target_duration_sec` (e.g. narration ran 2x long), OR on-screen content
   visibly outlasts the narration (dead air).
-- Sum of `target_duration_sec` across beats should be within ~15% of
-  `estimated_duration_minutes * 60` (self-check).
+- **Investigation double-count rule:** an `investigation` container beat
+  (`narration: ""`) has `target_duration_sec` = the whole scene length (the
+  sum of its segment beats' targets). To avoid double-counting, the
+  sum-of-durations self-check **excludes container beats** (any beat whose
+  `visual.kind == "investigation"`) and counts the segment beats instead.
+- Sum of `target_duration_sec` across beats (containers excluded, per above)
+  should be within ~15% of `estimated_duration_minutes * 60` (self-check).
 
 ---
 
@@ -240,16 +256,22 @@ canonical order:
 - `investigation_demonstration` legitimately spans **many** beats (the
   reference video has ~11) — some `investigation`, some `dashboard`, some
   `terminal`.
-- Validator (constitution §F, astra-side or a shared lib): for
-  `target_duration_class: "standard"|"deep-dive"`, every REQUIRED-tier stage
-  must appear in `beats[].stage`; `"short"` needs only the §3a minimum
-  signature. Missing RECOMMENDED → warning, not failure.
+**Validator (OQ-5 resolved — a shared library published from the alchemy repo).**
+`stageCoverage(spec) -> [{ stage, present: bool, tier: "REQUIRED"|"RECOMMENDED"|"OPTIONAL" }]`:
+for `target_duration_class: "standard"|"deep-dive"`, every REQUIRED-tier stage
+must appear in `beats[].stage`; `"short"` needs only the §3a minimum signature
+(problem, curiosity, one of {context_mental_model, investigation_demonstration},
+best_practice). Missing RECOMMENDED → surfaced with `present: false` but not a
+failure. The lib is a pure function, no alchemy runtime / AWS deps, versioned;
+alchemy runs it in the `/v1/generate` self-check and astra imports it for its
+§7.2 cross-check (astra also keeps its own thin jsonschema *shape* check
+separately — the lib is the *semantic* check only).
 
 ---
 
 ## 4. Per-beat `visual` payloads (what the renderer actually needs)
 
-`visual.kind` is one of the 9 beat renderer branches that
+`visual.kind` is one of 9 renderer branches (plus `investigation_segment`, a marker — §4.9) that
 `video-studio/src/compositions/*` currently pattern-match on. Each has a typed
 payload. **These are the real props from the current `Beat[]` types in
 `video-studio/src/data/*Script.ts` and the component signatures** — AL8 lifts
@@ -259,10 +281,10 @@ them into the contract-visible schema.
 ```jsonc
 { "kind": "title", "title": "Why Pod Autoscaling…", "subtitle": "Why can pod autoscaling still fail…?" }
 ```
-Renders `TitleCard`. Usually the only beat with no `stage` and no `narration`
-(a silent 7s open) — in which case `narration` is `""` and `narration_hash` is
-the hash of the empty string (still required, keeps the cache uniform).
-*(OQ-3: should a silent title beat be allowed to omit `narration`/`narration_hash`?)*
+Renders `TitleCard`. Usually the only beat with no `stage` and no spoken
+narration (a silent ~7s open). Per OQ-3 (resolved): `narration` is `""` and
+`narration_hash` is computed by the §1.5 formula over the empty string — NOT
+omitted — so the TTS cache and Vision QA transcript alignment stay uniform.
 
 ### 4.2 `visual.kind: "statement"`
 ```jsonc
@@ -402,13 +424,26 @@ Renders `TerminalMock`. `line.kind ∈ prompt | output`.
 Renders `EditorMock` (used by `DeployInferenceService`). `line.kind ∈ existing |
 added | comment | placeholder`.
 
-### 4.9 `visual.kind: "recap"`
+### 4.9 `visual.kind: "investigation_segment"` (child of an `investigation` container)
+```jsonc
+{ "kind": "investigation_segment", "of_container": "beat-10-investigation", "segment_index": 0, "highlight_index": null }
+```
+Not a standalone renderer branch — a **marker**. A segment beat carries the
+real `narration` / `narration_hash` / `target_duration_sec` and a stable `id`;
+its `visual` is this marker pointing at the `investigation` container beat
+(`of_container`) whose keyframe timeline drives the pixels. The renderer
+ignores a segment beat's own `<Sequence>` visuals (the container paints the
+scene) and uses only its caption + audio at the segment's `t` offset. Listed
+here so astra's jsonschema shape-check accepts it as a valid `visual.kind`
+(OQ-4 resolved: option (a)).
+
+### 4.10 `visual.kind: "recap"`
 ```jsonc
 { "kind": "recap", "items": ["KEDA — \"How many replicas do I need?\"", "Karpenter — \"Do I have the capacity?\"", "Scheduler — \"Where do they run?\""] }
 ```
 Renders `RecapCard`. 3–5 short items.
 
-### 4.10 Not in v1
+### 4.11 Not in v1
 `GenerationLoopScene`, `LatencyContrastScene`, `PipelineDiagram`,
 `SqsQueueMeter` (used *inside* `investigation`), `LineChart`, `CameraFocus` —
 these are either sub-components of the above or specific to the
@@ -426,13 +461,18 @@ spec_hash = "sha256:" + hex(sha256(canonical_json(spec_without_spec_hash_field))
 ```
 - `canonical_json` = keys sorted recursively, no insignificant whitespace,
   UTF-8.
-- Computed by alchemy in `/v1/generate`, **excluding** the `spec_hash` field
-  itself.
+- Computed by alchemy in `/v1/generate` over a canonical projection of the spec
+  containing ONLY: `beats[].{id, stage, narration, on_screen, visual}` and
+  top-level `{central_question, title, format}`. Everything else — all duration
+  estimates, every `narration_hash`, `experience_id`, `voice`, and `spec_hash`
+  itself — is excluded, so a regeneration that changes only a timing guess still
+  hashes identically (OQ-6 resolved).
 - **astra's use (A5 dedup):** on a Gate-2 reject → re-generate. If the new
   spec's `spec_hash` equals the previous cycle's, the regeneration was a no-op
   (the model produced byte-identical output) — astra escalates
-  (`needs_review`, reason ~`render_no_progress`) rather than burning a render
-  cycle. Also lets astra skip a redundant `/v1/render` if a retry produced an
+  (`needs_review`, reason `render_no_progress` — a real contract slug, CD-11,
+  going into §5.6, with the message "regeneration didn't change anything — try
+  different feedback") rather than burning a render cycle. Also lets astra skip a redundant `/v1/render` if a retry produced an
   identical spec.
 - `narration_hash` values are *inputs* to `spec_hash` (they're fields in the
   spec), so a narration change moves both.
@@ -461,7 +501,7 @@ Its `video/v1` `video_spec` (abbreviated — 6 of 24 beats shown):
       "id": "beat-01-title",
       "stage": null,
       "narration": "",
-      "narration_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "narration_hash": "sha256:be4ab52659afc1259ee263f8616447c1f435226ad6451c616d9cedd634304cd1",  // = sha256("\n" + canonical voice json), per the pinned §1.5 formula
       "on_screen": "Title card: 'Why Pod Autoscaling Can Still Leave You Stuck' with the central question as a subtitle.",
       "target_duration_sec": 7,
       "visual": { "kind": "title", "title": "Why Pod Autoscaling Can Still Leave You Stuck", "subtitle": "Why can pod autoscaling still fail when a GPU workload needs additional node capacity?" }
@@ -533,7 +573,7 @@ Its `video/v1` `video_spec` (abbreviated — 6 of 24 beats shown):
       "id": "beat-10-investigation",
       "stage": "investigation_demonstration",
       "narration": "",
-      "narration_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "narration_hash": "sha256:be4ab52659afc1259ee263f8616447c1f435226ad6451c616d9cedd634304cd1",
       "on_screen": "Continuous investigation scene: traffic climbs 100->980 req/s, KEDA scales pods 4->14, both GPU nodes fill to 100%, 2 pods go Pending, a 3rd GPU node fades in (Karpenter), pending pods schedule, queue drains, system settles.",
       "target_duration_sec": 83.7,
       "visual": {
@@ -573,17 +613,17 @@ Its derived `script_outline` (the flat §5.5 preview):
 
 ---
 
-## 7. Open questions (astra + alchemy)
+## 7. Open questions — ALL RESOLVED (astra + alchemy, 2026-08-29)
 
-| # | Question | alchemy's lean |
+| # | Question | Resolution |
 |---|---|---|
-| **OQ-1** | `format` has 3 values but only `animated-explainer` has a full renderer. Does Content Studio v1 generate only `animated-explainer` (and `screencast`/`talking-head` are `video/v1.1`), or must AL5 render all three? | **v1 = `animated-explainer` only.** `screencast` is close (`terminal`+`editor`+`dashboard` beats already exist); `talking-head` needs an avatar/footage pipeline that doesn't exist. AL3 should reject non-`animated-explainer` `format` as `unsupported_type` for now. |
-| **OQ-2** | `architecture` node coordinates are hand-authored in the reference. Can a model place nodes on a 1920×1080 canvas reliably, or does alchemy need a layout engine / named-layout library? | Provide the model a **small library of named layouts** (`request-path-horizontal`, `control-plane-split`, …) it picks from + per-node label/highlight, rather than raw coordinates. Reduces `layout_bug` risk. Needs a v1.1 field `visual.layout_ref` — or ship v1 with raw coords + a strong self-check on bounds. |
-| **OQ-3** | Silent `title` beat: allow `narration`/`narration_hash` to be omitted, or require `""` + the empty-string hash? | Require `""` + empty hash — keeps every beat uniform for the TTS cache and Vision QA transcript alignment (a silent beat contributes an empty transcript window). |
-| **OQ-4** | `investigation` segments: sibling beats with `narration_ref` (alchemy's lean (a)), or nested `segments[]` with inline narration (b)? Affects whether Vision QA's `beat_id` can address a segment. | **(a)** — every narration unit is a first-class beat with a stable id; the `investigation` container beat has `narration: ""` and owns only the keyframe timeline. Vision QA addresses `beat-13` directly. Costs: `beats[]` isn't purely "one visual each" — a container beat + N segment beats. Flag if astra's A5 state machine assumes 1 beat = 1 renderable unit. |
-| **OQ-5** | Who runs the constitution §F stage-coverage validator — astra (as part of its schema check), alchemy (in `/v1/generate` self-check), or a shared lib? | **Shared lib**, published from the alchemy repo (it's the constitution's rule, and alchemy owns the constitution). astra imports it for its §7.2 cross-check; alchemy runs it in the self-check. Avoids drift. |
-| **OQ-6** | `spec_hash` stability: `estimated_duration_minutes` and `target_duration_sec` are model estimates that could jitter between otherwise-identical regenerations, defeating the dedup. Exclude them from the hash? | Hash **only the semantically-load-bearing fields**: `beats[].{id, stage, narration, on_screen, visual}` + top-level `{central_question, title, format}`. Exclude all duration estimates and `narration_hash` (derivable). A "same spec" is same *content*, not same timing guess. Needs astra sign-off since astra owns the dedup semantics. |
-| **OQ-7** | Does astra's Vision QA need the `voice` params per beat, or is the global object enough? | Global is enough for v1 (one voice per video). Per-beat override is a v1.1 concern. |
+| **OQ-1** | `format`: v1 generates only `animated-explainer`, or all three? | **v1 = `animated-explainer` only.** AL3 rejects other `format` values as `unsupported_type`. `screencast`/`talking-head` are `video/v1.1`. |
+| **OQ-2** | `architecture` node placement — model-authored coords, or a layout library? | **Raw x/y for v1** + a self-check that every node is within 1920×1080 with a sane margin. Named-layout library (`visual.layout_ref`) is v1.1. |
+| **OQ-3** | Silent `title` beat — omit `narration`/`narration_hash`, or require `""` + a hash? | **Require `""`** and compute `narration_hash` via the §1.5 formula over the empty string. Not omitted — keeps the TTS cache and Vision QA transcript alignment uniform. |
+| **OQ-4** | `investigation` segments — sibling beats (a) or nested inline (b)? | **(a).** Every narration unit is a first-class beat with a stable `id`; the `investigation` container beat has `narration: ""` and owns only the keyframe timeline. astra's A5 treats `video_spec` as an **opaque blob** (never parses `beats[]`; `route_vision_verdict` branches only on `verdict.category`), so (a) is fully compatible. |
+| **OQ-5** | Who runs the constitution §F stage-coverage validator? | **A shared library, published from the alchemy repo.** Conditions (astra): (a) pure function, no alchemy runtime / AWS deps, versioned (a package astra pins, or a vendored single module); (b) structured output — `[{ stage, present: bool, tier }]`, never a bare bool, so astra can cite specifics in its re-prompt note; (c) astra **also** keeps its own thin jsonschema *shape* check of `video/v1` — the shared lib is only the *stage-coverage semantic* check. See §3 "Validator". |
+| **OQ-6** | What does `spec_hash` cover? | **The load-bearing projection only:** `beats[].{id, stage, narration, on_screen, visual}` + top-level `{central_question, title, format}`. Excluded: `estimated_duration_minutes`, every `target_duration_sec`, every `narration_hash` (derivable), `experience_id` (constant in a run), and `spec_hash` itself. A regeneration that changes only a timing estimate hashes identically. See §5. |
+| **OQ-7** | Per-beat `voice` params, or is the global object enough? | **Global `voice{}` is enough for v1.** Per-beat override is a v1.1 concern. |
 
 ---
 
@@ -602,11 +642,21 @@ Its derived `script_outline` (the flat §5.5 preview):
 - **`on_screen` (prose, Vision-QA-facing) and `visual` (structured,
   renderer-facing) both live in the spec** and must stay consistent — AL3
   generates `visual` first, derives `on_screen`, self-checks the pair.
-- **9 `visual.kind` values** map 1:1 to the renderer branches
-  `video-studio/src/compositions/*` already have. A genuinely new visual is a
-  `video/v1.1`.
+- **9 `visual.kind` values** (+ `investigation_segment`, a marker — §4.9) map to
+  the renderer branches `video-studio/src/compositions/*` already have. A
+  genuinely new visual is a `video/v1.1`.
 - **The `stage` enum is the constitution's 10-value list**, finally landing
   here, with a rendering meaning and a Vision-QA-routing meaning per value (§3).
-- **7 open questions** for astra — the load-bearing ones are OQ-4 (investigation
-  segment addressing, affects A5), OQ-6 (what `spec_hash` covers, affects
-  dedup), OQ-5 (who owns the stage validator).
+- **`spec_hash`** covers the load-bearing projection only (beats' `id`/`stage`/
+  `narration`/`on_screen`/`visual` + top-level `central_question`/`title`/
+  `format`); timing estimates, `narration_hash`, `experience_id`, `spec_hash`
+  are excluded so a timing-only jitter still dedups (OQ-6).
+- **`narration_hash`** has a pinned formula (§1.5) so astra's reloaded S3 copy
+  computes the identical value.
+- **All 7 open questions RESOLVED** with astra (§7). Load-bearing outcomes:
+  OQ-4 = sibling-beat granularity (A5 treats the spec as an opaque blob, so
+  it's compatible); OQ-5 = a shared stage-coverage lib published from the
+  alchemy repo (pure, versioned, structured output); OQ-6 = the hash projection
+  above.
+- **New contract slug** `render_no_progress` (CD-11, §5.6) for a no-op
+  regeneration.
