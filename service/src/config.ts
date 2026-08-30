@@ -146,8 +146,10 @@ export async function buildConfig(): Promise<ServiceConfig> {
   const jwtSecret = await resolveSecret({
     envVar: "ALCHEMY_SERVICE_JWT_SECRET",
     arnEnvVar: "ALCHEMY_SERVICE_JWT_SECRET_ARN",
-    // If the SM entry is a JSON blob (astra's `service-secrets` shape), pull this key.
-    secretJsonKey: process.env.ALCHEMY_SERVICE_JWT_SECRET_JSON_KEY || "ALCHEMY_SERVICE_JWT_SECRET",
+    // Only treat the Secrets Manager entry as a JSON blob if explicitly told
+    // to (e.g. if it's ever migrated to astra's multi-key `service-secrets`
+    // shape). By default CDK generates (and ops writes back) a plain string.
+    secretJsonKey: process.env.ALCHEMY_SERVICE_JWT_SECRET_JSON_KEY || undefined,
     region,
   });
 

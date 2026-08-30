@@ -72,9 +72,11 @@ export class AlchemyContentStudioStack extends Stack {
         LOG_LEVEL: "info",
         // AWS_REGION is set by the Lambda runtime — do not set it here.
         // Resolve the JWT secret from Secrets Manager by name (the config.ts
-        // env -> SM precedence). Pass the ARN, not the value.
+        // env -> SM precedence). Pass the ARN, not the value. The secret is a
+        // plain string (CDK's default GenerateSecretString, and what ops
+        // writes back) — no ALCHEMY_SERVICE_JWT_SECRET_JSON_KEY, so config.ts
+        // reads it as-is rather than trying to JSON-parse it.
         ALCHEMY_SERVICE_JWT_SECRET_ARN: jwtSecret.secretArn,
-        ALCHEMY_SERVICE_JWT_SECRET_JSON_KEY: "ALCHEMY_SERVICE_JWT_SECRET",
         // AL3 persists generated artifacts here; AL6 validates + signs pointers
         // against this bucket name.
         ALCHEMY_CONTENT_BUCKET: content.bucket.bucketName,

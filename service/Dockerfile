@@ -16,6 +16,9 @@ RUN npx tsc -p tsconfig.json \
 FROM public.ecr.aws/lambda/nodejs:20-arm64
 
 # LAMBDA_TASK_ROOT = /var/task
+# package.json (with "type": "module") MUST ship at runtime too — without it
+# Node's Lambda runtime loads dist/lambda.js as CommonJS and fails on `import`.
+COPY --from=build /build/package.json ${LAMBDA_TASK_ROOT}/package.json
 COPY --from=build /build/node_modules ${LAMBDA_TASK_ROOT}/node_modules
 COPY --from=build /build/dist ${LAMBDA_TASK_ROOT}/
 
