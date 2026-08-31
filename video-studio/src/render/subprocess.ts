@@ -7,7 +7,7 @@
  */
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, cp } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import type { VideoSpec } from '../spec/videoSpecTypes.js';
 
@@ -34,6 +34,18 @@ export async function remotionRender(
   await writeFile(
     propsPath,
     JSON.stringify({ spec: params.spec, measuredAudio: params.measuredAudio, audioPrefix: params.audioPrefix }),
+  );
+
+  // `--public-dir=<workdir>` points Remotion at the per-job scratch dir,
+  // which only ever gets the dynamically synthesized narration .wav files
+  // written into it — SpecVideo.tsx's BackgroundMusic also references a
+  // STATIC repo asset (audio/music/ambient-bed.wav) that only exists in
+  // videoStudioRoot's own public/, so it must be copied alongside the
+  // generated audio or Remotion's dev-server 404s on it mid-render.
+  await cp(
+    join(cfg.videoStudioRoot, 'public', 'audio', 'music'),
+    join(params.workdir, 'audio', 'music'),
+    { recursive: true },
   );
 
   await exec(
