@@ -28,13 +28,17 @@ test("stack synthesizes exactly one S3 bucket and one Lambda", () => {
   t.resourceCountIs("AWS::Lambda::Function", 1);
 });
 
-test("the request Lambda is an ARM64 container image with a Function URL (auth NONE)", () => {
+test("the request Lambda is an ARM64 container image with a Function URL (auth NONE, streamed)", () => {
   const t = synthStack();
   t.hasResourceProperties("AWS::Lambda::Function", {
     PackageType: "Image",
     Architectures: ["arm64"],
   });
-  t.hasResourceProperties("AWS::Lambda::Url", { AuthType: "NONE" });
+  // RESPONSE_STREAM, not the BUFFERED default: BUFFERED hard-caps the
+  // client-visible response at 29s regardless of the Lambda's own Timeout,
+  // which killed a real ~30s /v1/generate call mid-request. lambda.ts is
+  // wrapped with awslambda.streamifyResponse() to match.
+  t.hasResourceProperties("AWS::Lambda::Url", { AuthType: "NONE", InvokeMode: "RESPONSE_STREAM" });
 });
 
 test("the Lambda gets both secret ARNs in its env, never a raw value", () => {

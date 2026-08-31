@@ -22,6 +22,7 @@ import {
   DockerImageFunction,
   DockerImageCode,
   FunctionUrlAuthType,
+  InvokeMode,
   Architecture,
 } from "aws-cdk-lib/aws-lambda";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
@@ -143,6 +144,11 @@ export class AlchemyContentStudioStack extends Stack {
 
     const fnUrl = service.addFunctionUrl({
       authType: FunctionUrlAuthType.NONE, // JWT preHandler is the gate
+      // BUFFERED (the default) hard-caps the client-visible response at 29s
+      // regardless of the Lambda's own Timeout — a real /v1/generate call
+      // (~25-30s, more for video) was getting cut off mid-request. lambda.ts
+      // is wrapped with awslambda.streamifyResponse() to match.
+      invokeMode: InvokeMode.RESPONSE_STREAM,
     });
 
     new CfnOutput(this, "ServiceUrl", { value: fnUrl.url });
