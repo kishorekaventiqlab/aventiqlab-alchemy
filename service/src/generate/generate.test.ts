@@ -181,6 +181,38 @@ test("the built prompt passes the untrusted context inside the wrapper, and prio
   await app.close();
 });
 
+// Regression test for a real production bug: the model added a top-level
+// "artifact_type" field the schema's additionalProperties:false rejected.
+// Root cause was that the prompt never told the model the exact allowed keys.
+test("the built prompt states the EXACT allowed top-level keys and explicitly forbids echoing artifact_type/schema_version", async () => {
+  const { app, model } = await appWith(VALID_CONTENT.material);
+  await authedPost(app, body("material"));
+  const call = model.calls[0]!;
+  assert.ok(call.user.includes("Allowed top-level keys"), "the prompt states the allow-list");
+  for (const key of ["title", "format", "reading_time_minutes", "key_sections", "body_markdown"]) {
+    assert.ok(call.user.includes(`"${key}"`), `allow-list includes "${key}"`);
+  }
+  assert.ok(
+    call.system.includes("artifact_type") && call.system.includes("schema_version"),
+    "the system prompt explicitly names artifact_type/schema_version as forbidden, not just 'no extra fields'",
+  );
+  await app.close();
+});
+
+test("the allowed-keys line matches DELIVERABLE_SCHEMA's own properties for every AL3 type", async () => {
+  const { DELIVERABLE_SCHEMA } = await import("./schemas.js");
+  for (const type of ["material", "quiz", "source_code_lab", "skill_evaluator"] as const) {
+    const { app, model } = await appWith(VALID_CONTENT[type]);
+    await authedPost(app, body(type));
+    const call = model.calls[0]!;
+    const schemaKeys = Object.keys((DELIVERABLE_SCHEMA[type] as { properties: object }).properties);
+    for (const key of schemaKeys) {
+      assert.ok(call.user.includes(`"${key}"`), `${type}: allow-list includes schema key "${key}"`);
+    }
+    await app.close();
+  }
+});
+
 // ---- Request validation & unsupported types --------------------------
 
 test("battleground -> unsupported_type (video is now supported)", async () => {
