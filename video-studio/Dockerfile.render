@@ -26,9 +26,9 @@ WORKDIR /app
 # ---- Chatterbox V3 CPU venv (AL9) ----------------------------------------
 COPY tools/chatterbox/requirements.txt tools/chatterbox/requirements.txt
 RUN python3.11 -m venv /app/tools/chatterbox/.venv \
-    && /app/tools/chatterbox/.venv/bin/pip install --upgrade pip \
-    && /app/tools/chatterbox/.venv/bin/pip install --index-url https://download.pytorch.org/whl/cpu torch torchaudio \
-    && /app/tools/chatterbox/.venv/bin/pip install -r tools/chatterbox/requirements.txt
+    && /app/tools/chatterbox/.venv/bin/pip install --no-cache-dir --upgrade pip \
+    && /app/tools/chatterbox/.venv/bin/pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchaudio \
+    && /app/tools/chatterbox/.venv/bin/pip install --no-cache-dir -r tools/chatterbox/requirements.txt
 
 COPY tools/chatterbox/synthesize.py tools/chatterbox/synthesize.py
 

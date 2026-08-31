@@ -101,6 +101,13 @@ export class RenderCompute extends Construct {
     const taskDef = new FargateTaskDefinition(this, "RenderTaskDef", {
       cpu: 4096, // 4 vCPU
       memoryLimitMiB: 8192, // 8 GB
+      // Fargate's 20 GiB default was exhausted extracting the render image
+      // (10.14 GB compressed in ECR — torch/torchaudio CPU wheels + Chatterbox
+      // pre-pulled weights + Remotion/Chromium; uncompressed layers exceed
+      // 20 GiB) — confirmed live via a CannotPullContainerError "no space
+      // left on device". 40 GiB gives comfortable headroom without
+      // over-provisioning.
+      ephemeralStorageGiB: 40,
       runtimePlatform: {
         cpuArchitecture: CpuArchitecture.X86_64, // Chatterbox/torch CPU wheels are surest on x86_64
         operatingSystemFamily: OperatingSystemFamily.LINUX,

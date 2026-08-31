@@ -81,13 +81,17 @@ test("AL5: exactly one render-jobs DynamoDB table with an experience_id GSI + TT
   });
 });
 
-test("AL5: exactly one Fargate render task (4 vCPU / 8 GB, no inbound port mappings)", () => {
+test("AL5: exactly one Fargate render task (4 vCPU / 8 GB / 40 GiB ephemeral storage, no inbound port mappings)", () => {
   const t = synthStack();
   t.resourceCountIs("AWS::ECS::TaskDefinition", 1);
   t.hasResourceProperties("AWS::ECS::TaskDefinition", {
     RequiresCompatibilities: ["FARGATE"],
     Cpu: "4096",
     Memory: "8192",
+    // The platform default (20 GiB) was exhausted extracting the render
+    // image (10+ GB compressed — torch/Chatterbox/Remotion), confirmed live
+    // via a CannotPullContainerError "no space left on device".
+    EphemeralStorage: { SizeInGiB: 40 },
   });
   const taskDefs = t.findResources("AWS::ECS::TaskDefinition");
   const containers = Object.values(taskDefs)[0]!.Properties.ContainerDefinitions as Array<{
