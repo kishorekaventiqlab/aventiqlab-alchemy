@@ -78,7 +78,15 @@ export class AlchemyContentStudioStack extends Stack {
       }),
       architecture: Architecture.ARM_64,
       memorySize: 512,
-      timeout: Duration.seconds(29), // Function URL hard cap is 15 min; keep request work short
+      // 120s: /v1/generate's real OpenRouter call (+ a possible one-shot
+      // reparse, openrouter.ts) regularly takes ~25-30s alone; 29s was too
+      // tight and caused a hard Lambda kill mid-request (empty 502, no error
+      // logged) on the first live end-to-end call. /v1/render is async
+      // (202 + a separate Fargate task) so it doesn't need this budget — this
+      // timeout only has to cover /v1/generate, /v1/artifacts/sign, and
+      // /v1/artifacts/promote. Function URL's own hard cap is 15 min, so
+      // there's room to be generous without hitting a platform ceiling.
+      timeout: Duration.seconds(120),
       logGroup,
       environment: {
         NODE_ENV: "production",

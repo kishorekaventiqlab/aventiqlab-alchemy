@@ -225,7 +225,12 @@ export async function loadGenerationConfig(region: string): Promise<GenerationCo
       skill_evaluator: process.env.OPENROUTER_MODEL_SKILL_EVALUATOR || defaultModel,
     },
     contentBucket,
-    modelTimeoutMs: intFromEnv("OPENROUTER_TIMEOUT_MS", 120_000),
+    // Per-OpenRouter-call timeout. openrouter.ts can make up to TWO sequential
+    // calls (the initial call + one reparse attempt on malformed JSON), so
+    // this must leave room for both plus self-check/S3-write inside the
+    // Lambda's own timeout (120s, content-studio-stack.ts) — 45s x 2 = 90s,
+    // leaving ~30s of margin.
+    modelTimeoutMs: intFromEnv("OPENROUTER_TIMEOUT_MS", 45_000),
   };
 }
 
