@@ -208,6 +208,24 @@ the one-render-per-experience guard).
 IaC: a new construct in the AL2 CDK stack — the table + the Fargate task
 definition + a `RunTask` permission on the Lambda role + the task role (§9).
 
+### 3.1 Known gap: a job can get stuck at `pending`/`running` forever
+
+Found during the first real end-to-end `/v1/render` verification
+(2026-08-31): if the Fargate task fails to progress far enough to write its
+own status update — e.g. it crashes before/during startup, or `RunTaskCommand`
+returns HTTP 200 with an empty `tasks[]` and a populated `failures[]` (which
+`launcher.ts`'s `launch()` currently never inspects — it only reacts to the
+SDK call throwing) — nothing else updates the job record. The row sits at
+`pending`/`running` indefinitely; a caller polling `GET
+/v1/render/{render_job_id}` gets no error and no way to know the job is dead,
+until the 30-day TTL eventually reaps the row.
+
+Not fixed here — this needs its own design pass (candidates: a self-timeout
+the Lambda enforces on read, e.g. treat a job older than N minutes with no
+`started_at`/no progress as failed; a periodic reconciliation sweep against
+ECS task state; or the render task registering a heartbeat). Tracked here so
+it isn't lost, not scoped or prioritized yet.
+
 ---
 
 ## 4. `generate-audio.ts` changes + the TTS cache

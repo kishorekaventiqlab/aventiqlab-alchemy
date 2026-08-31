@@ -26,6 +26,7 @@ import {
 import { Vpc, SubnetType, SecurityGroup, type IVpc } from "aws-cdk-lib/aws-ec2";
 import { RetentionDays, LogGroup } from "aws-cdk-lib/aws-logs";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { Platform } from "aws-cdk-lib/aws-ecr-assets";
 import { Construct } from "constructs";
 import type { ContentBucket } from "./content-bucket.js";
 import type { ISecret } from "aws-cdk-lib/aws-secretsmanager";
@@ -110,7 +111,16 @@ export class RenderCompute extends Construct {
       containerName: this.containerName,
       // The AL9 image: video-studio + a chatterbox-tts CPU venv + pre-pulled
       // weights. Built from video-studio/Dockerfile.render (see that file).
-      image: ContainerImage.fromAsset("../../video-studio", { file: "Dockerfile.render" }),
+      // platform MUST be pinned to match runtimePlatform.cpuArchitecture above
+      // (X86_64) — without it, `docker buildx` defaults to the BUILD HOST's
+      // native architecture (e.g. arm64 on Apple Silicon), producing an image
+      // that fails at container start with "exec format error" on the
+      // x86_64 Fargate runtime. Confirmed live: this broke every real
+      // /v1/render call until this fix (first real end-to-end render attempt).
+      image: ContainerImage.fromAsset("../../video-studio", {
+        file: "Dockerfile.render",
+        platform: Platform.LINUX_AMD64,
+      }),
       logging: LogDrivers.awsLogs({ streamPrefix: "render", logGroup }),
       environment: {
         NODE_ENV: "production",
