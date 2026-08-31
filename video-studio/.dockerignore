@@ -1,7 +1,13 @@
 node_modules
 out
 tools/chatterbox/.venv
-public/audio
+# public/audio/* is local dev/test fixtures (per-composition narration
+# scratch, pronunciation tests) - excluded to keep the image small. EXCEPT
+# public/audio/music/, which SpecVideo.tsx's BackgroundMusic references as a
+# real runtime asset (subprocess.ts copies it into each render's workdir) -
+# confirmed live: excluding it broke every real render with ENOENT.
+public/audio/*
+!public/audio/music
 **/*.test.ts
 .env
 .env.local
