@@ -339,6 +339,39 @@ emits the §7.5 shape (`{ name, pass, detail }`, 6–7 checks).
   **structural** failure (duration way off, missing beat audio) → return
   immediately. Keep minimal.
 
+### 7.1 Known gap: `validate-render.ts` crashes before reporting any checks
+
+Found during this system's first-ever fully successful `/v1/render`
+(2026-08-31, render_job_id `rj_01M1C8Y1469SYVRMB2BRRAXR1G` — real mp4
+produced, `renders/cexp_01RENDERVERIFY6/cycle-1/attempt-1.mp4`, confirmed via
+S3 `head-object`): the job reached `status: "done"` with
+`mechanical_qa: { passed: false, checks: [] }` — an **empty** `checks` array,
+which looks like "no checks ran" rather than "checks ran and found a real
+problem".
+
+Root cause: `rmsAt()` (the unconditional "Audio is not silent" check, run
+early in `main()`'s check sequence) writes a scratch WAV file to
+`${repoRoot}/out/.validate-rms-*.wav`. `out/` is excluded via
+`video-studio/.dockerignore` and nothing creates it at runtime in the render
+container, so the write throws `ENOENT`. That exception propagates up through
+`main()`'s uncaught-rejection handler (`console.error` + `exitCode = 1`)
+**before** the `console.log` report loop at the end of `main()` ever runs —
+so none of the `[PASS]`/`[FAIL]` lines `subprocess.ts`'s regex parser looks
+for are ever printed, and it correctly (if misleadingly) reports zero checks.
+
+Net effect: `mechanical_qa.passed: false` is only *accidentally* the
+"right-looking" value — the script isn't finding real problems, it's crashing
+before it can check anything. The render pipeline itself is confirmed
+genuinely working (see the milestone note above), but the quality gate that's
+supposed to catch audio/resolution/codec/duration problems has never actually
+run successfully against a real render.
+
+Not fixed here — candidates for the actual fix: `mkdir(join(repoRoot, "out"),
+{ recursive: true })` before `rmsAt()`'s first call, or write the scratch WAV
+to the render job's own `workdir` (which the container guarantees exists)
+instead of `repoRoot/out/`. Tracked here so it isn't lost, not scoped or
+implemented yet.
+
 ---
 
 ## 8. Promote-to-produced (CD-18)
