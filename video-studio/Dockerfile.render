@@ -40,8 +40,28 @@ RUN /app/tools/chatterbox/.venv/bin/python tools/chatterbox/synthesize.py \
       --text "warm the cache" --output /tmp/warm.wav --device cpu || true
 
 # ---- Node / video-studio -------------------------------------------------
-COPY package.json package-lock.json* ./
-RUN npm install --no-audit --no-fund
+# npm ci (not install) against a REQUIRED (non-glob) package-lock.json: `npm
+# install` re-resolves within package.json's caret ranges at build time
+# against whatever the registry currently has, drifting the resolved
+# `remotion`/`zod` tree build to build. `npm ci` refuses to deviate from the
+# lockfile (and fails fast if it's missing or out of sync with package.json),
+# so the exact dependency tree that was tested is what actually ships.
+#
+# The lockfile itself was regenerated from a TRULY ISOLATED `npm install`
+# (this repo is an npm workspace; the committed lockfile's original
+# resolution depended on hoisting from the workspace root, which this Docker
+# build context never has — `ContainerImage.fromAsset("../../video-studio")`
+# copies video-studio/ alone) — without that, `npm ci` fails outright here
+# even though it succeeds when run from inside the workspace.
+#
+# The actual real-render blocker this whole investigation was chasing turned
+# out to be separate from the dependency drift: Remotion's default webpack
+# config never resolves this codebase's `.js`-suffixed TS-ESM imports (e.g.
+# `from '../compositions/SpecVideo.js'`) to their real `.tsx` source, no
+# matter which dependency versions are installed — fixed via
+# resolve.extensionAlias in remotion.config.ts, not here.
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
 COPY . .
 
 ENV CHATTERBOX_PYTHON=/app/tools/chatterbox/.venv/bin/python
