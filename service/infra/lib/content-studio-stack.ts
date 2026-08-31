@@ -11,8 +11,11 @@
  * (see render-compute.ts). The Lambda does POST /v1/render (202 + RunTask) +
  * GET /v1/render/{id} + POST /v1/artifacts/promote; the Fargate task renders.
  *
- * Nothing here is deployed as part of Phase 2 — `cdk deploy` is a later,
- * explicitly-authorized step (per-repo deploy roles are not yet provisioned).
+ * Two Secrets Manager containers, both CREATE-only placeholders that ops
+ * replaces out of band: ALCHEMY_SERVICE_JWT_SECRET (astra <-> alchemy service
+ * tokens) and OPENROUTER_API_KEY (AL3 /v1/generate's model calls).
+ *
+ * `cdk deploy` is an explicitly-authorized step — not run automatically.
  */
 import { Stack, type StackProps, Duration, CfnOutput } from "aws-cdk-lib";
 import {
@@ -52,6 +55,16 @@ export class AlchemyContentStudioStack extends Stack {
         "ALCHEMY_SERVICE_JWT_SECRET — HS256 shared secret for astra -> alchemy service tokens. Replace the generated value with the one exchanged with astra out of band.",
     });
 
+    // ---- The OpenRouter API key (AL3 /v1/generate's model calls) -----------
+    // Same pattern as the JWT secret: CDK creates the container with a random
+    // CREATE-only placeholder value; ops replaces it with the real OpenRouter
+    // key out of band. Plain string (no JSON key) — config.ts reads it as-is.
+    const openRouterSecret = new Secret(this, "OpenRouterApiKey", {
+      secretName: "alchemy/openrouter-api-key",
+      description:
+        "OPENROUTER_API_KEY — used by POST /v1/generate's model calls. Replace the generated placeholder with the real OpenRouter key.",
+    });
+
     // ---- AL2: the request-service Lambda -----------------------------------
     const logGroup = new LogGroup(this, "RequestServiceLogs", {
       retention: RetentionDays.ONE_MONTH,
@@ -80,12 +93,14 @@ export class AlchemyContentStudioStack extends Stack {
         // AL3 persists generated artifacts here; AL6 validates + signs pointers
         // against this bucket name.
         ALCHEMY_CONTENT_BUCKET: content.bucket.bucketName,
-        // OPENROUTER_API_KEY_ARN is added when the secret value is provisioned
-        // (AL10-adjacent). Until then /v1/generate returns not_configured.
+        // Resolved from Secrets Manager the same way as the JWT secret; the
+        // real value is pasted in by ops out of band (AL10-adjacent).
+        OPENROUTER_API_KEY_ARN: openRouterSecret.secretArn,
       },
     });
 
     jwtSecret.grantRead(service);
+    openRouterSecret.grantRead(service);
 
     // The request Lambda serves /v1/generate (AL3), /v1/artifacts/sign (AL6),
     // POST+GET /v1/render (AL5), and POST /v1/artifacts/promote (AL5):
@@ -125,6 +140,7 @@ export class AlchemyContentStudioStack extends Stack {
     new CfnOutput(this, "ServiceUrl", { value: fnUrl.url });
     new CfnOutput(this, "ContentBucketName", { value: content.bucket.bucketName });
     new CfnOutput(this, "ServiceJwtSecretArn", { value: jwtSecret.secretArn });
+    new CfnOutput(this, "OpenRouterApiKeySecretArn", { value: openRouterSecret.secretArn });
     new CfnOutput(this, "RenderJobsTableName", { value: renderCompute.jobsTable.tableName });
     new CfnOutput(this, "RenderEcsClusterArn", { value: renderCompute.cluster.clusterArn });
   }

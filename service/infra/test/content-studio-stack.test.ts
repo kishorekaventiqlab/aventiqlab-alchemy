@@ -37,12 +37,14 @@ test("the request Lambda is an ARM64 container image with a Function URL (auth N
   t.hasResourceProperties("AWS::Lambda::Url", { AuthType: "NONE" });
 });
 
-test("the Lambda gets the JWT secret ARN in its env, never the value", () => {
+test("the Lambda gets both secret ARNs in its env, never a raw value", () => {
   const t = synthStack();
   const fns = t.findResources("AWS::Lambda::Function");
   const env = Object.values(fns)[0]!.Properties.Environment.Variables as Record<string, unknown>;
-  assert.ok("ALCHEMY_SERVICE_JWT_SECRET_ARN" in env, "passes the ARN");
-  assert.ok(!("ALCHEMY_SERVICE_JWT_SECRET" in env), "never passes the raw secret");
+  assert.ok("ALCHEMY_SERVICE_JWT_SECRET_ARN" in env, "passes the JWT secret ARN");
+  assert.ok(!("ALCHEMY_SERVICE_JWT_SECRET" in env), "never passes the raw JWT secret");
+  assert.ok("OPENROUTER_API_KEY_ARN" in env, "passes the OpenRouter secret ARN");
+  assert.ok(!("OPENROUTER_API_KEY" in env), "never passes the raw OpenRouter key");
   assert.ok(!("AWS_REGION" in env), "does not set the reserved AWS_REGION");
   assert.ok("ALCHEMY_CONTENT_BUCKET" in env, "passes the content bucket name (AL3 + AL6)");
 });
@@ -138,13 +140,19 @@ test("the Lambda can read the JWT secret", () => {
   assert.ok(allDocs.includes("secretsmanager:GetSecretValue"), "grants GetSecretValue");
 });
 
-test("the Secrets Manager entry carries no literal secret value in the template", () => {
+test("both Secrets Manager entries carry no literal secret value in the template", () => {
   const t = synthStack();
   const secrets = t.findResources("AWS::SecretsManager::Secret");
-  const props = Object.values(secrets)[0]!.Properties;
-  assert.equal(props.SecretString, undefined, "no literal secret value in the synthesized template");
-  assert.equal(props.Name, "alchemy/service-secrets");
+  const byName = new Map(Object.values(secrets).map((s) => [s.Properties.Name, s.Properties]));
+
+  assert.equal(byName.size, 2, "exactly two secrets: the JWT secret and the OpenRouter key");
+  for (const name of ["alchemy/service-secrets", "alchemy/openrouter-api-key"]) {
+    const props = byName.get(name);
+    assert.ok(props, `${name} exists`);
+    assert.equal(props!.SecretString, undefined, `${name} has no literal secret value in the synthesized template`);
+  }
   // CDK's default GenerateSecretString: {} produces a random value on CREATE
-  // only; ops replaces it with the astra-shared secret and redeploys don't
-  // reset it. That's acceptable — the generated value is a never-used placeholder.
+  // only; ops replaces it with the real value (astra-shared secret / OpenRouter
+  // key) and redeploys don't reset it. That's acceptable — the generated value
+  // is a never-used placeholder.
 });
