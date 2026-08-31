@@ -7,7 +7,7 @@ import type { Al3SupportedType, LearningContext } from "./types.js";
 import { renderContextBlock } from "./context.js";
 import { DELIVERABLE_SCHEMA } from "./schemas.js";
 
-export const PROMPT_VERSION = "al3-2026-08-30";
+export const PROMPT_VERSION = "al3-2026-08-31";
 
 const COMMON_SYSTEM = [
   "You generate exactly one learning artifact for the AventiqLab AI/ML Platform Engineering curriculum.",
@@ -78,26 +78,35 @@ const TYPE_INSTRUCTIONS: Record<Al3SupportedType, string> = {
   video: [
     "Your job: the video/v1 Video Specification (video_spec) - a worked engineering-reasoning video, NOT a narrated reference doc. format is always \"animated-explainer\".",
     "",
-    "NARRATIVE (docs/video-artifact-constitution.md): the beats must move through the reasoning spine IN ORDER - problem -> stakes -> curiosity -> context_mental_model -> options -> trade_offs -> investigation_demonstration -> decision -> best_practice -> takeaway. For target_duration_class \"standard\", every REQUIRED-tier stage (problem, curiosity, context_mental_model, investigation_demonstration, decision, best_practice) MUST appear as a beat's `stage`. Never introduce a technology by definition - it arrives as the answer to a question the viewer was made to ask.",
+    "NARRATIVE (docs/video-artifact-constitution.md): the beats must move through the reasoning spine IN ORDER - problem -> stakes -> curiosity -> context_mental_model -> options -> trade_offs -> investigation_demonstration -> decision -> best_practice -> takeaway. Never introduce a technology by definition - it arrives as the answer to a question the viewer was made to ask.",
+    "",
+    "STAGE COVERAGE IS CHECKED MECHANICALLY - EVERY beat object MUST include a `stage` field naming which point in the reasoning spine it is (or `null` for a beat that isn't spine-bearing, e.g. an investigation_segment). For target_duration_class \"standard\" (the default unless the context clearly calls for \"short\" or \"deep-dive\"), you MUST have at least one beat whose `stage` is EXACTLY each of: \"problem\", \"curiosity\", \"context_mental_model\", \"investigation_demonstration\", \"decision\", \"best_practice\" - all six, spelled exactly like that, each as some beat's literal `stage` value. Missing even one fails validation. \"stakes\", \"options\", and \"trade_offs\" are recommended but not required; \"takeaway\" is optional.",
     "",
     "PER BEAT, produce IN THIS ORDER:",
-    "1. `visual` FIRST - the structured payload for that beat's `visual.kind`:",
+    "1. `stage` - one of: problem, stakes, curiosity, context_mental_model, options, trade_offs, investigation_demonstration, decision, best_practice, takeaway, or null. This is what the mechanical stage-coverage check reads - never leave it out to \"imply\" the stage from content.",
+    "2. `visual` - the structured payload for that beat's `visual.kind`:",
     "   - title:     { kind:\"title\", title, subtitle }",
     "   - statement: { kind:\"statement\", eyebrow, eyebrow_color (accent|danger|warning|success), statement, support? }  -- for problem/stakes/curiosity/decision/best_practice",
     "   - architecture: { kind:\"architecture\", nodes[]{node_kind (users|alb|service|pod|gpu|keda|scheduler|karpenter|node), label, sublabel, x (0-1920), y (0-1080)}, edges[]{from_index, to_index, flowing?}, highlight_index? }  -- keep nodes inside the 1920x1080 frame with margin",
     "   - optionsCompare: { kind:\"optionsCompare\", options[]{name, solves, does_not_solve?, favored?} }  -- 1 option for the `options` stage, 2-3 for `trade_offs`",
-    "   - investigation: { kind:\"investigation\", keyframes[]{t, traffic, pod_count, gpu_pct, queue_depth, nodes[]{id,label,fill_percent,full?,incoming?}, pending_pods[], resolved_pods[], traffic_color?, gpu_color?}, segments[]{t, narration_ref, highlight_index?} }  -- ONE container beat, narration \"\"",
-    "   - investigation_segment: { kind:\"investigation_segment\", of_container (the container beat id), segment_index }  -- one beat PER narrated moment of the investigation; THIS beat carries the real narration",
+    "   - investigation: { kind:\"investigation\", keyframes[]{t, traffic, pod_count, gpu_pct, queue_depth, nodes[]{id,label,fill_percent,full?,incoming?}, pending_pods[], resolved_pods[], traffic_color?, gpu_color?}, segments[]{t, narration_ref, highlight_index?} }  -- ONE container beat, narration \"\", stage \"investigation_demonstration\"",
+    "   - investigation_segment: { kind:\"investigation_segment\", of_container (the container beat id), segment_index }  -- one beat PER narrated moment of the investigation; THIS beat carries the real narration; its own `stage` is null (the container beat already carries \"investigation_demonstration\")",
     "   - dashboard: { kind:\"dashboard\", service_name, alert?, panels[]{label, unit, color, points[], flat?}, focus_panel_index? }",
     "   - terminal: { kind:\"terminal\", lines[]{kind (prompt|output), text}, focus_line_index? }",
     "   - editor: { kind:\"editor\", filename, lines[]{kind (existing|added|comment|placeholder), text}, focus_line_index? }",
     "   - recap: { kind:\"recap\", items[] (3-5 short lines) }  -- the takeaway stage",
-    "2. `on_screen` - a 1-2 sentence PROSE description of what that beat's `visual` shows (elements, state, what's emphasized). It must faithfully describe the `visual` you just wrote - a reviewer compares it against the rendered frame.",
-    "3. `narration` - the VERBATIM spoken words for that beat. One engineer explaining to another. No markup, no 'CAPTION:', no stage directions. A silent title beat has narration \"\".",
-    "4. `target_duration_sec` - your estimate of the spoken length (~ words / 2.5). For an `investigation` container beat, the sum of its segments' targets.",
-    "5. `id` - \"beat-01\", \"beat-02\", ... zero-padded, optionally a slug (\"beat-07-investigation\"). Unique. `narration_ref` in an investigation segment points at that segment beat's own id.",
+    "3. `on_screen` - a 1-2 sentence PROSE description of what that beat's `visual` shows (elements, state, what's emphasized). It must faithfully describe the `visual` you just wrote - a reviewer compares it against the rendered frame.",
+    "4. `narration` - the VERBATIM spoken words for that beat. One engineer explaining to another. No markup, no 'CAPTION:', no stage directions. A silent title beat has narration \"\".",
+    "5. `target_duration_sec` - your estimate of the spoken length (~ words / 2.5, at a natural spoken pace of roughly 150 words/minute). For an `investigation` container beat, this is the sum of its segments' own targets (the container contributes no narration of its own).",
+    "6. `id` - \"beat-01\", \"beat-02\", ... zero-padded, optionally a slug (\"beat-07-investigation\"). Unique. `narration_ref` in an investigation segment points at that segment beat's own id.",
     "",
-    "DO NOT set `narration_hash` or `spec_hash` - alchemy computes those. Set `schema_version` to \"video/v1\", echo `experience_id`, set `voice` to {provider:\"chatterbox-v3\", voice_id:\"default\", params:{exaggeration:0.5, cfg_weight:0.5}}, and set `estimated_duration_minutes` and `target_duration_class`.",
+    "DURATION MATH IS CHECKED MECHANICALLY TOO, AND YOU CANNOT GUESS IT IN ADVANCE: `estimated_duration_minutes` is NOT a free-standing creative estimate - it is arithmetic performed on the beats you already wrote. Because you generate JSON token-by-token and cannot revise earlier fields, YOU MUST WRITE THE `beats` ARRAY BEFORE THE `estimated_duration_minutes` FIELD in your JSON output, even though `beats` appears later in the schema's property list - reorder your own output so `beats` comes first among the top-level fields, THEN compute and write `estimated_duration_minutes` last, once every beat's `target_duration_sec` is already on the page in front of you. To compute it: add up every beat's target_duration_sec (investigation CONTAINER beats excluded - only their segments count), divide by 60. The result must land within 15% of that sum - because it IS that sum, not a separate creative call. Do not write a round number like 4 or 8 that you have not actually added up from the beats above it.",
+    "",
+    "Example of two complete, correctly-shaped beats (follow this exact field set and field order; note stage is present on every beat, including as null):",
+    '  { "id": "beat-01", "stage": "problem", "narration": "Our GPU inference service is falling behind. p99 latency has tripled in the last twenty minutes and the autoscaler already maxed out.", "on_screen": "A statement card reads the p99 regression as a danger-colored headline.", "target_duration_sec": 9, "visual": { "kind": "statement", "eyebrow": "INCIDENT", "eyebrow_color": "danger", "statement": "p99 latency has tripled in twenty minutes.", "support": "The autoscaler is already at its configured maximum." } }',
+    '  { "id": "beat-08-investigation-01", "stage": null, "narration": "First thing to check: is this actually compute-bound? GPU utilization is pinned at ninety-five percent while memory stays flat.", "on_screen": "The investigation scene highlights the GPU utilization meter climbing to 95% while the memory meter stays level.", "target_duration_sec": 11, "visual": { "kind": "investigation_segment", "of_container": "beat-07-investigation", "segment_index": 0 } }',
+    "",
+    "DO NOT set `narration_hash` or `spec_hash` - alchemy computes those. Set `schema_version` to \"video/v1\", echo `experience_id`, set `voice` to {provider:\"chatterbox-v3\", voice_id:\"default\", params:{exaggeration:0.5, cfg_weight:0.5}}, and set `target_duration_class` (default \"standard\" unless the context clearly warrants otherwise).",
   ].join("\n"),
 };
 

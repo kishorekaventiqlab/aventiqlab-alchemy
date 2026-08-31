@@ -199,6 +199,39 @@ test("the built prompt states the EXACT allowed top-level keys and explicitly fo
   await app.close();
 });
 
+// Regression test for a real production bug: a live video generation call
+// failed self-check with every REQUIRED stage reported missing, and the
+// duration sum 71% off estimated_duration_minutes. Root cause was that the
+// prompt described the reasoning spine in prose but never told the model to
+// literally set each beat's `stage` field, and never explained that
+// estimated_duration_minutes must be derived from summing target_duration_sec
+// rather than chosen independently.
+test("the video prompt explicitly requires a `stage` field per beat and explains the duration-math relationship", async () => {
+  const { app, model } = await appWith(VALID_CONTENT.video);
+  await authedPost(app, body("video"));
+  const call = model.calls[0]!;
+  assert.ok(call.user.includes("`stage`"), "the prompt calls out the stage field by name");
+  for (const stage of [
+    "problem",
+    "curiosity",
+    "context_mental_model",
+    "investigation_demonstration",
+    "decision",
+    "best_practice",
+  ]) {
+    assert.ok(call.user.includes(`"${stage}"`), `the prompt names required stage "${stage}"`);
+  }
+  assert.ok(
+    /estimated_duration_minutes/.test(call.user) && /target_duration_sec/.test(call.user),
+    "the prompt connects estimated_duration_minutes to the sum of target_duration_sec",
+  );
+  assert.ok(
+    call.user.includes("NOT a free-standing creative estimate") || call.user.toLowerCase().includes("derived"),
+    "the prompt states estimated_duration_minutes is derived, not chosen independently",
+  );
+  await app.close();
+});
+
 test("the allowed-keys line matches DELIVERABLE_SCHEMA's own properties for every AL3 type", async () => {
   const { DELIVERABLE_SCHEMA } = await import("./schemas.js");
   for (const type of ["material", "quiz", "source_code_lab", "skill_evaluator"] as const) {
