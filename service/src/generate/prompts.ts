@@ -7,7 +7,7 @@ import type { Al3SupportedType, LearningContext } from "./types.js";
 import { renderContextBlock } from "./context.js";
 import { DELIVERABLE_SCHEMA } from "./schemas.js";
 
-export const PROMPT_VERSION = "al3-2026-08-31";
+export const PROMPT_VERSION = "al3-2026-08-31e";
 
 const COMMON_SYSTEM = [
   "You generate exactly one learning artifact for the AventiqLab AI/ML Platform Engineering curriculum.",
@@ -41,7 +41,7 @@ const TYPE_INSTRUCTIONS: Record<Al3SupportedType, string> = {
     "- questions[] grounded in the learning context. Each question's material_section should name the concept area it tests.",
     "- EVERY question object needs exactly these fields: id, type, material_section, prompt, explanation, plus the type-specific fields below. The field is called \"prompt\", never \"question\". explanation is ALWAYS required, on every question, regardless of type.",
     '- multiple-choice / scenario-judgment questions ALSO need: "options" (a letter-keyed map, e.g. {"a": "...", "b": "...", "c": "...", "d": "..."}) and "correct" (the letter, e.g. "b"). At least 3 options; exactly one correct. The type value is spelled "multiple-choice" or "scenario-judgment" — with a hyphen, never an underscore.',
-    "- scenario-judgment questions test judgment in a described situation, not trivia recall.",
+    "- scenario-judgment questions test judgment in a described situation, not trivia recall. Write the situation directly INTO the \"prompt\" string itself (e.g. \"During a traffic surge, ... What is the root cause?\") - there is no separate \"scenario\" field. A scenario-judgment question object has EXACTLY the same field set as multiple-choice: id, type, material_section, prompt, explanation, options, correct - nothing more.",
     '- ordering questions ALSO need: "ordering" (the correct order, an array of strings) — no options/correct. short-answer questions ALSO need: "answer" (the model answer, a string) — no options/correct.',
     "- Example of one complete multiple-choice question object (follow this exact field set):",
     '  { "id": "q1", "type": "multiple-choice", "material_section": "GPU utilization signals", "prompt": "A service reports 95% GPU utilization with flat memory. What does this indicate?", "options": { "a": "A memory leak", "b": "A compute-bound workload", "c": "A network bottleneck", "d": "A misconfiguration" }, "correct": "b", "explanation": "Rising compute utilization with flat memory is the classic compute-saturation signature." }',
@@ -65,6 +65,7 @@ const TYPE_INSTRUCTIONS: Record<Al3SupportedType, string> = {
   skill_evaluator: [
     "Your job: the structure for a conversational reasoning assessment (the future ASTRA conversation's script). NOT a quiz - no auto-scored questions.",
     "- Produce the full object: skills_evaluated (cap-* ids from the context's target_capabilities), scenario, opening_question, expected_reasoning_areas, follow_up_question_paths, misconception_indicators, strong_answer_indicators, weak_answer_indicators, evidence_criteria, scoring_dimensions, proficiency_levels, pass_conditions, escalation_rules.",
+    "- expected_reasoning_areas, strong_answer_indicators, weak_answer_indicators, and evidence_criteria are each a flat ARRAY OF STRINGS - one short phrase per array entry, NOT an object and NOT an array of objects. e.g. evidence_criteria: [\"Names GPU utilization as the saturated resource, not just 'the GPU'.\", \"Distinguishes compute-bound from memory-bound using the flat-memory signal.\"].",
     "- scenario should be a TRANSFER scenario - a variant of the reference situation, not the reference itself, so the learner must reason rather than recall.",
     "- EVERY entry in follow_up_question_paths[] needs exactly these three fields: trigger (what the learner said/did that triggers this follow-up), follow_up_question (what you ask next), targets_reasoning_area (which expected_reasoning_areas entry this probes). Example: { \"trigger\": \"Learner jumps straight to a mitigation without describing diagnosis.\", \"follow_up_question\": \"Before we get to fixing it - what specifically told you this is GPU-bound?\", \"targets_reasoning_area\": \"Root-cause diagnosis using corroborating signals\" }. Do NOT use \"condition\"/\"question\" or any other field names here - that shape belongs to escalation_rules, not follow_up_question_paths.",
     "- EVERY entry in misconception_indicators[] needs exactly: misconception, likely_root_cause, corrective_follow_up.",
@@ -80,7 +81,9 @@ const TYPE_INSTRUCTIONS: Record<Al3SupportedType, string> = {
     "",
     "NARRATIVE (docs/video-artifact-constitution.md): the beats must move through the reasoning spine IN ORDER - problem -> stakes -> curiosity -> context_mental_model -> options -> trade_offs -> investigation_demonstration -> decision -> best_practice -> takeaway. Never introduce a technology by definition - it arrives as the answer to a question the viewer was made to ask.",
     "",
-    "STAGE COVERAGE IS CHECKED MECHANICALLY - EVERY beat object MUST include a `stage` field naming which point in the reasoning spine it is (or `null` for a beat that isn't spine-bearing, e.g. an investigation_segment). For target_duration_class \"standard\" (the default unless the context clearly calls for \"short\" or \"deep-dive\"), you MUST have at least one beat whose `stage` is EXACTLY each of: \"problem\", \"curiosity\", \"context_mental_model\", \"investigation_demonstration\", \"decision\", \"best_practice\" - all six, spelled exactly like that, each as some beat's literal `stage` value. Missing even one fails validation. \"stakes\", \"options\", and \"trade_offs\" are recommended but not required; \"takeaway\" is optional.",
+    "THIS ORDER IS CHECKED MECHANICALLY, INCLUDING options AND trade_offs - a common mistake is placing trade_offs (or options) AFTER investigation_demonstration, e.g. to \"revisit the alternatives now that we know the answer\". Do NOT do this even if it reads naturally - options and trade_offs are about the alternatives the team is weighing BEFORE they investigate, not a retrospective after the investigation reveals the answer. Both must appear, if present at all, strictly before the investigation_demonstration beat, never after or interleaved with it.",
+    "",
+    "STAGE COVERAGE IS CHECKED MECHANICALLY TOO - EVERY beat object MUST include a `stage` field naming which point in the reasoning spine it is (or `null` for a beat that isn't spine-bearing, e.g. an investigation_segment). For target_duration_class \"standard\" (the default unless the context clearly calls for \"short\" or \"deep-dive\"), you MUST have at least one beat whose `stage` is EXACTLY each of: \"problem\", \"curiosity\", \"context_mental_model\", \"investigation_demonstration\", \"decision\", \"best_practice\" - all six, spelled exactly like that, each as some beat's literal `stage` value. Missing even one fails validation. \"stakes\", \"options\", and \"trade_offs\" are recommended but not required; \"takeaway\" is optional.",
     "",
     "PER BEAT, produce IN THIS ORDER:",
     "1. `stage` - one of: problem, stakes, curiosity, context_mental_model, options, trade_offs, investigation_demonstration, decision, best_practice, takeaway, or null. This is what the mechanical stage-coverage check reads - never leave it out to \"imply\" the stage from content.",
@@ -88,14 +91,14 @@ const TYPE_INSTRUCTIONS: Record<Al3SupportedType, string> = {
     "   - title:     { kind:\"title\", title, subtitle }",
     "   - statement: { kind:\"statement\", eyebrow, eyebrow_color (accent|danger|warning|success), statement, support? }  -- for problem/stakes/curiosity/decision/best_practice",
     "   - architecture: { kind:\"architecture\", nodes[]{node_kind (users|alb|service|pod|gpu|keda|scheduler|karpenter|node), label, sublabel, x (0-1920), y (0-1080)}, edges[]{from_index, to_index, flowing?}, highlight_index? }  -- keep nodes inside the 1920x1080 frame with margin",
-    "   - optionsCompare: { kind:\"optionsCompare\", options[]{name, solves, does_not_solve?, favored?} }  -- 1 option for the `options` stage, 2-3 for `trade_offs`",
-    "   - investigation: { kind:\"investigation\", keyframes[]{t, traffic, pod_count, gpu_pct, queue_depth, nodes[]{id,label,fill_percent,full?,incoming?}, pending_pods[], resolved_pods[], traffic_color?, gpu_color?}, segments[]{t, narration_ref, highlight_index?} }  -- ONE container beat, narration \"\", stage \"investigation_demonstration\"",
+    "   - optionsCompare: { kind:\"optionsCompare\", options[]{name, solves, does_not_solve?, favored?} }  -- 1 option for the `options` stage, 2-3 for `trade_offs`. Its `on_screen` MUST literally use the word \"comparison\" or \"options\" or \"trade-off\" (e.g. \"A comparison card lists each option and whether it solves the problem.\") so it is recognizable as a comparison, not just a description of the options' content.",
+    "   - investigation: { kind:\"investigation\", keyframes[]{t, traffic, pod_count, gpu_pct, queue_depth, nodes[]{id,label,fill_percent,full?,incoming?}, pending_pods[], resolved_pods[], traffic_color?, gpu_color?}, segments[]{t, narration_ref, highlight_index?} }  -- ONE container beat, narration \"\", stage \"investigation_demonstration\". Every keyframes[] numeric field is a PLAIN NUMBER, never a string and never a unit-labeled string (no \"1500 req/s\", no \"85%\") - the renderer supplies its own units and formatting. t is elapsed seconds from the start of the investigation (0, then increasing). traffic and queue_depth are unitless magnitudes you choose consistently across the keyframes of ONE investigation (e.g. requests/sec or queue length as a bare integer). pod_count is a plain integer count. gpu_pct is 0-100. traffic_color and gpu_color, if set, are from the SAME enum as eyebrow_color - one of accent|danger|warning|success - never a raw color word like \"red\" or \"green\", and never a hex code; omit them entirely if you don't need to flag a keyframe as notable.",
     "   - investigation_segment: { kind:\"investigation_segment\", of_container (the container beat id), segment_index }  -- one beat PER narrated moment of the investigation; THIS beat carries the real narration; its own `stage` is null (the container beat already carries \"investigation_demonstration\")",
     "   - dashboard: { kind:\"dashboard\", service_name, alert?, panels[]{label, unit, color, points[], flat?}, focus_panel_index? }",
     "   - terminal: { kind:\"terminal\", lines[]{kind (prompt|output), text}, focus_line_index? }",
     "   - editor: { kind:\"editor\", filename, lines[]{kind (existing|added|comment|placeholder), text}, focus_line_index? }",
     "   - recap: { kind:\"recap\", items[] (3-5 short lines) }  -- the takeaway stage",
-    "3. `on_screen` - a 1-2 sentence PROSE description of what that beat's `visual` shows (elements, state, what's emphasized). It must faithfully describe the `visual` you just wrote - a reviewer compares it against the rendered frame.",
+    "3. `on_screen` - a 1-2 sentence PROSE description of what that beat's `visual` shows (elements, state, what's emphasized). It must faithfully describe the `visual` you just wrote - a reviewer compares it against the rendered frame. Name the visual's kind of element in plain words as part of that description (e.g. for a `statement` visual, describe it AS a statement/card, not just paraphrase its text; for a `terminal`, say \"a terminal\"/\"a command line\"; for a `dashboard`, say \"a dashboard\"/\"a panel\"; for an `editor`, say \"an editor\"/name the file - a reviewer's automated check confirms your description names the kind of thing on screen, not only its content).",
     "4. `narration` - the VERBATIM spoken words for that beat. One engineer explaining to another. No markup, no 'CAPTION:', no stage directions. A silent title beat has narration \"\".",
     "5. `target_duration_sec` - your estimate of the spoken length (~ words / 2.5, at a natural spoken pace of roughly 150 words/minute). For an `investigation` container beat, this is the sum of its segments' own targets (the container contributes no narration of its own).",
     "6. `id` - \"beat-01\", \"beat-02\", ... zero-padded, optionally a slug (\"beat-07-investigation\"). Unique. `narration_ref` in an investigation segment points at that segment beat's own id.",
@@ -129,6 +132,18 @@ export function buildPrompt(
     `. Any other top-level key (artifact_type, schema_version, id, etc.) will be rejected.`;
 
   let user = `${TYPE_INSTRUCTIONS[type]}\n\n${allowedKeysLine}\n\n${contextBlock}`;
+
+  // skills_evaluated needs the literal cap-* id, but the context block above
+  // renders each capability's human-readable `name` (more useful for prose
+  // elsewhere in the prompt) — so the model never sees the id string it's
+  // asked to copy. Give it directly here, for this type only.
+  if (type === "skill_evaluator" && ctx.target_capabilities?.length) {
+    const ids = ctx.target_capabilities.map((c) => c.id);
+    user +=
+      `\n\nThe EXACT skills_evaluated values to use (copy these strings verbatim, not the capability names above): ` +
+      ids.map((id) => `"${id}"`).join(", ") +
+      `.`;
+  }
 
   if (priorError && priorError.trim()) {
     user +=

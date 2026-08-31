@@ -232,6 +232,21 @@ test("the video prompt explicitly requires a `stage` field per beat and explains
   await app.close();
 });
 
+// Regression test for a real production bug found while re-verifying against
+// a different model: the context block renders each target_capabilities
+// entry's human-readable `name` (c.name ?? c.id), so the model never actually
+// sees the literal cap-* id it's asked to copy into skills_evaluated — it
+// echoed the name instead, which fails the schema's cap-* id pattern.
+test("the skill_evaluator prompt gives the literal cap-* ids to copy into skills_evaluated, not just the capability names", async () => {
+  const { app, model } = await appWith(VALID_CONTENT.skill_evaluator);
+  await authedPost(app, body("skill_evaluator"));
+  const call = model.calls[0]!;
+  for (const cap of LEARNING_CONTEXT.target_capabilities ?? []) {
+    assert.ok(call.user.includes(`"${cap.id}"`), `the prompt states the literal id "${cap.id}"`);
+  }
+  await app.close();
+});
+
 test("the allowed-keys line matches DELIVERABLE_SCHEMA's own properties for every AL3 type", async () => {
   const { DELIVERABLE_SCHEMA } = await import("./schemas.js");
   for (const type of ["material", "quiz", "source_code_lab", "skill_evaluator"] as const) {

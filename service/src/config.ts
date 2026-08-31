@@ -212,7 +212,12 @@ export async function loadGenerationConfig(region: string): Promise<GenerationCo
     throw new ConfigError("ALCHEMY_CONTENT_BUCKET is not set — the AL7 bucket name is required for /v1/generate.");
   }
 
-  const defaultModel = process.env.OPENROUTER_MODEL_DEFAULT || "anthropic/claude-sonnet-4";
+  // Cost: Gemini 3.7 Flash is ~14x cheaper per call than Sonnet 4 on
+  // OpenRouter and is what astra's assessment-engine already uses — picked
+  // for cost consistency across the platform's two LLM-calling systems.
+  // Every artifact-type prompt was re-verified against real Gemini 3.7 Flash
+  // output before this default changed (generate.test.ts + prompts.ts).
+  const defaultModel = process.env.OPENROUTER_MODEL_DEFAULT || "google/gemini-3.7-flash";
 
   return {
     openRouterApiKey,
