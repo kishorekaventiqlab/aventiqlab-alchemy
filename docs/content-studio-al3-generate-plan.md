@@ -423,6 +423,153 @@ replacing the keyword-regex check with something structural instead of
 English-language matching. Tracked here so it isn't lost, not scoped or
 implemented yet.
 
+### 4.2 Proposal: making the `on_screen` / `visual.kind` check topic-agnostic
+
+Scoping pass for §4.1, per platform's ask (2026-09-01). Planning only — no
+code changed by this section.
+
+#### 4.2.1 Audit: every `visual.kind`'s current check
+
+`selfcheck.ts`'s `KIND_KEYWORDS` covers 9 of the 10 `VISUAL_KIND` enum
+values (`video-schema.ts`) — `investigation_segment` is deliberately
+exempted (its `on_screen` describes the parent container's scene, not
+itself; see `checkVideo`'s `if (kind === "investigation_segment") continue`).
+All 9 checked kinds use the same mechanism: an English-keyword regex tested
+against free-form `on_screen` prose. None has a structural fallback today.
+
+| `visual.kind` | Regex | Domain-agnostic? | Live failure so far? |
+|---|---|---|---|
+| `title` | `/\btitle card\b\|\btitle screen\b/i` | Yes — "title card"/"title screen" are describing the UI chrome, not the lesson topic | No |
+| `statement` | `/\bstatement\b\|\bcard\b\|\beyebrow\b\|\bsingle sentence\b/i` | Yes — same reasoning | No (prompt-patched pre-emptively 2026-08-31) |
+| `optionsCompare` | `/\bcomparison\b\|\bcolumn\b\|\boption\b\|\bsolves\b\|\btrade-?off\b/i` | Yes | No (prompt-patched pre-emptively 2026-08-31) |
+| `dashboard` | `/\bdashboard\b\|\bgraph\b\|\bpanel\b\|\bmetric\b\|\bchart\b/i` | Yes | No |
+| `terminal` | `/\bterminal\b\|\bkubectl\b\|\bcommand line\b\|\bshell\b/i` | **Partial** — `kubectl` is Kubernetes-specific; a terminal beat in a non-Kubernetes topic (e.g. a Python REPL, a `git` walkthrough) could plausibly never say "kubectl", "terminal", "command line", or "shell" if the model instead names the tool directly | No, but the same class of risk as `investigation`/`architecture` |
+| `editor` | `/\beditor\b\|\bfile\b\|\.ya?ml\b\|\bdiff\b\|\bcode\b/i` | Yes (`.ya?ml` is narrow but the other 4 terms are generic) | No |
+| `recap` | `/\brecap\b\|\bsummary\b\|\btakeaway\b\|\bthree (things\|points)\b/i` | Yes | No |
+| `architecture` | `/\barchitecture\b\|\bdiagram\b\|\bnode\b\|\bcomponent\b\|\barrow\b/i` | **No** — `node` is a Kubernetes-node term reused as a generic graph-node word by coincidence; the regex works today largely by luck of `node`'s dual meaning, not by design | Not yet observed live, but the same shape of risk as `investigation` |
+| `investigation` | `/\bscene\b\|\bpods?\b\|\bqueue\b\|\bnode\b\|\btraffic\b\|\bmeter\b/i` | **No** — every term (`pods`, `queue`, `traffic`, `node`) is GPU/Kubernetes-inference vocabulary; `scene`/`meter` are the only generic escape hatches | **Yes** — the live failure this section documents |
+
+**Conclusion:** 2 of 9 kinds (`architecture`, `investigation`) are built
+entirely from domain-specific vocabulary with no reliable generic fallback
+word; `investigation` has already failed live, `architecture` is the same
+shape of risk and has not yet been observed to fail only because it hasn't
+been exercised against enough non-Kubernetes topics yet. `terminal` has one
+narrow domain-specific term (`kubectl`) alongside otherwise-generic ones,
+so it's lower risk but not zero. The other 6 kinds are genuinely
+topic-agnostic today (they check for the *kind of UI element*, e.g. "card",
+"panel", "diagram" — not domain content) and are not expected to recur as
+this specific bug, independent of what topic a course covers.
+
+#### 4.2.2 Candidate fix A — require the model to literally echo `visual.kind`
+
+**Design:** change the `on_screen` instruction (per kind, in `prompts.ts`) to
+require a literal, fixed anchor phrase tied to the kind itself rather than
+open-ended descriptive vocabulary — e.g. always start or end `on_screen`
+with a fixed tag like `"[architecture]"` or require the literal word
+`architecture`/`investigation`/etc. to appear verbatim (already the pattern
+`optionsCompare` and `statement` were prompt-patched toward on 2026-08-31,
+just not yet made a HARD requirement with a single fixed word per kind).
+`selfcheck.ts`'s regex per kind narrows to matching that one fixed anchor
+term (or a very small, deliberately chosen synonym set), replacing the
+current "any of these 4-6 loosely-related words" approach.
+
+- **Reliability:** high, and directly addresses the root cause — the check
+  no longer depends on the model's free vocabulary intersecting a
+  hand-picked domain-specific list. Works identically regardless of topic.
+- **Constrains the model's phrasing:** meaningfully. Forces slightly
+  mechanical language into `on_screen` (e.g. "An architecture diagram
+  shows..." rather than a more natural "The system layout reveals...").
+  `on_screen` is internal tooling metadata (used to compare against the
+  rendered frame, not learner-facing narration), so this constraint has no
+  pedagogical cost — but it does reduce the model's freedom on one field.
+- **Needs a prompt change alongside the selfcheck.ts change:** yes, for
+  every one of the 9 kinds (not just the 2 at real risk) — a fixed-anchor
+  requirement only works if the prompt states it precisely enough that the
+  model reliably complies, and inconsistent phrasing rules across kinds
+  (loose for some, strict for others) would be confusing to maintain.
+- **Regression risk against yesterday's prompt-tuning:** low. Yesterday's
+  `optionsCompare` fix ("MUST literally use the word 'comparison' or
+  'options' or 'trade-off'") is already this exact pattern in miniature —
+  this candidate generalizes and formalizes it across all 9 kinds rather
+  than reversing it. The `statement` nudge ("describe it AS a
+  statement/card") is compatible too. Both would very likely stay correct
+  under this design and could be tightened to match the new stricter
+  per-kind wording for consistency.
+
+#### 4.2.3 Candidate fix B — structural check instead of English keyword matching
+
+**Design:** stop reading `on_screen`'s prose entirely for this check.
+Instead, verify agreement using fields that already exist on `visual`
+itself: e.g. for `architecture`, check that `on_screen` mentions at least
+one of the beat's own `nodes[].label` values (real content the model
+already wrote, not a fixed vocabulary list) rather than a generic word like
+"architecture"; for `investigation`, check for a segment/keyframe-derived
+signal instead of a hardcoded word list; for `dashboard`, check for
+`panels[].label`; etc. Each kind would need its own bespoke structural rule
+since the fields differ per kind (this is NOT one general mechanism — see
+below).
+
+- **Reliability:** potentially higher-fidelity semantically (it checks
+  "does on_screen mention what's actually in the visual" rather than "does
+  on_screen contain a UI-chrome word"), but implementation risk is real:
+  each kind's structural check is a separate piece of bespoke logic to get
+  right, versus Fix A's one uniform mechanism repeated per kind.
+- **Constrains the model's phrasing:** less than Fix A in principle (no
+  fixed anchor word required) — but in practice the model still has to
+  reliably reproduce specific label text, which is its own kind of
+  constraint (typos/paraphrasing a node label would still fail the check).
+- **Needs a prompt change alongside the selfcheck.ts change:** likely yes
+  too, to nudge the model toward mentioning at least one real
+  content-bearing field per kind — so this isn't actually prompt-change-free
+  relative to Fix A.
+- **A real complication found during this audit:** `terminal` and `editor`
+  share the exact same structural shape (`lines[]` with `kind`/`text`) —
+  only `editor`'s `filename` field reliably distinguishes them structurally.
+  A structural check for `editor` can lean on `filename`; `terminal` has no
+  equivalently distinguishing field to check against, so it would still
+  need a keyword-style fallback (or Fix A's fixed-anchor approach) for that
+  one kind specifically. This means Fix B can't fully replace Fix A's
+  mechanism as a single unified approach — some kinds structurally support
+  it, some don't (`terminal`, and arguably `title`/`recap`/`statement`,
+  which have no strongly kind-identifying content field either — a
+  `statement`'s `statement` text field is just prose, not a discriminator).
+- **Regression risk against yesterday's prompt-tuning:** higher than Fix A.
+  Yesterday's fixes were both fixed-anchor-word patches (Fix A's shape);
+  Fix B would replace that mechanism for at least `architecture` and
+  `dashboard` (the kinds with a clean discriminating field), leaving a
+  split system — some kinds checked structurally, some still keyword-based
+  — which is more surface area to keep consistent over time.
+
+#### 4.2.4 Recommendation
+
+**Fix A (fixed-anchor echo, generalized to all 9 kinds).** It directly
+targets the actual root cause (domain-specific vocabulary), is the smaller
+and more uniform change, has proven reliability (it's exactly what already
+worked for `optionsCompare`/`statement` yesterday), and avoids introducing
+a split checking strategy across kinds (Fix B's `terminal`/`title`/`recap`/
+`statement` gap). Fix B's higher-fidelity semantic check is a genuinely
+interesting idea for a future, separate improvement — e.g. layered on TOP
+of Fix A for the kinds where it cleanly applies (`architecture`,
+`dashboard`) — but is not the right first move given it can't stand alone
+across all 9 kinds and carries more implementation surface for the same
+underlying problem Fix A already solves.
+
+**Rough scope:** small-to-medium. `service/src/generate/prompts.ts` — one
+new fixed-anchor sentence per kind (9 edits, most of them 1-2 lines, in the
+existing per-kind `visual` instruction block) plus bumping `PROMPT_VERSION`.
+`service/src/generate/selfcheck.ts` — tighten `KIND_KEYWORDS` per kind to
+the new fixed anchor term(s) (9 regex edits, same shape as the existing
+map). New/updated tests in `generate.test.ts` (mirroring the existing
+"the built prompt states..." pattern from 2026-08-30/31) asserting each
+kind's prompt states its anchor requirement, plus unit coverage alongside
+the existing `selfCheck(...)` tests already inline in that same file (there
+is no separate `selfcheck.test.ts`) for a few representative kinds
+confirming the tightened regex accepts a compliant `on_screen` and rejects
+a non-compliant one. Then real-model re-verification against both current
+models (Sonnet, Gemini) for all 9 kinds, same rigor as the 2026-08-31
+prompt-tuning pass, before redeploying — this is the part likely to
+dominate actual time spent, not the code change itself.
+
 ---
 
 ## 5. S3 write — **BLOCKED ON AL7**
