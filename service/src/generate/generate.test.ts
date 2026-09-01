@@ -232,6 +232,41 @@ test("the video prompt explicitly requires a `stage` field per beat and explains
   await app.close();
 });
 
+// Regression test for a real production bug: a live video call failed
+// self-check because "investigation" beats' KIND_KEYWORDS regex was built
+// from GPU/Kubernetes-inference vocabulary (pods, queue, traffic) that
+// doesn't generalize to other course topics (this one was AWS IAM). Fixed
+// by requiring a single fixed anchor word per visual.kind, topic-independent
+// (AL3 plan doc §4.2). Confirms the prompt actually states each kind's
+// requirement — selfCheck's own acceptance/rejection is covered separately.
+test("the video prompt requires a fixed anchor word in on_screen for every visual.kind except investigation_segment", async () => {
+  const { app, model } = await appWith(VALID_CONTENT.video);
+  await authedPost(app, body("video"));
+  const call = model.calls[0]!;
+  const anchors: Record<string, string> = {
+    title: "title",
+    statement: "statement",
+    architecture: "architecture",
+    optionsCompare: "comparison",
+    investigation: "investigation",
+    dashboard: "dashboard",
+    terminal: "terminal",
+    editor: "editor",
+    recap: "recap",
+  };
+  for (const [kind, anchor] of Object.entries(anchors)) {
+    assert.ok(
+      call.user.includes(kind) && call.user.toLowerCase().includes(`must contain the word "${anchor}"`),
+      `the prompt states ${kind}'s on_screen must contain "${anchor}"`,
+    );
+  }
+  assert.ok(
+    call.user.includes("investigation_segment") && call.user.includes("exempt"),
+    "the prompt explicitly exempts investigation_segment from the anchor-word rule",
+  );
+  await app.close();
+});
+
 // Regression test for a real production bug found while re-verifying against
 // a different model: the context block renders each target_capabilities
 // entry's human-readable `name` (c.name ?? c.id), so the model never actually
@@ -388,4 +423,38 @@ test("selfCheck flags a skill_evaluator missing a proficiency level", () => {
   const r = selfCheck("skill_evaluator", bad);
   assert.equal(r.ok, false);
   assert.match(r.errors.join(" "), /Architect/);
+});
+
+// Regression coverage for the anchor-word tightening (AL3 plan doc §4.2):
+// the tightened investigation/architecture regexes must reject an accurate
+// but off-topic description (the exact live failure mode) and accept one
+// that states the required anchor word, regardless of subject matter.
+test("selfCheck's investigation anchor-word check accepts a non-Kubernetes on_screen that states \"investigation\", rejects one that doesn't", () => {
+  const good = structuredClone(VALID_CONTENT.video) as Record<string, unknown>;
+  const investigationBeat = (good.beats as Array<Record<string, unknown>>).find(
+    (b) => (b.visual as { kind?: string }).kind === "investigation",
+  )!;
+  investigationBeat.on_screen =
+    "An investigation view tracks the security state during credential audit, unauthorized escalation attempt, and boundary containment.";
+  assert.equal(selfCheck("video", good).ok, true, "accepts a topic-agnostic description that states \"investigation\"");
+
+  const bad = structuredClone(good) as Record<string, unknown>;
+  const badBeat = (bad.beats as Array<Record<string, unknown>>).find(
+    (b) => (b.visual as { kind?: string }).kind === "investigation",
+  )!;
+  badBeat.on_screen =
+    "A view tracks the security state during credential audit, unauthorized escalation attempt, and boundary containment.";
+  const r = selfCheck("video", bad);
+  assert.equal(r.ok, false, "rejects the exact real live failure mode: an accurate description missing the anchor word");
+  assert.match(r.errors.join(" "), /investigation/);
+});
+
+test("selfCheck's architecture anchor-word check no longer accepts the word \"node\" alone (the old regex's coincidental escape hatch)", () => {
+  const spec = structuredClone(VALID_CONTENT.video) as Record<string, unknown>;
+  const archBeat = (spec.beats as Array<Record<string, unknown>>).find(
+    (b) => (b.visual as { kind?: string }).kind === "architecture",
+  )!;
+  archBeat.on_screen = "A diagram of nodes and the flow of traffic between them."; // "node"/"diagram" without "architecture"
+  const r = selfCheck("video", spec);
+  assert.equal(r.ok, false, "the old regex would have passed this via \"node\"/\"diagram\"; the tightened one requires \"architecture\" itself");
 });

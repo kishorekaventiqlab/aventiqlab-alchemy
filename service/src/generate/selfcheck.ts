@@ -58,17 +58,28 @@ export function selfCheck(type: Al3SupportedType, content: unknown): SelfCheckRe
   return { ok: errors.length === 0, errors };
 }
 
-/** Nouns whose presence in on_screen we cross-check against visual.kind. */
+/**
+ * A single fixed anchor word per visual.kind that the prompt requires
+ * on_screen to literally contain (prompts.ts's per-kind instructions).
+ * Deliberately NOT a loose list of topic-adjacent synonyms - the prior
+ * version's investigation/architecture/terminal entries leaned on
+ * GPU/Kubernetes-inference vocabulary (pods, queue, traffic, kubectl, node)
+ * that doesn't generalize to other course topics, and investigation's
+ * failed live (2026-09-01, AL3 plan doc §4.1) on an accurate description
+ * that simply didn't happen to use those specific words. Each regex here
+ * matches only the kind's own name (or a one-word close variant), which the
+ * model is told to echo verbatim regardless of subject matter.
+ */
 const KIND_KEYWORDS: Record<string, RegExp> = {
-  terminal: /\bterminal\b|\bkubectl\b|\bcommand line\b|\bshell\b/i,
-  editor: /\beditor\b|\bfile\b|\.ya?ml\b|\bdiff\b|\bcode\b/i,
-  dashboard: /\bdashboard\b|\bgraph\b|\bpanel\b|\bmetric\b|\bchart\b/i,
-  architecture: /\barchitecture\b|\bdiagram\b|\bnode\b|\bcomponent\b|\barrow\b/i,
-  recap: /\brecap\b|\bsummary\b|\btakeaway\b|\bthree (things|points)\b/i,
-  optionsCompare: /\bcomparison\b|\bcolumn\b|\boption\b|\bsolves\b|\btrade-?off\b/i,
-  statement: /\bstatement\b|\bcard\b|\beyebrow\b|\bsingle sentence\b/i,
-  title: /\btitle card\b|\btitle screen\b/i,
-  investigation: /\bscene\b|\bpods?\b|\bqueue\b|\bnode\b|\btraffic\b|\bmeter\b/i,
+  terminal: /\bterminal\b/i,
+  editor: /\beditor\b/i,
+  dashboard: /\bdashboard\b/i,
+  architecture: /\barchitecture\b/i,
+  recap: /\brecap\b/i,
+  optionsCompare: /\bcomparison\b/i,
+  statement: /\bstatement\b/i,
+  title: /\btitle\b/i,
+  investigation: /\binvestigation\b/i,
 };
 
 function checkVideo(c: Record<string, unknown>): string[] {

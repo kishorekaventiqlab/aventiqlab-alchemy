@@ -160,7 +160,7 @@ test("video with stages out of canonical order -> generation_failed", async () =
 test("video beat whose on_screen contradicts its visual.kind -> generation_failed", async () => {
   const bad = structuredClone(VALID_CONTENT.video) as Record<string, unknown>;
   const arch = (bad.beats as Array<Record<string, unknown>>).find((b) => (b.visual as { kind?: string }).kind === "architecture")!;
-  arch.on_screen = "A person talking to camera about autoscaling."; // no diagram/node/arrow terms
+  arch.on_screen = "A person talking to camera about autoscaling."; // no "architecture" anchor word
   const { app } = await appReturning(bad);
   const res = await authedPost(app, videoBody());
   assert.equal(res.statusCode, 502);

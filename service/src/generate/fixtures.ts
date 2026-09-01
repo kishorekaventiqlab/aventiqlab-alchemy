@@ -222,7 +222,7 @@ export const VALID_CONTENT = {
         stage: "investigation_demonstration",
         narration: "",
         narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-        on_screen: "Continuous scene: traffic climbs, KEDA scales pods, both GPU nodes fill to 100%, two pods go Pending, a third node fades in, pending pods schedule, the queue drains.",
+        on_screen: "Continuous investigation view: traffic climbs, KEDA scales pods, both GPU nodes fill to 100%, two pods go Pending, a third node fades in, pending pods schedule, the queue drains.",
         target_duration_sec: 40,
         visual: {
           kind: "investigation",
