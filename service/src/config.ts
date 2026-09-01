@@ -137,6 +137,25 @@ function intFromEnv(name: string, fallback: number): number {
 }
 
 /**
+ * Hard product requirement, not just a cost-driven default: alchemy content
+ * generation must never call Claude Sonnet (or any other non-Gemini model)
+ * via OpenRouter, under any circumstance — including a future env-var
+ * override (OPENROUTER_MODEL_DEFAULT/_MATERIAL/_QUIZ/_SOURCE_CODE_LAB/
+ * _SKILL_EVALUATOR all read raw env, with nothing previously stopping one of
+ * them from being set to a non-Gemini model). A prefix check (not an exact
+ * pin) so a future Gemini point release doesn't need a code change here.
+ */
+function assertAllowedModel(envVarName: string, model: string): string {
+  if (!model.startsWith("google/gemini-")) {
+    throw new ConfigError(
+      `${envVarName} resolved to "${model}", which is not a Gemini model. ` +
+        `alchemy content generation must only ever call Gemini via OpenRouter — refusing to start.`,
+    );
+  }
+  return model;
+}
+
+/**
  * Resolve all config + secrets. Call once at startup. Throws ConfigError
  * (code: "not_configured") if anything required is missing.
  */
@@ -217,17 +236,28 @@ export async function loadGenerationConfig(region: string): Promise<GenerationCo
   // for cost consistency across the platform's two LLM-calling systems.
   // Every artifact-type prompt was re-verified against real Gemini 3.7 Flash
   // output before this default changed (generate.test.ts + prompts.ts).
-  const defaultModel = process.env.OPENROUTER_MODEL_DEFAULT || "google/gemini-3.7-flash";
+  // Also a hard product requirement (assertAllowedModel, above) — not just a
+  // cost-driven default a future override could quietly undo.
+  const defaultModel = assertAllowedModel(
+    "OPENROUTER_MODEL_DEFAULT",
+    process.env.OPENROUTER_MODEL_DEFAULT || "google/gemini-3.7-flash",
+  );
 
   return {
     openRouterApiKey,
     openRouterBaseUrl: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
     defaultModel,
     modelByType: {
-      material: process.env.OPENROUTER_MODEL_MATERIAL || defaultModel,
-      quiz: process.env.OPENROUTER_MODEL_QUIZ || defaultModel,
-      source_code_lab: process.env.OPENROUTER_MODEL_SOURCE_CODE_LAB || defaultModel,
-      skill_evaluator: process.env.OPENROUTER_MODEL_SKILL_EVALUATOR || defaultModel,
+      material: assertAllowedModel("OPENROUTER_MODEL_MATERIAL", process.env.OPENROUTER_MODEL_MATERIAL || defaultModel),
+      quiz: assertAllowedModel("OPENROUTER_MODEL_QUIZ", process.env.OPENROUTER_MODEL_QUIZ || defaultModel),
+      source_code_lab: assertAllowedModel(
+        "OPENROUTER_MODEL_SOURCE_CODE_LAB",
+        process.env.OPENROUTER_MODEL_SOURCE_CODE_LAB || defaultModel,
+      ),
+      skill_evaluator: assertAllowedModel(
+        "OPENROUTER_MODEL_SKILL_EVALUATOR",
+        process.env.OPENROUTER_MODEL_SKILL_EVALUATOR || defaultModel,
+      ),
     },
     contentBucket,
     // Per-OpenRouter-call timeout. openrouter.ts can make up to TWO sequential
