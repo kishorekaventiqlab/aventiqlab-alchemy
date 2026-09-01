@@ -59,11 +59,17 @@ export async function generateArtifact(
   // Work on a copy — never mutate the parsed model output in place.
   const working = structuredClone(content) as Record<string, unknown>;
 
-  // For video: alchemy computes the pinned hashes (the model is told not to).
-  // Done BEFORE self-check so the schema's `narration_hash`/`spec_hash` patterns
-  // validate against real values, not model guesses.
+  // For video: alchemy computes the pinned hashes (the model is told not to)
+  // and the estimated duration (the model IS told to compute it, but the
+  // prompt's own framing already says this is pure arithmetic on beats it
+  // already wrote, not a creative estimate — so alchemy just does that
+  // arithmetic itself rather than trusting an occasional model slip; see
+  // fillVideoEstimatedDuration). Done BEFORE self-check so the schema's
+  // `narration_hash`/`spec_hash` patterns and the duration-sum check
+  // validate against real, alchemy-computed values, not model guesses.
   if (type === "video") {
     fillVideoHashes(working);
+    fillVideoEstimatedDuration(working);
   }
 
   const check = selfCheck(type, working);
@@ -128,6 +134,28 @@ function fillVideoHashes(spec: Record<string, unknown>): void {
     b.narration_hash = narrationHash(String(b.narration ?? ""), voice);
   }
   spec.spec_hash = specHash(spec as never);
+}
+
+/**
+ * Set the top-level `estimated_duration_minutes` on a generated video_spec,
+ * overwriting the model's own value — same mirror-selfcheck.ts arithmetic
+ * (investigation CONTAINER beats excluded; their segments are counted) the
+ * prompt already asks the model to do itself. The prompt's own framing says
+ * this field is "NOT a free-standing creative estimate", so there is no
+ * creative model decision being overridden here, just an occasional
+ * arithmetic slip being made impossible (docs/video-v1-schema.md; the
+ * duration-sum self-check can no longer fail this specific way once the
+ * value is computed the same way the check itself computes it).
+ */
+function fillVideoEstimatedDuration(spec: Record<string, unknown>): void {
+  const beats = Array.isArray(spec.beats) ? (spec.beats as Array<Record<string, unknown>>) : [];
+  let sum = 0;
+  for (const b of beats) {
+    const v = (b.visual ?? {}) as Record<string, unknown>;
+    if (v.kind === "investigation") continue; // container — its segments are counted
+    sum += Number(b.target_duration_sec) || 0;
+  }
+  spec.estimated_duration_minutes = sum / 60;
 }
 
 async function safeWriteError(

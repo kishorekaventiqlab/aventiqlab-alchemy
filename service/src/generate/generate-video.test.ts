@@ -216,13 +216,43 @@ test("sum-of-durations check excludes the investigation container (no double cou
   assert.ok(r.ok, r.errors.join("; "));
 });
 
-test("sum-of-durations WAY off estimate -> generation_failed", async () => {
+// selfCheck's own duration-drift detection, tested directly: generator.ts's
+// fillVideoEstimatedDuration now overwrites estimated_duration_minutes
+// server-side before selfCheck ever runs (a mismatched value from the model
+// can no longer reach this check through the real /v1/generate pipeline —
+// see the HTTP-level test below), so this check's ability to actually catch
+// a real drift is exercised at the selfCheck level, same pattern as the
+// "excludes the investigation container" test above.
+test("selfCheck's sum-of-durations check flags a WAY off estimate", () => {
   const bad = structuredClone(VALID_CONTENT.video) as Record<string, unknown>;
+  for (const b of bad.beats as Array<Record<string, unknown>>) {
+    b.narration_hash = narrationHash(String(b.narration ?? ""), bad.voice);
+  }
+  bad.spec_hash = specHash(bad as never);
   bad.estimated_duration_minutes = 30; // 1800s vs ~123s of beats
+  const r = selfCheck("video", bad);
+  assert.equal(r.ok, false);
+  assert.match(r.errors.join(" "), /target_duration_sec|within 15/);
+});
+
+// Regression test for a real production bug: the video duration-sum
+// self-check failed live (18% drift) even though the model correctly
+// followed the "write beats before estimated_duration_minutes, then sum"
+// prompt instruction — a genuine arithmetic slip, not a missing
+// instruction. Fixed by having alchemy compute estimated_duration_minutes
+// itself (generator.ts's fillVideoEstimatedDuration), same
+// correct-by-construction pattern as narration_hash/spec_hash. Confirms the
+// real /v1/generate pipeline now succeeds even when the mocked "model"
+// returns a wildly wrong estimated_duration_minutes.
+test("a wildly wrong model-supplied estimated_duration_minutes no longer fails generation - alchemy recomputes it", async () => {
+  const bad = structuredClone(VALID_CONTENT.video) as Record<string, unknown>;
+  bad.estimated_duration_minutes = 30; // 1800s vs ~123s of beats — would have failed before this fix
   const { app } = await appReturning(bad);
   const res = await authedPost(app, videoBody());
-  assert.equal(res.statusCode, 502);
-  assert.match(res.json().error.message, /target_duration_sec|within 15/);
+  assert.equal(res.statusCode, 200, res.body);
+  const returned = res.json().content.estimated_duration_minutes as number;
+  assert.ok(Math.abs(returned - 30) > 1, "the model's wrong value was NOT what got returned");
+  assert.ok(returned > 1.5 && returned < 3, `estimated_duration_minutes (${returned}) should be recomputed from the real ~123s of beats, not 30`);
   await app.close();
 });
 
