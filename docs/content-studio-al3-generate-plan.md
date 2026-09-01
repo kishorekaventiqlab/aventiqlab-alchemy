@@ -386,6 +386,43 @@ is always traceable to the prompt that produced it).
   (retryable) with the validation error as the message. astra re-calls with
   `attempt+1` and its own error text.
 
+### 4.1 Known gap: the video `on_screen` / `visual.kind` agreement check is hardcoded to one topic's vocabulary
+
+Found live (2026-09-01, `cexp_01M1EEWETKKNDJ9X9Y3Z0AKZ6D`, model
+`google/gemini-3.7-flash`, `prompt_version: al3-2026-08-31e`): a real
+`/v1/generate video` call failed self-check —
+
+```
+Generated video failed self-check: beat "beat-07-investigation"
+visual.kind is "investigation" but on_screen does not describe it
+(no matching term) — on_screen and visual must agree
+```
+
+— even though the beat's `on_screen` text ("An investigation view tracks the
+security state during credential audit, unauthorized escalation attempt, and
+boundary containment.") was an accurate, well-written description. Root
+cause: `selfcheck.ts`'s `KIND_KEYWORDS` map checks `on_screen` against a
+literal-keyword regex per `visual.kind`, and the `investigation` kind's regex
+(`/\bscene\b|\bpods?\b|\bqueue\b|\bnode\b|\btraffic\b|\bmeter\b/i`) was
+clearly written against one example domain (GPU/Kubernetes inference) — none
+of those words are natural vocabulary for other topics (this one was AWS IAM
+identity delegation). The same class of bug was also found the day before
+against the `statement` and `optionsCompare` kinds during real-model
+verification testing and worked around by tuning the PROMPT toward
+keyword-matching vocabulary for those two kinds specifically — that
+workaround does not generalize to new topics or the kinds it didn't cover
+(confirmed: `investigation` was not in that pass).
+
+Not fixed here — astra's own retry (re-call with `attempt+1` and the error
+fed back, `retryable: true`) should recover this specific occurrence, per
+the same feedback loop verified extensively during real-model testing.
+The underlying fragility needs a real design decision before a permanent
+fix: candidates include requiring the model to literally echo `visual.kind`
+as a word in `on_screen` (schema/prompt-level, not vocabulary-dependent), or
+replacing the keyword-regex check with something structural instead of
+English-language matching. Tracked here so it isn't lost, not scoped or
+implemented yet.
+
 ---
 
 ## 5. S3 write — **BLOCKED ON AL7**
