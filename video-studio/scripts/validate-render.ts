@@ -22,6 +22,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
+import { tmpdir } from "node:os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
@@ -97,7 +98,14 @@ const ffprobeJson = (ffprobe: string, mp4Path: string): any => {
 
 const rmsAt = (ffmpeg: string, mp4Path: string, startSeconds: number, durationSeconds: number): number => {
   const dylibDir = dirname(ffmpeg);
-  const tmpWav = join(repoRoot, "out", `.validate-rms-${startSeconds}.wav`);
+  // os.tmpdir() (not a repo-relative "out/" path): the render container never
+  // has out/ (video-studio/.dockerignore excludes it to keep the image
+  // small), so writing there threw ENOENT and crashed this whole script
+  // before it could report a single check — mechanical_qa came back
+  // {checks: [], passed: false} for every real render, not because checks
+  // failed but because none of them ever ran. tmpdir() always exists and is
+  // writable regardless of build context or OS.
+  const tmpWav = join(tmpdir(), `validate-rms-${startSeconds}-${process.pid}.wav`);
   execFileSync(ffmpeg, [
     "-v", "error", "-y", "-ss", String(startSeconds), "-t", String(durationSeconds),
     "-i", mp4Path, "-vn", "-acodec", "pcm_s16le", "-ar", "22050", "-ac", "1", tmpWav,

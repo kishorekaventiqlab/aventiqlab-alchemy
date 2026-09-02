@@ -117,8 +117,18 @@ export async function validateRender(
     );
     stdout = res.stdout;
   } catch (err) {
-    // exit 1 = some checks failed; still parse the report.
-    stdout = (err as { stdout?: string }).stdout ?? '';
+    // exit 1 can mean either "some checks failed" (validate-render.ts ran to
+    // completion and printed its [PASS]/[FAIL] report — parse it below) or
+    // "the script crashed before printing anything" (e.g. a filesystem
+    // error). Either way stderr carries real signal that was previously
+    // discarded entirely, silently producing {checks: [], passed: false}
+    // with no trace in the worker's own logs of WHY no checks ran. Log it so
+    // a future regression like that isn't invisible again.
+    const e = err as { stdout?: string; stderr?: string; message?: string };
+    stdout = e.stdout ?? '';
+    if (e.stderr || (!stdout && e.message)) {
+      console.error(`validate-render.ts exited non-zero:\n${e.stderr || e.message}`);
+    }
     passed = false;
   }
 
