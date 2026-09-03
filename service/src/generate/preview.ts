@@ -100,7 +100,12 @@ export function derivePreview(type: Al3SupportedType, content: Record<string, un
         pass_conditions: content.pass_conditions ?? {},
       };
     }
-    case "video": {
+    case "video":
+    case "video_v2": {
+      // Identical logic for v1 and v2: script_outline is derived from
+      // beats[].stage/outline_hint/narration/on_screen, none of which differ
+      // between the two schema versions — only visual.kind's per-kind payload
+      // shape differs, and this preview never reads visual at all.
       const beats = Array.isArray(content.beats) ? (content.beats as Array<Record<string, unknown>>) : [];
       return {
         title: content.title,

@@ -19,6 +19,7 @@ import { Ajv, type ValidateFunction } from "ajv";
 import { DELIVERABLE_SCHEMA } from "./schemas.js";
 import type { Al3SupportedType } from "./types.js";
 import { stageCoverage } from "../lib/video-stage-coverage.js";
+import { ENTITY_CATEGORY } from "./video-schema-v2.js";
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 const validators = new Map<string, ValidateFunction>();
@@ -53,6 +54,7 @@ export function selfCheck(type: Al3SupportedType, content: unknown): SelfCheckRe
     if (type === "quiz") errors.push(...checkQuiz(c));
     if (type === "material") errors.push(...checkMaterial(c));
     if (type === "video") errors.push(...checkVideo(c));
+    if (type === "video_v2") errors.push(...checkVideoV2(c));
   }
 
   return { ok: errors.length === 0, errors };
@@ -151,6 +153,140 @@ function checkVideo(c: Record<string, unknown>): string[] {
   }
 
   // 4. sum of target_duration_sec (investigation CONTAINER beats excluded — AL8 §1.7).
+  const est = Number(c.estimated_duration_minutes);
+  if (Number.isFinite(est) && est > 0) {
+    let sum = 0;
+    for (const b of beats) {
+      const v = (b.visual ?? {}) as Record<string, unknown>;
+      if (v.kind === "investigation") continue; // container — its segments are counted
+      sum += Number(b.target_duration_sec) || 0;
+    }
+    const target = est * 60;
+    const drift = Math.abs(sum - target) / target;
+    if (drift > 0.15) {
+      errs.push(
+        `sum of beat target_duration_sec (${sum.toFixed(1)}s, containers excluded) is ${(drift * 100).toFixed(0)}% off estimated_duration_minutes (${target}s) — must be within 15%`,
+      );
+    }
+  }
+
+  return errs;
+}
+
+const ENTITY_CATEGORY_SET = new Set<string>(ENTITY_CATEGORY);
+
+/**
+ * video/v2's checkVideo analog. Mirrors checkVideo's structural checks
+ * (id uniqueness, investigation container/segment wiring, on_screen<->kind
+ * keyword agreement, stage coverage, duration-sum arithmetic) but validates
+ * the v2 entities/relationships/events shapes instead of v1's nodes/edges/
+ * keyframes. Deliberately does NOT check anything domain-specific (e.g. "a
+ * Git video must contain a commit entity") — that's ASTRA's pedagogical
+ * concern, not alchemy's structural self-check.
+ */
+function checkVideoV2(c: Record<string, unknown>): string[] {
+  const errs: string[] = [];
+  const beats = Array.isArray(c.beats) ? (c.beats as Array<Record<string, unknown>>) : [];
+  if (beats.length === 0) return ["video has no beats"];
+
+  // 1. id uniqueness + investigation container/segment wiring.
+  const ids = new Set<string>();
+  const containerIds = new Set<string>();
+  for (const b of beats) {
+    const id = String(b.id ?? "");
+    if (ids.has(id)) errs.push(`duplicate beat id "${id}"`);
+    ids.add(id);
+    const v = (b.visual ?? {}) as Record<string, unknown>;
+    if (v.kind === "investigation") {
+      containerIds.add(id);
+      if (b.narration !== "") errs.push(`investigation container beat "${id}" must have narration ""`);
+    }
+  }
+
+  for (const b of beats) {
+    const v = (b.visual ?? {}) as Record<string, unknown>;
+    const kind = typeof v.kind === "string" ? v.kind : "";
+
+    if (kind === "investigation_segment") {
+      const of = String(v.of_container ?? "");
+      if (!containerIds.has(of)) {
+        errs.push(`investigation_segment beat "${String(b.id)}" points at of_container "${of}" which is not an investigation container`);
+      }
+    }
+
+    if (kind === "architecture") {
+      const entities = Array.isArray(v.entities) ? (v.entities as Array<Record<string, unknown>>) : [];
+      const entityIds = new Set<string>();
+      for (const e of entities) {
+        const eid = String(e.id ?? "");
+        if (entityIds.has(eid)) errs.push(`architecture beat "${String(b.id)}" has duplicate entity id "${eid}"`);
+        entityIds.add(eid);
+        const x = Number(e.x);
+        const y = Number(e.y);
+        if (x < 40 || x > 1880 || y < 40 || y > 1040) {
+          errs.push(`architecture entity "${eid}" at (${x},${y}) is outside the safe 1920x1080 frame`);
+        }
+      }
+      const relationships = Array.isArray(v.relationships) ? (v.relationships as Array<Record<string, unknown>>) : [];
+      for (const r of relationships) {
+        const from = String(r.from_id ?? "");
+        const to = String(r.to_id ?? "");
+        if (!entityIds.has(from)) errs.push(`architecture beat "${String(b.id)}" relationship from_id "${from}" is not a declared entity`);
+        if (!entityIds.has(to)) errs.push(`architecture beat "${String(b.id)}" relationship to_id "${to}" is not a declared entity`);
+      }
+      const highlight = v.highlight_id;
+      if (typeof highlight === "string" && highlight && !entityIds.has(highlight)) {
+        errs.push(`architecture beat "${String(b.id)}" highlight_id "${highlight}" is not a declared entity`);
+      }
+    }
+
+    if (kind === "investigation") {
+      const entities = Array.isArray(v.entities) ? (v.entities as Array<Record<string, unknown>>) : [];
+      const entityIds = new Set<string>();
+      for (const e of entities) {
+        const eid = String(e.id ?? "");
+        if (entityIds.has(eid)) errs.push(`investigation beat "${String(b.id)}" has duplicate entity id "${eid}"`);
+        entityIds.add(eid);
+        const cat = String(e.category ?? "");
+        if (!ENTITY_CATEGORY_SET.has(cat)) errs.push(`investigation beat "${String(b.id)}" entity "${eid}" has invalid category "${cat}"`);
+      }
+      const events = Array.isArray(v.events) ? (v.events as Array<Record<string, unknown>>) : [];
+      for (const ev of events) {
+        const target = ev.target;
+        if (typeof target === "string" && target && !entityIds.has(target)) {
+          errs.push(`investigation beat "${String(b.id)}" event target "${target}" is not a declared entity`);
+        }
+      }
+      if (Array.isArray(v.segments)) {
+        for (const seg of v.segments as Array<Record<string, unknown>>) {
+          const ref = String(seg.narration_ref ?? "");
+          if (!ids.has(ref)) errs.push(`investigation "${String(b.id)}" segment narration_ref "${ref}" is not a beat id`);
+          const highlight = seg.highlight_id;
+          if (typeof highlight === "string" && highlight && !entityIds.has(highlight)) {
+            errs.push(`investigation beat "${String(b.id)}" segment highlight_id "${highlight}" is not a declared entity`);
+          }
+        }
+      }
+    }
+
+    // 2. on_screen <-> visual.kind cross-match (AL8 §1.6 consistency rule).
+    const onScreen = typeof b.on_screen === "string" ? b.on_screen : "";
+    if (kind === "investigation_segment") continue; // describes the shared scene, exempt.
+    const kw = KIND_KEYWORDS[kind];
+    if (kw && onScreen && !kw.test(onScreen)) {
+      errs.push(
+        `beat "${String(b.id)}" visual.kind is "${kind}" but on_screen does not describe it (no matching term) — on_screen and visual must agree`,
+      );
+    }
+  }
+
+  // 3. stage coverage (the shared lib — narrative-only, format-agnostic).
+  const coverage = stageCoverage(c);
+  if (!coverage.ok) {
+    errs.push(`stage coverage: ${coverage.notes.join(" ")}`);
+  }
+
+  // 4. sum of target_duration_sec (investigation CONTAINER beats excluded).
   const est = Number(c.estimated_duration_minutes);
   if (Number.isFinite(est) && est > 0) {
     let sum = 0;

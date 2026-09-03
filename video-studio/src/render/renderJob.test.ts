@@ -86,7 +86,10 @@ function baseSteps(overrides: Partial<RenderSteps> = {}): { steps: RenderSteps; 
   const steps: RenderSteps = {
     regenerateBeatNarration: async (spec, beatId, reason) => {
       calls.regen!.push({ beatId, reason });
-      return { ...spec, beats: spec.beats.map((b) => (b.id === beatId ? { ...b, narration: 'FIXED narration.' } : b)) };
+      return {
+        ...spec,
+        beats: spec.beats.map((b) => (b.id === beatId ? { ...b, narration: 'FIXED narration.' } : b)),
+      } as typeof spec;
     },
     narrationHash,
     specHash,

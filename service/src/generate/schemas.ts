@@ -264,6 +264,8 @@ export const SKILL_EVALUATOR_SCHEMA = {
 
 export { VIDEO_SCHEMA } from "./video-schema.js";
 import { VIDEO_SCHEMA } from "./video-schema.js";
+export { VIDEO_SCHEMA_V2 } from "./video-schema-v2.js";
+import { VIDEO_SCHEMA_V2 } from "./video-schema-v2.js";
 
 export const DELIVERABLE_SCHEMA: Record<string, object> = {
   material: MATERIAL_SCHEMA,
@@ -271,6 +273,7 @@ export const DELIVERABLE_SCHEMA: Record<string, object> = {
   source_code_lab: SOURCE_CODE_LAB_SCHEMA,
   skill_evaluator: SKILL_EVALUATOR_SCHEMA,
   video: VIDEO_SCHEMA,
+  video_v2: VIDEO_SCHEMA_V2,
 };
 
 export { CAPABILITY_VERB, EVALUATION_DIMENSION, PROFICIENCY_LEVEL };

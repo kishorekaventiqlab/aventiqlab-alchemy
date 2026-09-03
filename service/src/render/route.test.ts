@@ -87,13 +87,33 @@ test("POST /v1/render with a bad video_spec -> validation_failed, no job", async
   await app.close();
 });
 
-test("POST /v1/render with schema_version != video/v1 -> unsupported_type", async () => {
+test("POST /v1/render with an unknown schema_version -> unsupported_type", async () => {
+  const store = new MemoryRenderJobStore();
+  const app = await appWith(store, new FakeLauncher());
+  const bad = { ...VALID_CONTENT.video, schema_version: "video/v99" };
+  const res = await postRender(app, renderBody({ video_spec: bad }));
+  assert.equal(res.statusCode, 422);
+  assert.equal(res.json().error.code, "unsupported_type");
+  await app.close();
+});
+
+test("POST /v1/render with schema_version video/v2 but v1-shaped content -> validation_failed (v2 is supported, this content is not valid v2)", async () => {
   const store = new MemoryRenderJobStore();
   const app = await appWith(store, new FakeLauncher());
   const bad = { ...VALID_CONTENT.video, schema_version: "video/v2" };
   const res = await postRender(app, renderBody({ video_spec: bad }));
   assert.equal(res.statusCode, 422);
-  assert.equal(res.json().error.code, "unsupported_type");
+  assert.equal(res.json().error.code, "validation_failed");
+  await app.close();
+});
+
+test("POST /v1/render with a real video/v2 spec -> 202, accepted", async () => {
+  const store = new MemoryRenderJobStore();
+  const launcher = new FakeLauncher();
+  const app = await appWith(store, launcher);
+  const res = await postRender(app, renderBody({ video_spec: VALID_CONTENT.video_v2 }));
+  assert.equal(res.statusCode, 202, res.body);
+  assert.equal(launcher.launches.length, 1);
   await app.close();
 });
 

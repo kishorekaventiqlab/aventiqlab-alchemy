@@ -8,8 +8,17 @@
  */
 import { loadVideoSpec, retimeBeats, type LoadedVideo } from '../spec/loadVideoSpec.js';
 import type { VideoSpec } from '../spec/videoSpecTypes.js';
+import { loadVideoSpecV2, retimeBeatsV2, type LoadedVideoV2 } from '../spec/loadVideoSpecV2.js';
+import type { VideoSpecV2 } from '../spec/videoSpecTypesV2.js';
 import { synthesizeAudioPlan, measuredAudioMap, type AudioCache, type RenderAudioManifest } from '../audio/synthesize.js';
 import type { TTSProvider } from '../audio/TTSProvider.js';
+
+type AnySpec = VideoSpec | VideoSpecV2;
+type AnyLoaded = LoadedVideo | LoadedVideoV2;
+
+function isV2(spec: AnySpec): spec is VideoSpecV2 {
+  return spec.schema_version === 'video/v2';
+}
 
 export interface VisionQaFeedback {
   category: 'pass' | 'layout_bug' | 'pacing_issue' | 'narration_flaw' | 'content_flaw';
@@ -21,7 +30,7 @@ export interface RenderJobInput {
   renderJobId: string;
   experienceId: string;
   cycle: number;
-  videoSpec: VideoSpec;
+  videoSpec: AnySpec;
   visionQaFeedback?: VisionQaFeedback | null;
 }
 
@@ -40,26 +49,27 @@ export interface RenderJobResult {
 export interface RenderSteps {
   /** Regenerate one beat's narration (OpenRouter). Returns the updated spec. */
   regenerateBeatNarration: (
-    spec: VideoSpec,
+    spec: AnySpec,
     beatId: string,
     reason: string | undefined,
-  ) => Promise<VideoSpec>;
+  ) => Promise<AnySpec>;
   /** narration_hash for a (narration, voice) pair — the AL8 pinned formula. */
   narrationHash: (narration: string, voice: unknown) => string;
   /** spec_hash over the load-bearing projection — the AL8 pinned formula. */
-  specHash: (spec: VideoSpec) => string;
+  specHash: (spec: AnySpec) => string;
   /** The TTS provider + the content-addressed cache. */
   ttsProvider: TTSProvider;
   audioCache: AudioCache;
   /** Absolute path to the render workdir. */
   workdir: string;
-  /** Run `remotion render spec-video` with the given inputProps. Returns the MP4 path. */
+  /** Run `remotion render <compositionId>` with the given inputProps. Returns the MP4 path. */
   remotionRender: (params: {
-    spec: VideoSpec;
+    spec: AnySpec;
     measuredAudio: Record<string, number>;
     audioPrefix: string;
     outPath: string;
     workdir: string;
+    compositionId: string;
   }) => Promise<void>;
   /** Extract a poster frame. Returns nothing; writes to posterPath. */
   extractPoster: (mp4Path: string, posterPath: string, atSeconds: number) => Promise<void>;
@@ -128,7 +138,12 @@ export async function runRenderJob(input: RenderJobInput, steps: RenderSteps): P
   }
 
   // ---- 2. load + audio plan ------------------------------------------
-  const loaded0: LoadedVideo = loadVideoSpec(spec);
+  // isV2's narrowing doesn't survive across statements once captured in a
+  // plain boolean, so the two schema versions' load/retime calls are each
+  // made inside their own narrowed branch, assigned into the AnySpec-wide
+  // `loaded0`/`loaded` variables below.
+  const v2 = isV2(spec);
+  const loaded0: AnyLoaded = isV2(spec) ? loadVideoSpecV2(spec) : loadVideoSpec(spec);
 
   await steps.onPhase('synthesizing');
   const manifest: RenderAudioManifest = await synthesizeAudioPlan(loaded0.audioPlan, {
@@ -144,7 +159,9 @@ export async function runRenderJob(input: RenderJobInput, steps: RenderSteps): P
 
   // ---- 3. retime + render ------------------------------------------
   const measured = measuredAudioMap(manifest);
-  let loaded = retimeBeats(loaded0, measured);
+  let loaded: AnyLoaded = isV2(spec)
+    ? retimeBeatsV2(loaded0 as LoadedVideoV2, measured)
+    : retimeBeats(loaded0 as LoadedVideo, measured);
   if (plan.tailBufferBumpSec > 0) {
     loaded = bumpTailBuffer(loaded, plan.tailBufferBumpSec);
   }
@@ -157,6 +174,7 @@ export async function runRenderJob(input: RenderJobInput, steps: RenderSteps): P
     audioPrefix: 'audio/',
     outPath: mp4Path,
     workdir: steps.workdir,
+    compositionId: v2 ? 'spec-video-v2' : 'spec-video',
   });
 
   const posterPath = `${steps.workdir}/out/poster.png`;
@@ -193,30 +211,30 @@ export async function runRenderJob(input: RenderJobInput, steps: RenderSteps): P
 
 // ---- helpers ---------------------------------------------------------
 
-function narrationHashForBeat(spec: VideoSpec, beatId: string): string | undefined {
+function narrationHashForBeat(spec: AnySpec, beatId: string): string | undefined {
   const b = spec.beats.find((x) => x.id === beatId);
   return b?.narration_hash;
 }
 
 /** Add `bumpSec` to every beat's duration and re-lay them contiguously. */
-function bumpTailBuffer(loaded: LoadedVideo, bumpSec: number): LoadedVideo {
+function bumpTailBuffer<T extends AnyLoaded>(loaded: T, bumpSec: number): T {
   let cursor = 0;
   const beats = loaded.beats.map((b) => {
     const duration = Math.round((b.duration + bumpSec) * 100) / 100;
     const start = Math.round(cursor * 100) / 100;
     cursor += duration;
     return { ...b, start, duration };
-  });
+  }) as T['beats'];
   const totalDurationSeconds = Math.round(cursor * 100) / 100;
   return {
     ...loaded,
-    beats: beats as LoadedVideo['beats'],
+    beats,
     totalDurationSeconds,
     totalDurationFrames: Math.round(totalDurationSeconds * loaded.fps),
   };
 }
 
-function posterFrameSeconds(loaded: LoadedVideo): number {
+function posterFrameSeconds(loaded: AnyLoaded): number {
   const firstNonTitle = loaded.beats.find((b) => b.type !== 'title');
   return firstNonTitle ? Math.min(firstNonTitle.start + 1, firstNonTitle.start + firstNonTitle.duration / 2) : 3;
 }

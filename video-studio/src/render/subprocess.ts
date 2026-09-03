@@ -10,6 +10,7 @@ import { promisify } from 'node:util';
 import { mkdir, writeFile, readFile, cp } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import type { VideoSpec } from '../spec/videoSpecTypes.js';
+import type { VideoSpecV2 } from '../spec/videoSpecTypesV2.js';
 
 const exec = promisify(execFile);
 
@@ -22,12 +23,21 @@ export interface SubprocessConfig {
 }
 
 /**
- * `npx remotion render src/index.ts spec-video <out> --props=<json> --public-dir=<workdir>`.
- * The `spec-video` composition's calculateMetadata reads the spec from props.
+ * `npx remotion render src/index.ts <compositionId> <out> --props=<json> --public-dir=<workdir>`.
+ * The composition's calculateMetadata reads the spec from props.
+ * `compositionId` defaults to `spec-video` (video/v1); pass `spec-video-v2`
+ * for a video/v2 spec.
  */
 export async function remotionRender(
   cfg: SubprocessConfig,
-  params: { spec: VideoSpec; measuredAudio: Record<string, number>; audioPrefix: string; outPath: string; workdir: string },
+  params: {
+    spec: VideoSpec | VideoSpecV2;
+    measuredAudio: Record<string, number>;
+    audioPrefix: string;
+    outPath: string;
+    workdir: string;
+    compositionId?: string;
+  },
 ): Promise<void> {
   await mkdir(dirname(params.outPath), { recursive: true });
   const propsPath = join(params.workdir, 'inputProps.json');
@@ -54,7 +64,7 @@ export async function remotionRender(
       'remotion',
       'render',
       'src/index.ts',
-      'spec-video',
+      params.compositionId ?? 'spec-video',
       params.outPath,
       `--props=${propsPath}`,
       `--public-dir=${params.workdir}`,

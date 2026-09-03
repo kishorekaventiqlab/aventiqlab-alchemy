@@ -82,6 +82,26 @@ export const LEARNING_CONTEXT: LearningContext = {
   learner_problem: "Why pod autoscaling is not enough for GPU workloads.",
 };
 
+// A deliberately non-Kubernetes learning context for video_v2 fixtures — the
+// whole point of video/v2 is that architecture/investigation must not leak
+// Kubernetes vocabulary onto an unrelated topic (video-schema-v2.ts).
+export const LEARNING_CONTEXT_GIT: LearningContext = {
+  schema_version: "learning-ir/v1",
+  learning_context_id: "lctx_02TEST",
+  title: "Why Git Branches Don't Copy History",
+  topic: "How Git represents branches as movable pointers, not copies of commit history",
+  learner_level: "Beginner",
+  tone: "Practical & direct",
+  progression_archetype: "concept-first",
+  target_capabilities: [{ id: "cap-git-branching-model", resolved: true, name: "Git branching model" }],
+  scenario: "You've just been told to 'create a feature branch' and aren't sure what actually happens when you do.",
+  business_context: "New engineers routinely fear branching will duplicate the whole repo.",
+  starting_state: "main has 3 commits. No feature branch exists yet.",
+  learner_mission: "Understand what `git branch feature` actually changes.",
+  core_concept: "A branch is a movable pointer to a commit, not a copy of history.",
+  learner_problem: "Why creating a branch doesn't duplicate any commits.",
+};
+
 export const VALID_CONTENT = {
   material: {
     title: "GPU Inference Capacity & Autoscaling Signals",
@@ -273,6 +293,133 @@ export const VALID_CONTENT = {
         on_screen: "A statement card, green 'Best practice' eyebrow, one actionable rule.",
         target_duration_sec: 11,
         visual: { kind: "statement", eyebrow: "Best practice", eyebrow_color: "success", statement: "Replicas increasing, pods still Pending? Check node capacity before tuning the scaler." },
+      },
+    ],
+  },
+
+  // A minimal-but-valid video/v2 spec on a Git-branching topic (deliberately
+  // not Kubernetes) — the constitution's 6 REQUIRED stages as beats + a
+  // title, plus a 3-beat investigation (container + 2 segments) driven by
+  // entities/events instead of v1's K8s-shaped keyframes.
+  video_v2: {
+    schema_version: "video/v2",
+    experience_id: "cexp_01TEST",
+    title: "Why Git Branches Don't Copy History",
+    format: "animated-explainer",
+    central_question: "What actually happens when you create a Git branch?",
+    estimated_duration_minutes: 1.25,
+    target_duration_class: "standard",
+    spec_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    voice: { provider: "chatterbox-v3", voice_id: "default", params: { exaggeration: 0.5, cfg_weight: 0.5 } },
+    beats: [
+      {
+        id: "beat-01-title",
+        stage: null,
+        narration: "",
+        narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        on_screen: "Title card: 'Why Git Branches Don't Copy History' with the central question as a subtitle.",
+        target_duration_sec: 6,
+        visual: { kind: "title", title: "Why Git Branches Don't Copy History", subtitle: "What actually happens when you create a Git branch?" },
+      },
+      {
+        id: "beat-02-problem",
+        stage: "problem",
+        narration: "You've been told to create a feature branch, and you're worried it's going to duplicate the whole repository's history.",
+        narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        on_screen: "A red statement card describing the fear that branching duplicates history.",
+        target_duration_sec: 9,
+        visual: { kind: "statement", eyebrow: "The problem", eyebrow_color: "danger", statement: "Won't creating a branch copy the whole repo's history?", support: "That would make branching expensive and slow." },
+      },
+      {
+        id: "beat-03-curiosity",
+        stage: "curiosity",
+        narration: "Git branches are created almost instantly, even on huge repositories. So what is actually happening under the hood?",
+        narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        on_screen: "An accent statement card posing the question of why branching is instant.",
+        target_duration_sec: 8,
+        visual: { kind: "statement", eyebrow: "The question", eyebrow_color: "accent", statement: "Why is creating a branch instant, even on a huge repo?" },
+      },
+      {
+        id: "beat-04-context",
+        stage: "context_mental_model",
+        narration: "Here is the commit graph. main points at the latest commit on the main line of history — that's all a branch really is: a name pointing at one commit.",
+        narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        on_screen: "An architecture diagram shows a chain of commits with the main branch reference pointing at the newest one.",
+        target_duration_sec: 12,
+        visual: {
+          kind: "architecture",
+          entities: [
+            { id: "commit-1", category: "process", label: "Commit 1", x: 300, y: 400 },
+            { id: "commit-2", category: "process", label: "Commit 2", x: 600, y: 400 },
+            { id: "commit-3", category: "process", label: "Commit 3", sublabel: "main", x: 900, y: 400 },
+          ],
+          relationships: [
+            { from_id: "commit-1", to_id: "commit-2", flowing: true },
+            { from_id: "commit-2", to_id: "commit-3", flowing: true },
+          ],
+          highlight_id: "commit-3",
+        },
+      },
+      {
+        id: "beat-05-investigation",
+        stage: "investigation_demonstration",
+        narration: "",
+        narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        on_screen: "Continuous investigation view: a new branch reference is created pointing at the current commit, then its state changes as commits are added.",
+        target_duration_sec: 20,
+        visual: {
+          kind: "investigation",
+          entities: [
+            { id: "commit-3", category: "process", label: "Commit 3" },
+            { id: "branch-feature", category: "actor", label: "feature" },
+          ],
+          events: [
+            { t: 0, type: "create", target: "branch-feature", detail: "git branch feature" },
+            { t: 8, type: "state_change", target: "branch-feature", from: "none", to: "created" },
+            { t: 14, type: "connect", target: "branch-feature", to: "commit-3", detail: "points at Commit 3, same as main" },
+          ],
+          segments: [
+            { t: 0, narration_ref: "beat-05a-investigation-seg", highlight_id: null },
+            { t: 8, narration_ref: "beat-05b-investigation-seg", highlight_id: "branch-feature" },
+          ],
+          camera_keyframes: [],
+        },
+      },
+      {
+        id: "beat-05a-investigation-seg",
+        stage: "investigation_demonstration",
+        narration: "Right now there's just one branch, main, pointing at Commit 3. No feature branch exists yet.",
+        narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        on_screen: "Wide shot of the commit graph with only main pointing at the latest commit.",
+        target_duration_sec: 9,
+        visual: { kind: "investigation_segment", of_container: "beat-05-investigation", segment_index: 0 },
+      },
+      {
+        id: "beat-05b-investigation-seg",
+        stage: "investigation_demonstration",
+        narration: "Running git branch feature creates a new pointer, feature, at the exact same commit as main. No commits were copied — only a new reference was created.",
+        narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        on_screen: "A new branch reference labeled feature appears alongside main, both pointing at the same commit.",
+        target_duration_sec: 11,
+        visual: { kind: "investigation_segment", of_container: "beat-05-investigation", segment_index: 1 },
+      },
+      {
+        id: "beat-06-decision",
+        stage: "decision",
+        narration: "So the decision is: think of a branch as a label, not a container. Create branches freely — the only cost is a few bytes for the pointer.",
+        narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        on_screen: "A statement card, accent 'The decision' eyebrow.",
+        target_duration_sec: 10,
+        visual: { kind: "statement", eyebrow: "The decision", eyebrow_color: "accent", statement: "Treat a branch as a cheap, movable label — not a copy." },
+      },
+      {
+        id: "beat-07-best-practice",
+        stage: "best_practice",
+        narration: "Here's the rule worth keeping: create a branch for anything experimental. It costs almost nothing, and you can always delete the pointer without touching any commit.",
+        narration_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        on_screen: "A statement card, green 'Best practice' eyebrow, one actionable rule.",
+        target_duration_sec: 10,
+        visual: { kind: "statement", eyebrow: "Best practice", eyebrow_color: "success", statement: "Branch liberally — it's just a cheap, movable pointer." },
       },
     ],
   },

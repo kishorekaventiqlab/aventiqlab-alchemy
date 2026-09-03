@@ -40,8 +40,13 @@ export function validateGenerateRequest(body: unknown): ValidatedRequest {
   }
 
   // artifact_type: known v1 type? generatable at all? supported by AL3 yet?
+  // "video_v2" is a deliberate exception to the V1_ARTIFACT_TYPES gate below:
+  // it's NOT part of the frozen contract v1.3 §3.1 enum (video/v1 stays
+  // exactly as astra signed off on it) — it's an additive, alchemy-internal
+  // artifact_type for the topic-neutral video/v2 schema, reached only by a
+  // caller that explicitly opts in by sending artifact_type: "video_v2".
   const at = b.artifact_type;
-  if (!(V1_ARTIFACT_TYPES as readonly string[]).includes(at)) {
+  if (at !== "video_v2" && !(V1_ARTIFACT_TYPES as readonly string[]).includes(at)) {
     if (at === "battleground") {
       throw new ServiceError("unsupported_type", "`battleground` is not a generatable content type.");
     }

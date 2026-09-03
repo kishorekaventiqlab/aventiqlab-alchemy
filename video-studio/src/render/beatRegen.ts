@@ -8,10 +8,27 @@
  */
 import OpenAI from 'openai';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
-import type { VideoSpec, SpecBeat } from '../spec/videoSpecTypes.js';
 
-export interface BeatRegenParams {
-  spec: VideoSpec;
+/**
+ * The narration-regen surface only touches beat-level narrative fields
+ * (id/stage/narration/on_screen), which are identical between video/v1 and
+ * video/v2 — only `visual`'s per-kind payload differs between the two, and
+ * this function never reads `visual` at all. Generic over any spec whose
+ * beats share this shape, so it works unmodified for both schema versions.
+ */
+export interface RegenerableBeat {
+  id: string;
+  stage?: string | null;
+  narration: string;
+  on_screen: string;
+}
+
+export interface RegenerableSpec {
+  beats: RegenerableBeat[];
+}
+
+export interface BeatRegenParams<TSpec extends RegenerableSpec> {
+  spec: TSpec;
   beatId: string;
   reason: string | undefined;
   region: string;
@@ -37,14 +54,16 @@ async function resolveOpenRouterKey(region: string): Promise<string> {
   throw new Error(`Secrets Manager entry has no string key "${jsonKey}"`);
 }
 
-function otherBeatsContext(spec: VideoSpec, targetId: string): string {
+function otherBeatsContext(spec: RegenerableSpec, targetId: string): string {
   return spec.beats
     .filter((b) => b.id !== targetId && b.narration.trim())
     .map((b) => `- [${b.stage ?? 'beat'}] ${b.narration}`)
     .join('\n');
 }
 
-export async function regenerateBeatNarration(params: BeatRegenParams): Promise<VideoSpec> {
+export async function regenerateBeatNarration<TSpec extends RegenerableSpec>(
+  params: BeatRegenParams<TSpec>,
+): Promise<TSpec> {
   const { spec, beatId, reason } = params;
   const beat = spec.beats.find((b) => b.id === beatId);
   if (!beat) throw new Error(`narration_flaw evidence.beat_id "${beatId}" is not a beat in the spec`);
@@ -101,7 +120,7 @@ export async function regenerateBeatNarration(params: BeatRegenParams): Promise<
   }
 
   // Return a new spec with just that beat's narration replaced.
-  const updatedBeats: SpecBeat[] = spec.beats.map((b) =>
+  const updatedBeats = spec.beats.map((b) =>
     b.id === beatId ? { ...b, narration: parsed.narration as string } : b,
   );
   return { ...spec, beats: updatedBeats };

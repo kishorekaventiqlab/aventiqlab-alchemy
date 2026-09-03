@@ -38,7 +38,7 @@ export async function generateArtifact(
       user: prompt.user,
       model,
       responseSchema: DELIVERABLE_SCHEMA[type] as object,
-      schemaName: `${type}_v1`,
+      schemaName: type,
     });
   } catch (err) {
     // Model-layer errors (timeout/quota/unavailable/malformed) are already
@@ -59,15 +59,17 @@ export async function generateArtifact(
   // Work on a copy — never mutate the parsed model output in place.
   const working = structuredClone(content) as Record<string, unknown>;
 
-  // For video: alchemy computes the pinned hashes (the model is told not to)
-  // and the estimated duration (the model IS told to compute it, but the
-  // prompt's own framing already says this is pure arithmetic on beats it
+  // For video (v1 and v2 — both share the same top-level beat envelope
+  // `{narration, target_duration_sec, visual}`, only `visual`'s per-kind
+  // payload differs): alchemy computes the pinned hashes (the model is told
+  // not to) and the estimated duration (the model IS told to compute it, but
+  // the prompt's own framing already says this is pure arithmetic on beats it
   // already wrote, not a creative estimate — so alchemy just does that
   // arithmetic itself rather than trusting an occasional model slip; see
   // fillVideoEstimatedDuration). Done BEFORE self-check so the schema's
   // `narration_hash`/`spec_hash` patterns and the duration-sum check
   // validate against real, alchemy-computed values, not model guesses.
-  if (type === "video") {
+  if (type === "video" || type === "video_v2") {
     fillVideoHashes(working);
     fillVideoEstimatedDuration(working);
   }

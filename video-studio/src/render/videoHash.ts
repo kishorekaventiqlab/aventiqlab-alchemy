@@ -5,7 +5,24 @@
  * after a narration_flaw beat regen.
  */
 import { createHash } from 'node:crypto';
-import type { VideoSpec } from '../spec/videoSpecTypes.js';
+
+/**
+ * The pinned formulas only read this shared, format-agnostic projection —
+ * identical for video/v1 and video/v2 (only `visual`'s per-kind payload
+ * differs between schema versions, and it's carried through opaquely here).
+ */
+export interface HashableSpec {
+  central_question: string;
+  title: string;
+  format: string;
+  beats: Array<{
+    id: string;
+    stage?: string | null;
+    narration: string;
+    on_screen: string;
+    visual: unknown;
+  }>;
+}
 
 export function canonicalJson(value: unknown): string {
   return JSON.stringify(sortDeep(value));
@@ -33,7 +50,7 @@ export function narrationHash(narration: string, voice: unknown): string {
  * The load-bearing projection only (OQ-6): beats[].{id,stage,narration,on_screen,visual}
  * + top {central_question,title,format}. Everything else excluded.
  */
-export function specHash(spec: VideoSpec): string {
+export function specHash(spec: HashableSpec): string {
   const projection = {
     central_question: spec.central_question,
     title: spec.title,

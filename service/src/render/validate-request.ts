@@ -2,8 +2,10 @@
  * Validate the POST /v1/render request body (contract §7.4).
  *
  * The video_spec is validated with the SAME AL3 self-check used by
- * /v1/generate for artifact_type "video" — one source of truth for what a
- * valid video/v1 spec is.
+ * /v1/generate — one source of truth for what a valid spec is. video/v1 (the
+ * frozen astra contract) dispatches to checkVideo; video/v2 (topic-neutral
+ * architecture/investigation) dispatches to checkVideoV2. Any other
+ * schema_version is rejected.
  */
 import { ServiceError, validationFailed } from "../errors/envelope.js";
 import { selfCheck } from "../generate/selfcheck.js";
@@ -26,13 +28,18 @@ export function validateRenderRequest(body: unknown): RenderRequest {
   }
 
   const spec = b.video_spec as Record<string, unknown>;
-  if (spec.schema_version !== "video/v1") {
+  let selfCheckType: "video" | "video_v2";
+  if (spec.schema_version === "video/v1") {
+    selfCheckType = "video";
+  } else if (spec.schema_version === "video/v2") {
+    selfCheckType = "video_v2";
+  } else {
     throw new ServiceError(
       "unsupported_type",
-      `video_spec.schema_version must be "video/v1", got "${String(spec.schema_version)}".`,
+      `video_spec.schema_version must be "video/v1" or "video/v2", got "${String(spec.schema_version)}".`,
     );
   }
-  const check = selfCheck("video", spec);
+  const check = selfCheck(selfCheckType, spec);
   if (!check.ok) {
     throw validationFailed(`video_spec failed validation: ${check.errors.join("; ")}`);
   }

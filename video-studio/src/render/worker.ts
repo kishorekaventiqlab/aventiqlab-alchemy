@@ -25,6 +25,7 @@ import type { Readable } from 'node:stream';
 
 import { runRenderJob, type RenderJobInput, type RenderSteps, type VisionQaFeedback } from './renderJob.js';
 import type { VideoSpec } from '../spec/videoSpecTypes.js';
+import type { VideoSpecV2 } from '../spec/videoSpecTypesV2.js';
 import { ChatterboxProvider } from '../audio/providers/ChatterboxProvider.js';
 import { loadAudioConfig, voiceName } from '../audio/config.js';
 import { S3AudioCache } from './s3AudioCache.js';
@@ -40,7 +41,7 @@ interface StashedRequest {
   render_job_id: string;
   experience_id: string;
   cycle: number;
-  video_spec: VideoSpec;
+  video_spec: VideoSpec | VideoSpecV2;
   vision_qa_feedback?: VisionQaFeedback | null;
 }
 

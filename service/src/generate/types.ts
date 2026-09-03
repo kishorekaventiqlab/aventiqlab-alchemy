@@ -7,8 +7,21 @@
 export const V1_ARTIFACT_TYPES = ["material", "video", "source_code_lab", "quiz", "skill_evaluator"] as const;
 export type V1ArtifactType = (typeof V1_ARTIFACT_TYPES)[number];
 
-/** Types AL3 generates. `video` landed with AL8 (the video/v1 per-beat schema). */
-export const AL3_SUPPORTED_TYPES = ["material", "source_code_lab", "quiz", "skill_evaluator", "video"] as const;
+/**
+ * Types AL3 generates. `video` landed with AL8 (the video/v1 per-beat schema).
+ * `video_v2` is NOT part of the frozen v1.3 contract's `V1_ARTIFACT_TYPES` —
+ * it's an additive, alchemy-internal artifact_type for the topic-neutral
+ * video/v2 schema (video-schema-v2.ts), opted into explicitly by a caller
+ * that sends artifact_type: "video_v2". video/v1 stays exactly as-is.
+ */
+export const AL3_SUPPORTED_TYPES = [
+  "material",
+  "source_code_lab",
+  "quiz",
+  "skill_evaluator",
+  "video",
+  "video_v2",
+] as const;
 export type Al3SupportedType = (typeof AL3_SUPPORTED_TYPES)[number];
 
 export function isAl3SupportedType(t: string): t is Al3SupportedType {
@@ -22,6 +35,7 @@ export const SCHEMA_VERSION: Record<Al3SupportedType, string> = {
   quiz: "quiz/v1",
   skill_evaluator: "skill-evaluator/v1",
   video: "video/v1",
+  video_v2: "video/v2",
 };
 
 /** Request body — contract §7.1. */
