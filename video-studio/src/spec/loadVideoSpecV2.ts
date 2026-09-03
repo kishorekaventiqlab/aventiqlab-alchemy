@@ -58,6 +58,8 @@ export type RendererBeatV2 =
       type: 'investigation';
       start: number;
       duration: number;
+      /** The provisional (pre-audio-synthesis) duration events[].t was authored against — see retimeBeatsV2. */
+      provisionalDuration: number;
       entities: RendererEntity[];
       events: RendererEvent[];
       segments: RendererInvestigationSegmentV2[];
@@ -226,6 +228,7 @@ export function loadVideoSpecV2(spec: VideoSpecV2): LoadedVideoV2 {
         type: 'investigation',
         start: round2(cursor),
         duration: round2(duration),
+        provisionalDuration: round2(duration),
         entities: b.visual.entities.map(mapEntity),
         events: b.visual.events.map(mapEvent),
         segments: rSegments.map((s) => ({ ...s, t: round2(s.t) })),
@@ -276,7 +279,18 @@ export function retimeBeatsV2(loaded: LoadedVideoV2, measured: MeasuredAudio): L
         return retimed;
       });
       const duration = round2(Math.max(segCursor, 1));
-      beats.push({ ...beat, start: round2(cursor), duration, segments });
+      // events[].t was authored against provisionalDuration (the spec's own
+      // target_duration_sec estimate); real audio duration almost never
+      // matches that estimate exactly, so events must be rescaled by the
+      // same ratio or an event timed near the end of the ORIGINAL estimate
+      // (e.g. t=45 of a 49s estimate) would fall past the REAL, usually
+      // shorter, scene duration and simply never fire — a real bug found by
+      // watching an actual render, not caught by any unit/schema-level test
+      // (unit tests never measure real TTS audio against the full event
+      // timeline the way a live render does).
+      const scale = beat.provisionalDuration > 0 ? duration / beat.provisionalDuration : 1;
+      const events = beat.events.map((e) => ({ ...e, t: round2(e.t * scale) }));
+      beats.push({ ...beat, start: round2(cursor), duration, segments, events });
       cursor += duration;
       continue;
     }

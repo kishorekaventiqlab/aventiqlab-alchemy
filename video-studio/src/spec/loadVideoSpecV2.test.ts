@@ -229,6 +229,42 @@ test('retimeBeatsV2 re-lays the investigation segments against measured audio', 
   assert.ok(Math.abs(inv.segments[1]!.t - 5.5) < 0.01);
 });
 
+// Regression test for a real bug found only by watching an actual rendered
+// video (unit/schema-level checks never catch this — they don't measure
+// real TTS audio against the full event timeline): events[].t is authored
+// against the beat's PROVISIONAL duration (target_duration_sec, here 24s),
+// but real narration is almost always shorter, so the beat's REAL duration
+// after retiming can be much less. Without rescaling, an event timed near
+// the end of the provisional window (e.g. t=12 of 24s) falls past a much
+// shorter real duration and never fires during actual playback — the
+// diagram freezes mid-story while the narration keeps describing changes
+// that never visually happen. events[].t MUST scale by the same ratio
+// segments already do.
+test('retimeBeatsV2 rescales events[].t when real audio compresses the beat far below its provisional duration', () => {
+  const loaded = loadVideoSpecV2(makeSpec());
+  const invBefore = loaded.beats.find((b) => b.type === 'investigation');
+  assert.ok(invBefore && invBefore.type === 'investigation');
+  assert.equal(invBefore.provisionalDuration, invBefore.duration, 'provisionalDuration is set at load time, before any retiming');
+  const originalEventTimes = invBefore.events.map((e) => e.t);
+  assert.deepEqual(originalEventTimes, [0, 12]); // from the fixture: t=0 create, t=12 state_change
+
+  // Real narration much shorter than the 24s target_duration_sec estimate —
+  // this is exactly the shape of what happened in the real Git-branching
+  // render: a beat estimated at 49s came back as 29.7s of real audio.
+  const retimed = retimeBeatsV2(loaded, { 'beat-04a-seg.wav': 1.5, 'beat-04b-seg.wav': 1.5 });
+  const invAfter = retimed.beats.find((b) => b.type === 'investigation');
+  assert.ok(invAfter && invAfter.type === 'investigation');
+  assert.ok(invAfter.duration < invBefore.duration, 'the real duration must have actually compressed for this test to be meaningful');
+
+  const scale = invAfter.duration / invBefore.provisionalDuration;
+  for (const e of invAfter.events) {
+    assert.ok(e.t <= invAfter.duration + 0.01, `event at t=${e.t} must not fall past the beat's real duration (${invAfter.duration})`);
+  }
+  // Every event's new t must be its original t scaled by the same ratio segments were compressed by.
+  assert.ok(Math.abs(invAfter.events[0]!.t - originalEventTimes[0]! * scale) < 0.02);
+  assert.ok(Math.abs(invAfter.events[1]!.t - originalEventTimes[1]! * scale) < 0.02);
+});
+
 // ---- validation ------------------------------------------------------
 
 test('rejects a non-video/v2 schema_version', () => {
