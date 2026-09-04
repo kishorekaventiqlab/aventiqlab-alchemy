@@ -152,6 +152,8 @@ export interface SpecBeatV2 {
   narration: string;
   narration_hash: string;
   on_screen: string;
+  /** Short, learner-facing on-screen text (distinct from on_screen's reviewer-facing description). Optional for older specs — see loadVideoSpecV2's fallback. */
+  on_screen_caption?: string;
   target_duration_sec: number;
   outline_hint?: string;
   visual: SpecVisualV2;

@@ -32,6 +32,9 @@ export interface InvestigationEntity {
   y?: number;
 }
 
+const DEFAULT_NODE_WIDTH = 220;
+const DEFAULT_NODE_HEIGHT = 124;
+
 export interface InvestigationEvent {
   t: number;
   type:
@@ -217,8 +220,8 @@ export const InvestigationSceneV2: React.FC<{
       <div
         style={{
           position: 'absolute',
-          left: 60,
-          right: 60,
+          left: theme.spacing.safeMarginX * 0.6,
+          right: theme.spacing.safeMarginX * 0.6,
           bottom: 60,
           background: theme.panelBg,
           border: `1px solid ${theme.panelBorder}`,
@@ -230,7 +233,7 @@ export const InvestigationSceneV2: React.FC<{
         <div
           style={{
             fontFamily: theme.fontFamily,
-            fontSize: 13,
+            fontSize: theme.fontSize.kicker - 6,
             fontWeight: 700,
             letterSpacing: 1,
             color: theme.textDim,
@@ -242,7 +245,7 @@ export const InvestigationSceneV2: React.FC<{
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {logEvents.length === 0 && (
-            <div style={{ fontFamily: theme.monoFontFamily, fontSize: 15, color: theme.textDim }}>&hellip;</div>
+            <div style={{ fontFamily: theme.monoFontFamily, fontSize: theme.fontSize.diagramSublabel, color: theme.textDim }}>&hellip;</div>
           )}
           {logEvents.map((e, i) => {
             const isLatest = i === logEvents.length - 1;
@@ -253,7 +256,7 @@ export const InvestigationSceneV2: React.FC<{
                 key={`${e.t}-${e.type}-${e.target ?? i}`}
                 style={{
                   fontFamily: theme.monoFontFamily,
-                  fontSize: isLatest ? 17 : 15,
+                  fontSize: isLatest ? theme.fontSize.diagramLabel : theme.fontSize.diagramSublabel,
                   fontWeight: isLatest ? 700 : 500,
                   color: isLatest ? EVENT_COLOR[e.type] : theme.textDim,
                   opacity,
@@ -271,14 +274,16 @@ export const InvestigationSceneV2: React.FC<{
 
 const EntityPulse: React.FC<{ entity?: InvestigationEntity; color: string; opacity: number }> = ({ entity, color, opacity }) => {
   if (!entity || entity.x === undefined || entity.y === undefined) return null;
+  const width = DEFAULT_NODE_WIDTH + 20;
+  const height = DEFAULT_NODE_HEIGHT + 20;
   return (
     <div
       style={{
         position: 'absolute',
-        left: entity.x - 90,
-        top: entity.y + 130 - 42,
-        width: 180,
-        height: 84,
+        left: entity.x - width / 2,
+        top: entity.y + 130 - height / 2,
+        width,
+        height,
         borderRadius: 16,
         boxShadow: `0 0 0 6px ${color}33`,
         border: `2px solid ${color}`,

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArchitectureNodeV2, type EntityShapeCategory } from './ArchitectureNode';
 import { FlowArrow } from './FlowArrow';
+import { layoutRow, clampToSafeFrame } from './layoutGrid';
 
 export interface DiagramEntity {
   id: string;
@@ -71,6 +72,8 @@ export const ArchitectureDiagramV2: React.FC<{
           sublabel={entity.sublabel}
           x={entity.x}
           y={entity.y}
+          width={entity.width}
+          height={entity.height}
           highlighted={highlightId === entity.id}
           dimmed={highlightId !== undefined && highlightId !== entity.id}
           appearFrame={entity.appearFrame ?? 0}
@@ -80,18 +83,31 @@ export const ArchitectureDiagramV2: React.FC<{
   );
 };
 
-/** Entities that already carry x/y (architecture beats) pass through unchanged; entities missing x/y (investigation beats) are laid out on a single centered row. */
-function autoLayout(entities: DiagramEntity[]): Array<DiagramEntity & { x: number; y: number }> {
-  const missing = entities.filter((e) => e.x === undefined || e.y === undefined);
-  const gap = 260;
-  const totalWidth = (missing.length - 1) * gap;
-  const startX = 960 - totalWidth / 2;
-  const autoY = 460;
+type LaidOutEntity = DiagramEntity & { x: number; y: number; width: number; height: number };
+
+/**
+ * Entities that already carry x/y (architecture beats, model-placed) are
+ * clamped to the safe frame (a real renderer-side backstop — the service's
+ * spec-time selfcheck only validates the CENTER point, not the actual
+ * rendered bounding box, so a wide node centered near the edge could still
+ * overflow before this existed). Entities missing x/y (investigation beats,
+ * per the schema's own "the investigation renderer lays them out itself"
+ * comment) are auto-laid-out via the shared layoutRow helper — the same
+ * math InvestigationScene.tsx (v1) uses, instead of two independent
+ * reimplementations, and box size scales down as entity count grows instead
+ * of a fixed box regardless of density.
+ */
+function autoLayout(entities: DiagramEntity[]): LaidOutEntity[] {
+  const missingIds = new Set(entities.filter((e) => e.x === undefined || e.y === undefined).map((e) => e.id));
+  const autoBoxes = layoutRow(missingIds.size, { top: 300, bottom: 700 });
   let autoIndex = 0;
   return entities.map((e) => {
-    if (e.x !== undefined && e.y !== undefined) return e as DiagramEntity & { x: number; y: number };
-    const x = startX + autoIndex * gap;
+    if (e.x !== undefined && e.y !== undefined) {
+      const clamped = clampToSafeFrame({ x: e.x, y: e.y, width: 220, height: 124 });
+      return { ...e, ...clamped };
+    }
+    const box = autoBoxes[autoIndex]!;
     autoIndex += 1;
-    return { ...e, x, y: autoY };
+    return { ...e, x: box.x, y: box.y, width: box.width, height: box.height };
   });
 }

@@ -277,3 +277,71 @@ test("video/v2's ENTITY_CATEGORY and EVENT_TYPE enums are genuinely domain-neutr
     assert.ok(!eventType.includes(banned));
   }
 });
+
+// ---- mobile-readability density checks (new) --------------------------
+
+test("on_screen_caption over the mobile-readability character limit -> generation_failed", async () => {
+  const bad = structuredClone(VALID_CONTENT.video_v2) as Record<string, unknown>;
+  const beat = (bad.beats as Array<Record<string, unknown>>).find((b) => b.id === "beat-02-problem")!;
+  beat.on_screen_caption =
+    "This is a deliberately long on-screen caption that reproduces far too much of the narration and should trip the mobile-readability density limit for on_screen_caption.";
+  const { app } = await appReturning(bad);
+  const res = await authedPost(app, videoV2Body());
+  assert.equal(res.statusCode, 502);
+  assert.match(res.json().error.message, /on_screen_caption.*mobile-readability|mobile-readability.*on_screen_caption/);
+  await app.close();
+});
+
+test("on_screen_caption is optional — a beat that omits it still passes", () => {
+  const spec = structuredClone(VALID_CONTENT.video_v2) as Record<string, unknown>;
+  const beat = (spec.beats as Array<Record<string, unknown>>).find((b) => b.id === "beat-02-problem")!;
+  delete beat.on_screen_caption;
+  for (const b of spec.beats as Array<Record<string, unknown>>) {
+    b.narration_hash = narrationHash(String(b.narration ?? ""), spec.voice);
+  }
+  spec.spec_hash = specHash(spec as never);
+  const r = selfCheck("video_v2", spec);
+  assert.ok(r.ok, r.errors.join("; "));
+});
+
+test("architecture beat with more than 6 entities -> generation_failed (split into sequential beats instead)", async () => {
+  const bad = structuredClone(VALID_CONTENT.video_v2) as Record<string, unknown>;
+  const arch = (bad.beats as Array<Record<string, unknown>>).find((b) => (b.visual as { kind?: string }).kind === "architecture")!;
+  const entities = (arch.visual as { entities: Array<Record<string, unknown>> }).entities;
+  for (let i = 0; i < 5; i++) {
+    entities.push({ id: `extra-${i}`, category: "process", label: `Extra ${i}`, x: 200 + i * 100, y: 700 });
+  }
+  const { app } = await appReturning(bad);
+  const res = await authedPost(app, videoV2Body());
+  assert.equal(res.statusCode, 502);
+  assert.match(res.json().error.message, /density limit|split into sequential beats/);
+  await app.close();
+});
+
+test("investigation beat with more than 6 entities -> generation_failed (split into sequential beats instead)", async () => {
+  const bad = structuredClone(VALID_CONTENT.video_v2) as Record<string, unknown>;
+  const inv = (bad.beats as Array<Record<string, unknown>>).find((b) => (b.visual as { kind?: string }).kind === "investigation")!;
+  const entities = (inv.visual as { entities: Array<Record<string, unknown>> }).entities;
+  for (let i = 0; i < 5; i++) {
+    entities.push({ id: `extra-${i}`, category: "process", label: `Extra ${i}` });
+  }
+  const { app } = await appReturning(bad);
+  const res = await authedPost(app, videoV2Body());
+  assert.equal(res.statusCode, 502);
+  assert.match(res.json().error.message, /density limit|split into sequential beats/);
+  await app.close();
+});
+
+test("architecture entity centered near the frame edge with a realistic node size -> generation_failed (bounding-box-aware margin)", async () => {
+  const bad = structuredClone(VALID_CONTENT.video_v2) as Record<string, unknown>;
+  const arch = (bad.beats as Array<Record<string, unknown>>).find((b) => (b.visual as { kind?: string }).kind === "architecture")!;
+  // 1800 is well inside the OLD 40px-margin check (1880 limit) but a 220px-wide
+  // rendered node centered there would have its right edge at 1910, off the
+  // 1920 canvas — the new bounding-box-aware margin (1770) must catch this.
+  (arch.visual as { entities: Array<Record<string, unknown>> }).entities[0]!.x = 1800;
+  const { app } = await appReturning(bad);
+  const res = await authedPost(app, videoV2Body());
+  assert.equal(res.statusCode, 502);
+  assert.match(res.json().error.message, /outside the safe/);
+  await app.close();
+});

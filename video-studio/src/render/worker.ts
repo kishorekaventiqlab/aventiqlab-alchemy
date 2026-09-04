@@ -112,6 +112,19 @@ async function main(): Promise<void> {
       extractPoster: (mp4, poster, at) => extractPoster({ videoStudioRoot: VIDEO_STUDIO_ROOT }, mp4, poster, at),
       probeDurationSeconds: (mp4) => probeDurationSeconds({ videoStudioRoot: VIDEO_STUDIO_ROOT }, mp4),
       validateRender: (p) => validateRender({ videoStudioRoot: VIDEO_STUDIO_ROOT }, p),
+      // Mobile visual QA is a real publish-blocking gate (see renderJob.ts's
+      // doc comment) but only runs when a model key is actually configured
+      // — omitted entirely otherwise, same as beatRegen's OPENROUTER_API_KEY
+      // dependency, rather than failing every render in an environment that
+      // hasn't opted into this yet.
+      runVisualQa:
+        process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_ARN
+          ? async (p) => {
+              const { runVisualQa } = await import('../../scripts/validate-render-visual.js');
+              const loaded = JSON.parse(readFileSync(p.loadedVideoJsonPath, 'utf-8')) as { beats: Array<{ type: string; start: number; duration: number }> };
+              return runVisualQa(p.mp4Path, loaded.beats);
+            }
+          : undefined,
       uploadRenderArtifact: async (localPath, name) => {
         await s3.send(
           new PutObjectCommand({
@@ -154,6 +167,11 @@ async function main(): Promise<void> {
       phase: null,
       finished_at: new Date().toISOString(),
       mechanical_qa: result.mechanicalQa,
+      // Present only when OPENROUTER_API_KEY[_ARN] is configured (see the
+      // runVisualQa step above) — same shape/spirit as mechanical_qa: a real
+      // publish-blocking gate for the caller (astra) to check before
+      // approving, not just an advisory score.
+      visual_qa: result.visualQa,
       output: result.output,
       rendered_spec_pointer: result.renderedSpecPointer,
     });

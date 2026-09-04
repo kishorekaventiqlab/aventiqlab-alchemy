@@ -9,6 +9,7 @@ export interface JobPatch {
   status?: 'running' | 'done' | 'failed';
   phase?: 'synthesizing' | 'rendering' | 'validating' | null;
   mechanical_qa?: unknown;
+  visual_qa?: unknown;
   output?: unknown;
   rendered_spec_pointer?: string;
   error?: { code: string; message: string; retryable: boolean };

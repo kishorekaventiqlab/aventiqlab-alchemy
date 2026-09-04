@@ -178,7 +178,7 @@ export const InvestigationScene: React.FC<{
             right: 0,
             textAlign: 'center',
             fontFamily: theme.fontFamily,
-            fontSize: 15,
+            fontSize: theme.fontSize.diagramSublabel + 2,
             fontWeight: 700,
             letterSpacing: 1,
             color: anyFull ? theme.danger : theme.textDim,
@@ -210,7 +210,7 @@ export const InvestigationScene: React.FC<{
                 right: 0,
                 textAlign: 'center',
                 fontFamily: theme.fontFamily,
-                fontSize: 15,
+                fontSize: theme.fontSize.diagramSublabel + 2,
                 fontWeight: 700,
                 letterSpacing: 1,
                 color: theme.warning,
@@ -236,7 +236,7 @@ export const InvestigationScene: React.FC<{
                 right: 0,
                 textAlign: 'center',
                 fontFamily: theme.fontFamily,
-                fontSize: 15,
+                fontSize: theme.fontSize.diagramSublabel + 2,
                 fontWeight: 700,
                 letterSpacing: 1,
                 color: theme.success,
@@ -273,6 +273,6 @@ const ResolvedPod: React.FC<{ label: string }> = ({ label }) => (
     }}
   >
     <div style={{ width: 10, height: 10, borderRadius: '50%', background: theme.success, boxShadow: `0 0 8px ${theme.success}` }} />
-    <div style={{ fontFamily: theme.monoFontFamily, fontSize: 13, fontWeight: 700, color: theme.success }}>{label}</div>
+    <div style={{ fontFamily: theme.monoFontFamily, fontSize: theme.fontSize.diagramSublabel, fontWeight: 700, color: theme.success }}>{label}</div>
   </div>
 );

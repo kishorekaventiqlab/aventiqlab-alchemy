@@ -260,3 +260,47 @@ test('mechanical_qa failure is reported (not thrown) — the job still "succeeds
   assert.equal(result.mechanicalQa.passed, false);
   assert.ok(result.output.s3_pointer, 'output still populated so astra can look at it');
 });
+
+// ---- mobile visual QA (optional gate) ---------------------------------
+
+test('visualQa is absent from the result when steps.runVisualQa is not provided (no vision-model key configured)', async () => {
+  const { steps } = baseSteps(); // baseSteps never sets runVisualQa
+  const result = await runRenderJob(
+    { renderJobId: 'rj_x', experienceId: 'cexp_01TEST', cycle: 1, videoSpec: makeSpec(), visionQaFeedback: null },
+    steps,
+  );
+  assert.equal(result.visualQa, undefined);
+});
+
+test('a failing visualQa verdict is reported (not thrown) — the job still "succeeds", same as mechanical_qa', async () => {
+  const { steps } = baseSteps({
+    runVisualQa: async () => ({
+      passed: false,
+      failureReasons: ['typography scored 62 (< 90) on beat 3 (statement): text too small on a phone viewport'],
+      categoryMinimums: { typography: 62, contrast: 95, diagram_clarity: 100, mobile_readability: 70, code_readability: 100, content_density: 88 },
+    }),
+  });
+  const result = await runRenderJob(
+    { renderJobId: 'rj_x', experienceId: 'cexp_01TEST', cycle: 1, videoSpec: makeSpec(), visionQaFeedback: null },
+    steps,
+  );
+  assert.ok(result.visualQa, 'visualQa must be present when the step is provided');
+  assert.equal(result.visualQa!.passed, false);
+  assert.ok(result.visualQa!.failureReasons.length > 0);
+  assert.ok(result.output.s3_pointer, 'output still populated so astra can look at it — a failing visual QA does not block the render itself');
+});
+
+test('a passing visualQa verdict is reported as passed', async () => {
+  const { steps } = baseSteps({
+    runVisualQa: async () => ({
+      passed: true,
+      failureReasons: [],
+      categoryMinimums: { typography: 95, contrast: 96, diagram_clarity: 100, mobile_readability: 94, code_readability: 100, content_density: 92 },
+    }),
+  });
+  const result = await runRenderJob(
+    { renderJobId: 'rj_x', experienceId: 'cexp_01TEST', cycle: 1, videoSpec: makeSpec(), visionQaFeedback: null },
+    steps,
+  );
+  assert.equal(result.visualQa!.passed, true);
+});

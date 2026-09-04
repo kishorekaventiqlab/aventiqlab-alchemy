@@ -37,6 +37,19 @@ export interface MechanicalQa {
   checks: Array<{ name: string; pass: boolean; detail: string }>;
 }
 
+/**
+ * Mobile visual QA verdict (video-studio/scripts/validate-render-visual.ts).
+ * Unlike mechanical_qa (always computed), this is genuinely ABSENT when the
+ * render worker has no vision-model key configured — never defaulted to a
+ * failing stand-in the way mechanical_qa is, since "not run" and "ran and
+ * failed" are different states a caller (astra) needs to tell apart.
+ */
+export interface VisualQa {
+  passed: boolean;
+  failureReasons: string[];
+  categoryMinimums: Record<string, number>;
+}
+
 export interface RenderOutput {
   s3_pointer: string;
   duration_sec: number;
@@ -52,6 +65,7 @@ export interface RenderJob {
   phase: RenderPhase;
   request_s3_key: string;
   mechanical_qa?: MechanicalQa;
+  visual_qa?: VisualQa;
   output?: RenderOutput;
   /** F3: s3:// pointer to the video_spec alchemy actually rendered. */
   rendered_spec_pointer?: string;
@@ -82,6 +96,8 @@ export type RenderJobView =
       started_at?: string;
       finished_at?: string;
       mechanical_qa: MechanicalQa;
+      /** Absent when visual QA didn't run (no vision-model key configured) — see VisualQa's own doc comment. */
+      visual_qa?: VisualQa;
       output: RenderOutput;
       rendered_spec_pointer: string;
     }
@@ -108,6 +124,7 @@ export function jobToView(job: RenderJob): RenderJobView {
       status: "done",
       finished_at: job.finished_at,
       mechanical_qa: job.mechanical_qa ?? { passed: false, checks: [] },
+      visual_qa: job.visual_qa,
       output: job.output ?? { s3_pointer: "", duration_sec: 0, poster_s3_pointer: "" },
       rendered_spec_pointer: job.rendered_spec_pointer ?? "",
     };

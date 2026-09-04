@@ -16,6 +16,7 @@ import type {
   SpecRelationship,
   SpecEvent,
 } from './videoSpecTypesV2.js';
+import { theme } from '../components/theme.js';
 
 export const FPS = 30;
 export const LEAD_IN_SECONDS = 0.5;
@@ -122,7 +123,10 @@ export interface RendererEvent {
 
 export interface RendererInvestigationSegmentV2 {
   t: number;
+  /** Full narration — what synthesize.ts turns into speech (audioPlan keys off this same text). */
   caption: string;
+  /** Short on-screen text CaptionBar actually renders — see displayCaptionFor. */
+  displayCaption: string;
   audioFile: string;
   highlightId?: string;
 }
@@ -207,6 +211,7 @@ export function loadVideoSpecV2(spec: VideoSpecV2): LoadedVideoV2 {
         return {
           t: s.t,
           caption: segBeat.narration,
+          displayCaption: displayCaptionFor(segBeat),
           audioFile,
           highlightId: s.highlight_id ?? undefined,
         };
@@ -383,6 +388,27 @@ function mapEvent(e: SpecEvent): RendererEvent {
   };
 }
 
+/**
+ * The short, on-screen "key idea" text CaptionBar renders (NOT the audio
+ * plan's caption, which is always the full narration to synthesize as
+ * speech). Prefers the model-authored on_screen_caption; falls back to a
+ * hard word-boundary truncation of narration for older specs that predate
+ * the field, so a caller never falls back to displaying the ENTIRE
+ * narration paragraph the way v1's chunker does.
+ */
+function displayCaptionFor(b: SpecBeatV2): string {
+  if (b.on_screen_caption && b.on_screen_caption.trim()) return b.on_screen_caption.trim();
+  const words = b.narration.trim().split(/\s+/).filter(Boolean);
+  const maxChars = theme.density.maxCaptionChars;
+  let out = '';
+  for (const word of words) {
+    const candidate = out ? `${out} ${word}` : word;
+    if (candidate.length > maxChars) break;
+    out = candidate;
+  }
+  return out || b.narration.trim().slice(0, maxChars);
+}
+
 function mapVisualToBeat(
   b: SpecBeatV2,
   start: number,
@@ -398,7 +424,7 @@ function mapVisualToBeat(
         type: 'statement',
         start,
         duration,
-        caption: b.narration,
+        caption: displayCaptionFor(b),
         eyebrow: v.eyebrow,
         eyebrowColor: v.eyebrow_color,
         statement: v.statement,
@@ -410,7 +436,7 @@ function mapVisualToBeat(
         type: 'optionsCompare',
         start,
         duration,
-        caption: b.narration,
+        caption: displayCaptionFor(b),
         options: v.options.map((o) => ({
           name: o.name,
           solves: o.solves,
@@ -424,7 +450,7 @@ function mapVisualToBeat(
         type: 'architecture',
         start,
         duration,
-        caption: b.narration,
+        caption: displayCaptionFor(b),
         entities: v.entities.map(mapEntity),
         relationships: v.relationships.map(mapRelationship),
         highlightId: v.highlight_id ?? undefined,
@@ -435,7 +461,7 @@ function mapVisualToBeat(
         type: 'dashboard',
         start,
         duration,
-        caption: b.narration,
+        caption: displayCaptionFor(b),
         serviceName: v.service_name,
         alert: v.alert,
         panels: v.panels,
@@ -447,7 +473,7 @@ function mapVisualToBeat(
         type: 'terminal',
         start,
         duration,
-        caption: b.narration,
+        caption: displayCaptionFor(b),
         lines: v.lines.filter((l): l is { kind: 'prompt' | 'output'; text: string } =>
           l.kind === 'prompt' || l.kind === 'output',
         ),
@@ -459,7 +485,7 @@ function mapVisualToBeat(
         type: 'editor',
         start,
         duration,
-        caption: b.narration,
+        caption: displayCaptionFor(b),
         filename: v.filename,
         lines: v.lines.filter(
           (l): l is { kind: 'existing' | 'added' | 'comment' | 'placeholder'; text: string } =>
@@ -469,7 +495,7 @@ function mapVisualToBeat(
         audioFile,
       };
     case 'recap':
-      return { type: 'recap', start, duration, caption: b.narration, items: v.items, audioFile };
+      return { type: 'recap', start, duration, caption: displayCaptionFor(b), items: v.items, audioFile };
     case 'investigation':
     case 'investigation_segment':
       throw new VideoSpecV2Error(`mapVisualToBeat should not be called for "${v.kind}"`);

@@ -47,15 +47,15 @@ export const StatementCard: React.FC<{
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 26,
-        padding: '0 160px',
+        gap: theme.spacing.gap.lg,
+        padding: `0 ${theme.spacing.safeMarginX}px`,
         textAlign: 'center',
       }}
     >
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 15,
+          fontSize: theme.fontSize.kicker,
           letterSpacing: 3,
           textTransform: 'uppercase',
           fontWeight: 700,
@@ -68,7 +68,7 @@ export const StatementCard: React.FC<{
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 44,
+          fontSize: theme.fontSize.cardHeading + 12,
           fontWeight: 700,
           lineHeight: 1.25,
           color: theme.text,
@@ -82,11 +82,11 @@ export const StatementCard: React.FC<{
         <div
           style={{
             fontFamily: theme.fontFamily,
-            fontSize: 22,
+            fontSize: theme.fontSize.cardBody,
             fontWeight: 500,
             color: theme.textDim,
             opacity,
-            maxWidth: 820,
+            maxWidth: 1000,
           }}
         >
           {support}

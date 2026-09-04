@@ -22,8 +22,13 @@ export const OptionsCompare: React.FC<{
   appearFrame?: number;
 }> = ({ options, appearFrame = 0 }) => {
   const frame = useCurrentFrame();
-  const columnWidth = 480;
-  const gap = 32;
+  const gap = theme.spacing.gap.lg;
+  // Column width scales with how many options there are, up to the safe
+  // content width, so 1-2 options get a genuinely large card instead of the
+  // same fixed width regardless of density (the "too small on fewer options"
+  // gap the mobile-readability review flagged).
+  const safeWidth = 1920 - theme.spacing.safeMarginX * 2;
+  const columnWidth = Math.min(560, (safeWidth - gap * (options.length - 1)) / options.length);
   const totalWidth = options.length * columnWidth + (options.length - 1) * gap;
   const startX = 960 - totalWidth / 2 + columnWidth / 2;
 
@@ -66,7 +71,7 @@ export const OptionsCompare: React.FC<{
             <div
               style={{
                 fontFamily: theme.fontFamily,
-                fontSize: 22,
+                fontSize: theme.fontSize.cardHeading,
                 fontWeight: 700,
                 color: opt.favored ? theme.accentStrong : theme.text,
               }}
@@ -77,7 +82,7 @@ export const OptionsCompare: React.FC<{
               <div
                 style={{
                   fontFamily: theme.fontFamily,
-                  fontSize: 12,
+                  fontSize: theme.fontSize.kicker - 8,
                   fontWeight: 700,
                   letterSpacing: 0.6,
                   textTransform: 'uppercase',
@@ -86,7 +91,7 @@ export const OptionsCompare: React.FC<{
               >
                 Solves
               </div>
-              <div style={{ fontFamily: theme.fontFamily, fontSize: 17, color: theme.text, lineHeight: 1.4 }}>
+              <div style={{ fontFamily: theme.fontFamily, fontSize: theme.fontSize.cardBody, color: theme.text, lineHeight: 1.4 }}>
                 {opt.solves}
               </div>
             </div>
@@ -95,7 +100,7 @@ export const OptionsCompare: React.FC<{
                 <div
                   style={{
                     fontFamily: theme.fontFamily,
-                    fontSize: 12,
+                    fontSize: theme.fontSize.kicker - 8,
                     fontWeight: 700,
                     letterSpacing: 0.6,
                     textTransform: 'uppercase',
@@ -104,7 +109,7 @@ export const OptionsCompare: React.FC<{
                 >
                   Does not solve
                 </div>
-                <div style={{ fontFamily: theme.fontFamily, fontSize: 17, color: theme.textDim, lineHeight: 1.4 }}>
+                <div style={{ fontFamily: theme.fontFamily, fontSize: theme.fontSize.cardBody, color: theme.textDim, lineHeight: 1.4 }}>
                   {opt.doesNotSolve}
                 </div>
               </div>

@@ -17,14 +17,14 @@ export const RecapCard: React.FC<{ items: string[]; durationInFrames: number }> 
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        gap: 22,
-        padding: '0 140px',
+        gap: theme.spacing.gap.md,
+        padding: `0 ${theme.spacing.safeMarginX}px`,
       }}
     >
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 17,
+          fontSize: theme.fontSize.kicker,
           letterSpacing: 3,
           color: theme.accentStrong,
           fontWeight: 700,
@@ -52,7 +52,7 @@ export const RecapCard: React.FC<{ items: string[]; durationInFrames: number }> 
               opacity,
               transform: `translateX(${x}px)`,
               fontFamily: theme.fontFamily,
-              fontSize: 29,
+              fontSize: theme.fontSize.cardBody + 4,
               fontWeight: 500,
               color: theme.text,
             }}

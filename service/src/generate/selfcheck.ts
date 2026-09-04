@@ -184,6 +184,12 @@ const ENTITY_CATEGORY_SET = new Set<string>(ENTITY_CATEGORY);
  * Git video must contain a commit entity") — that's ASTRA's pedagogical
  * concern, not alchemy's structural self-check.
  */
+// Mirrors video-studio/src/components/theme.ts's `density` tokens, kept in
+// sync by hand (same cross-package pattern as video-hash.ts — service and
+// video-studio are separate deployables with no shared import surface).
+const MAX_ON_SCREEN_CAPTION_CHARS = 90;
+const MAX_ENTITIES_PER_FRAME = 6;
+
 function checkVideoV2(c: Record<string, unknown>): string[] {
   const errs: string[] = [];
   const beats = Array.isArray(c.beats) ? (c.beats as Array<Record<string, unknown>>) : [];
@@ -217,14 +223,25 @@ function checkVideoV2(c: Record<string, unknown>): string[] {
     if (kind === "architecture") {
       const entities = Array.isArray(v.entities) ? (v.entities as Array<Record<string, unknown>>) : [];
       const entityIds = new Set<string>();
+      if (entities.length > MAX_ENTITIES_PER_FRAME) {
+        errs.push(
+          `architecture beat "${String(b.id)}" has ${entities.length} entities, over the ${MAX_ENTITIES_PER_FRAME} per-frame density limit — split into sequential beats instead of cramming (mobile readability)`,
+        );
+      }
       for (const e of entities) {
         const eid = String(e.id ?? "");
         if (entityIds.has(eid)) errs.push(`architecture beat "${String(b.id)}" has duplicate entity id "${eid}"`);
         entityIds.add(eid);
+        // Bounding-box-aware margin: the model doesn't declare a node's
+        // render size (that's the renderer's own default), so this checks
+        // the center against a margin wide enough to cover the renderer's
+        // largest default box (220x124) — a real improvement over checking
+        // the center against the frame edge alone, which would still pass
+        // for a wide node centered near the edge.
         const x = Number(e.x);
         const y = Number(e.y);
-        if (x < 40 || x > 1880 || y < 40 || y > 1040) {
-          errs.push(`architecture entity "${eid}" at (${x},${y}) is outside the safe 1920x1080 frame`);
+        if (x < 150 || x > 1770 || y < 100 || y > 980) {
+          errs.push(`architecture entity "${eid}" at (${x},${y}) is outside the safe 1920x1080 frame (accounting for node size)`);
         }
       }
       const relationships = Array.isArray(v.relationships) ? (v.relationships as Array<Record<string, unknown>>) : [];
@@ -242,6 +259,11 @@ function checkVideoV2(c: Record<string, unknown>): string[] {
 
     if (kind === "investigation") {
       const entities = Array.isArray(v.entities) ? (v.entities as Array<Record<string, unknown>>) : [];
+      if (entities.length > MAX_ENTITIES_PER_FRAME) {
+        errs.push(
+          `investigation beat "${String(b.id)}" has ${entities.length} entities, over the ${MAX_ENTITIES_PER_FRAME} per-frame density limit — split into sequential beats instead of cramming (mobile readability)`,
+        );
+      }
       const entityIds = new Set<string>();
       for (const e of entities) {
         const eid = String(e.id ?? "");
@@ -269,7 +291,18 @@ function checkVideoV2(c: Record<string, unknown>): string[] {
       }
     }
 
-    // 2. on_screen <-> visual.kind cross-match (AL8 §1.6 consistency rule).
+    // 2. on_screen_caption density (mobile readability): the short,
+    // learner-facing on-screen text must actually be short — a long
+    // on_screen_caption defeats the entire point of having a separate field
+    // from narration. Optional field (older specs may omit it, falling back
+    // to a renderer-side truncation), so only checked when present.
+    if (typeof b.on_screen_caption === "string" && b.on_screen_caption.length > MAX_ON_SCREEN_CAPTION_CHARS) {
+      errs.push(
+        `beat "${String(b.id)}" on_screen_caption is ${b.on_screen_caption.length} chars, over the ${MAX_ON_SCREEN_CAPTION_CHARS}-char mobile-readability limit — shorten it to the key idea, put detail in narration instead`,
+      );
+    }
+
+    // 3. on_screen <-> visual.kind cross-match (AL8 §1.6 consistency rule).
     const onScreen = typeof b.on_screen === "string" ? b.on_screen : "";
     if (kind === "investigation_segment") continue; // describes the shared scene, exempt.
     const kw = KIND_KEYWORDS[kind];
@@ -280,7 +313,7 @@ function checkVideoV2(c: Record<string, unknown>): string[] {
     }
   }
 
-  // 3. stage coverage (the shared lib — narrative-only, format-agnostic).
+  // 4. stage coverage (the shared lib — narrative-only, format-agnostic).
   const coverage = stageCoverage(c);
   if (!coverage.ok) {
     errs.push(`stage coverage: ${coverage.notes.join(" ")}`);

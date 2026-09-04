@@ -77,7 +77,7 @@ export const DashboardMock: React.FC<{
         <div
           style={{
             fontFamily: theme.monoFontFamily,
-            fontSize: 22,
+            fontSize: theme.fontSize.cardBody,
             color: theme.textDim,
             fontWeight: 600,
           }}
@@ -88,7 +88,7 @@ export const DashboardMock: React.FC<{
           <div
             style={{
               fontFamily: theme.fontFamily,
-              fontSize: 19,
+              fontSize: theme.fontSize.cardBody - 2,
               fontWeight: 700,
               color: '#ffffff',
               background: theme.danger,
@@ -134,7 +134,7 @@ export const DashboardMock: React.FC<{
                 display: 'flex',
                 justifyContent: 'space-between',
                 fontFamily: theme.fontFamily,
-                fontSize: 19,
+                fontSize: theme.fontSize.cardBody - 2,
                 color: theme.textDim,
                 fontWeight: 600,
               }}

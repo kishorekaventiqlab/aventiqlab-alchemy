@@ -71,7 +71,7 @@ export const EditorMock: React.FC<{
           background: 'rgba(255,255,255,0.04)',
           borderBottom: `1px solid ${theme.terminalBorder}`,
           fontFamily: theme.monoFontFamily,
-          fontSize: 16,
+          fontSize: theme.fontSize.diagramSublabel,
           color: theme.terminalDim,
         }}
       >
@@ -80,7 +80,7 @@ export const EditorMock: React.FC<{
         ))}
         <span style={{ marginLeft: 12 }}>{filename}</span>
       </div>
-      <div style={{ padding: '20px 28px', fontFamily: theme.monoFontFamily, fontSize: 21, lineHeight: 1.6 }}>
+      <div style={{ padding: '20px 28px', fontFamily: theme.monoFontFamily, fontSize: theme.fontSize.code, lineHeight: 1.6 }}>
         {lines.map((line, i) => {
           const lineStart = i * perLine;
           const opacity = interpolate(frame, [lineStart, lineStart + 8], [0, 1], {

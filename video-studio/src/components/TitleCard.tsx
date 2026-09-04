@@ -33,8 +33,8 @@ export const TitleCard: React.FC<{ title: string; subtitle: string }> = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 28,
-        padding: '0 140px',
+        gap: theme.spacing.gap.lg,
+        padding: `0 ${theme.spacing.safeMarginX}px`,
         textAlign: 'center',
         background: `radial-gradient(circle at 50% 38%, ${theme.bgGradientStart} 0%, ${theme.bg} 75%)`,
       }}
@@ -42,7 +42,7 @@ export const TitleCard: React.FC<{ title: string; subtitle: string }> = ({
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 14,
+          fontSize: theme.fontSize.kicker,
           letterSpacing: 4,
           color: theme.accentStrong,
           fontWeight: 700,
@@ -54,7 +54,7 @@ export const TitleCard: React.FC<{ title: string; subtitle: string }> = ({
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 58,
+          fontSize: theme.fontSize.title,
           fontWeight: 700,
           color: theme.text,
           opacity,
@@ -66,11 +66,11 @@ export const TitleCard: React.FC<{ title: string; subtitle: string }> = ({
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 25,
+          fontSize: theme.fontSize.subtitle,
           fontWeight: 500,
           color: theme.textDim,
           opacity,
-          maxWidth: 900,
+          maxWidth: 1100,
         }}
       >
         {subtitle}

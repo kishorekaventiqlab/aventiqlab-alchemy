@@ -42,6 +42,16 @@ export interface ReRenderPlan {
 
 export interface RenderJobResult {
   mechanicalQa: { passed: boolean; checks: Array<{ name: string; pass: boolean; detail: string }> };
+  /**
+   * Mobile visual QA verdict (scripts/validate-render-visual.ts) — absent
+   * when steps.runVisualQa isn't provided (e.g. unit tests, or an
+   * environment without OPENROUTER_API_KEY). When present, `passed: false`
+   * is a REAL gate: the caller (worker.ts) must not treat the render as
+   * publish-ready. Deliberately does NOT trigger any automatic
+   * regenerate/re-layout — see runVisualQa's own doc comment for why that's
+   * an explicit follow-up, not this pass.
+   */
+  visualQa?: { passed: boolean; failureReasons: string[]; categoryMinimums: Record<string, number> };
   output: { s3_pointer: string; duration_sec: number; poster_s3_pointer: string };
   renderedSpecPointer: string;
 }
@@ -81,6 +91,15 @@ export interface RenderSteps {
     loadedVideoJsonPath: string;
     manifestPath: string;
   }) => Promise<{ passed: boolean; checks: Array<{ name: string; pass: boolean; detail: string }> }>;
+  /**
+   * Run scripts/validate-render-visual.ts's mobile visual QA against the
+   * MP4 + retimed LoadedVideo. Optional — omit to skip the visual QA gate
+   * entirely (e.g. in tests, or a deployment without a vision-model key).
+   */
+  runVisualQa?: (params: {
+    mp4Path: string;
+    loadedVideoJsonPath: string;
+  }) => Promise<{ passed: boolean; failureReasons: string[]; categoryMinimums: Record<string, number> }>;
   /** Upload a local file to renders/{experienceId}/cycle-{cycle}/{name}. Returns the s3:// pointer. */
   uploadRenderArtifact: (localPath: string, name: string) => Promise<string>;
   /** Write a JSON blob to renders/{experienceId}/cycle-{cycle}/{name}. Returns the s3:// pointer. */
@@ -194,6 +213,13 @@ export async function runRenderJob(input: RenderJobInput, steps: RenderSteps): P
     manifestPath,
   });
 
+  const visualQa = steps.runVisualQa
+    ? await steps.runVisualQa({ mp4Path, loadedVideoJsonPath: loadedJsonPath })
+    : undefined;
+  if (visualQa && !visualQa.passed) {
+    log(`mobile visual QA failed: ${visualQa.failureReasons.join('; ')}`);
+  }
+
   const durationSec = await steps.probeDurationSeconds(mp4Path);
 
   // ---- 5. upload -------------------------------------------------
@@ -204,6 +230,7 @@ export async function runRenderJob(input: RenderJobInput, steps: RenderSteps): P
 
   return {
     mechanicalQa,
+    visualQa,
     output: { s3_pointer: mp4Pointer, duration_sec: Math.round(durationSec), poster_s3_pointer: posterPointer },
     renderedSpecPointer: specPointer,
   };

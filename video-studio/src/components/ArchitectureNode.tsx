@@ -167,8 +167,8 @@ export const ArchitectureNodeV2: React.FC<{
   sublabel,
   x,
   y,
-  width = 150,
-  height = 84,
+  width = 220,
+  height = 124,
   highlighted = false,
   dimmed = false,
   appearFrame = 0,
@@ -220,7 +220,7 @@ export const ArchitectureNodeV2: React.FC<{
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 17,
+          fontSize: theme.fontSize.diagramLabel,
           fontWeight: 700,
           color: highlighted ? theme.accentStrong : theme.text,
           letterSpacing: 0.2,
@@ -233,7 +233,7 @@ export const ArchitectureNodeV2: React.FC<{
         <div
           style={{
             fontFamily: theme.fontFamily,
-            fontSize: 13,
+            fontSize: theme.fontSize.diagramSublabel,
             fontWeight: 500,
             color: theme.textDim,
             textAlign: 'center',
@@ -265,8 +265,8 @@ export const ArchitectureNode: React.FC<{
   sublabel,
   x,
   y,
-  width = 150,
-  height = 84,
+  width = 220,
+  height = 124,
   highlighted = false,
   dimmed = false,
   appearFrame = 0,
@@ -318,7 +318,7 @@ export const ArchitectureNode: React.FC<{
       <div
         style={{
           fontFamily: theme.fontFamily,
-          fontSize: 17,
+          fontSize: theme.fontSize.diagramLabel,
           fontWeight: 700,
           color: highlighted ? theme.accentStrong : theme.text,
           letterSpacing: 0.2,
@@ -331,7 +331,7 @@ export const ArchitectureNode: React.FC<{
         <div
           style={{
             fontFamily: theme.fontFamily,
-            fontSize: 13,
+            fontSize: theme.fontSize.diagramSublabel,
             fontWeight: 500,
             color: theme.textDim,
             textAlign: 'center',

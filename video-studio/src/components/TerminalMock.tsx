@@ -13,6 +13,16 @@ export const TerminalMock: React.FC<{
   focusScale?: number;
   focusStartFrame?: number;
   focusHoldFrame?: number;
+  /**
+   * Mobile-readability crop mode: when true and focusLineIndex is set, render
+   * ONLY the focused line plus a line of context on either side, at a larger
+   * size, instead of the full terminal body pushed-in via camera zoom. Per
+   * the "don't show a full terminal window with tiny text — crop into the
+   * relevant command+output" requirement. Falls back to the full-terminal +
+   * CameraFocus behavior when false/omitted, so existing v1 call sites are
+   * unaffected.
+   */
+  crop?: boolean;
 }> = ({
   lines,
   durationInFrames,
@@ -20,8 +30,16 @@ export const TerminalMock: React.FC<{
   focusScale = 1.08,
   focusStartFrame = 24,
   focusHoldFrame = 60,
+  crop = false,
 }) => {
   const frame = useCurrentFrame();
+
+  if (crop && focusLineIndex !== undefined) {
+    return (
+      <CroppedTerminal lines={lines} focusLineIndex={focusLineIndex} durationInFrames={durationInFrames} />
+    );
+  }
+
   // Stagger lines across the first ~70% of the beat so the last line has
   // time to breathe before the caption cycles to its final chunk.
   const revealWindow = Math.max(lines.length, durationInFrames * 0.7);
@@ -51,7 +69,7 @@ export const TerminalMock: React.FC<{
         borderRadius: 14,
         padding: '24px 28px',
         fontFamily: theme.monoFontFamily,
-        fontSize: 23,
+        fontSize: theme.fontSize.code,
         lineHeight: 1.7,
         boxShadow: '0 10px 30px rgba(16, 24, 40, 0.18)',
       }}
@@ -116,5 +134,67 @@ export const TerminalMock: React.FC<{
     >
       {content}
     </CameraFocus>
+  );
+};
+
+/**
+ * Crop mode: only the focused line + 1 line of context on either side,
+ * rendered large and centered — no camera zoom needed since there's nothing
+ * else on screen to crop away from.
+ */
+const CroppedTerminal: React.FC<{ lines: TerminalLine[]; focusLineIndex: number; durationInFrames: number }> = ({
+  lines,
+  focusLineIndex,
+}) => {
+  const start = Math.max(0, focusLineIndex - 1);
+  const end = Math.min(lines.length, focusLineIndex + 2);
+  const visible = lines.slice(start, end);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: `0 ${theme.spacing.safeMarginX}px`,
+      }}
+    >
+      <div
+        style={{
+          background: theme.terminalBg,
+          border: `1px solid ${theme.terminalBorder}`,
+          borderRadius: 16,
+          padding: '32px 40px',
+          fontFamily: theme.monoFontFamily,
+          fontSize: theme.fontSize.code + 6,
+          lineHeight: 1.8,
+          boxShadow: '0 10px 30px rgba(16, 24, 40, 0.18)',
+          maxWidth: 1920 - theme.spacing.safeMarginX * 2,
+        }}
+      >
+        {visible.map((line, i) => {
+          const highlighted = start + i === focusLineIndex;
+          return (
+            <div
+              key={start + i}
+              style={{
+                color: line.kind === 'prompt' ? theme.accentStrong : theme.terminalText,
+                background: highlighted ? 'rgba(29, 111, 214, 0.2)' : 'transparent',
+                borderRadius: 8,
+                padding: highlighted ? '4px 12px' : '4px 0',
+                margin: highlighted ? '0 -12px' : 0,
+                fontWeight: line.kind === 'prompt' || highlighted ? 700 : 400,
+                opacity: highlighted ? 1 : 0.7,
+              }}
+            >
+              {line.kind === 'prompt' ? `$ ${line.text}` : line.text}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };

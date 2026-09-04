@@ -58,7 +58,7 @@ const InvestigationV2CaptionsAndAudio: React.FC<{
       return (
         <Sequence key={seg.audioFile} from={from} durationInFrames={durationInFrames}>
           <Audio src={staticFile(`${audioPrefix}${seg.audioFile}`)} />
-          <CaptionBar text={seg.caption} durationInFrames={durationInFrames} />
+          <CaptionBar text={seg.displayCaption} durationInFrames={durationInFrames} shortCaption />
         </Sequence>
       );
     })}
@@ -97,7 +97,7 @@ const BeatViewV2: React.FC<{ beat: RendererBeatV2; durationInFrames: number; fps
             support={beat.support}
             durationInFrames={durationInFrames}
           />
-          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} />
+          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} shortCaption />
         </AbsoluteFill>
       );
     case 'optionsCompare':
@@ -105,7 +105,7 @@ const BeatViewV2: React.FC<{ beat: RendererBeatV2; durationInFrames: number; fps
         <AbsoluteFill>
           {audio}
           <OptionsCompare options={beat.options} />
-          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} />
+          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} shortCaption />
         </AbsoluteFill>
       );
     case 'architecture':
@@ -113,7 +113,7 @@ const BeatViewV2: React.FC<{ beat: RendererBeatV2; durationInFrames: number; fps
         <AbsoluteFill>
           {audio}
           <ArchitectureDiagramV2 entities={beat.entities} relationships={beat.relationships.map((r) => ({ fromId: r.fromId, toId: r.toId, flowing: r.flowing }))} highlightId={beat.highlightId} />
-          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} />
+          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} shortCaption />
         </AbsoluteFill>
       );
     case 'investigation':
@@ -139,7 +139,7 @@ const BeatViewV2: React.FC<{ beat: RendererBeatV2; durationInFrames: number; fps
             durationInFrames={durationInFrames}
             focusPanelIndex={beat.focusPanelIndex}
           />
-          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} />
+          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} shortCaption />
         </AbsoluteFill>
       );
     case 'terminal':
@@ -147,7 +147,7 @@ const BeatViewV2: React.FC<{ beat: RendererBeatV2; durationInFrames: number; fps
         <AbsoluteFill>
           {audio}
           <TerminalMock lines={beat.lines} durationInFrames={durationInFrames} focusLineIndex={beat.focusLineIndex} />
-          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} />
+          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} shortCaption />
         </AbsoluteFill>
       );
     case 'editor':
@@ -160,7 +160,7 @@ const BeatViewV2: React.FC<{ beat: RendererBeatV2; durationInFrames: number; fps
             durationInFrames={durationInFrames}
             focusLineIndex={beat.focusLineIndex}
           />
-          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} />
+          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} shortCaption />
         </AbsoluteFill>
       );
     case 'recap':
@@ -168,7 +168,7 @@ const BeatViewV2: React.FC<{ beat: RendererBeatV2; durationInFrames: number; fps
         <AbsoluteFill>
           {audio}
           <RecapCard items={beat.items} durationInFrames={durationInFrames} />
-          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} />
+          <CaptionBar text={beat.caption} durationInFrames={durationInFrames} shortCaption />
         </AbsoluteFill>
       );
   }

@@ -275,6 +275,15 @@ export const VIDEO_SCHEMA_V2 = {
           narration: { type: "string" },
           narration_hash: HASH,
           on_screen: { type: "string", minLength: 1 },
+          // The short, learner-facing on-screen text (distinct from
+          // `on_screen`, which is a reviewer-facing prose description the
+          // mechanical self-check keyword-matches against visual.kind, and
+          // from `narration`, the full spoken detail). Optional so older
+          // v2 specs without it still validate; the renderer falls back to
+          // a hard-truncated narration when absent. Length-capped in
+          // selfcheck.ts, not here, so the cap can live alongside the
+          // shared density token instead of being duplicated as a literal.
+          on_screen_caption: { type: "string", minLength: 1 },
           target_duration_sec: { type: "number", minimum: 0 },
           outline_hint: { type: "string" },
           visual: VISUAL_V2,
