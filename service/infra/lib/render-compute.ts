@@ -77,11 +77,10 @@ export class RenderCompute extends Construct {
       props.vpc ??
       new Vpc(this, "Vpc", {
         maxAzs: 2,
-        natGateways: 1, // the task needs egress (OpenRouter, HuggingFace weights are baked in)
-        subnetConfiguration: [
-          { name: "public", subnetType: SubnetType.PUBLIC, cidrMask: 24 },
-          { name: "private", subnetType: SubnetType.PRIVATE_WITH_EGRESS, cidrMask: 24 },
-        ],
+        // Dev phase: no NAT Gateway. The task runs in the public subnet with
+        // a public IP and reaches OpenRouter/HuggingFace via the IGW directly.
+        natGateways: 0,
+        subnetConfiguration: [{ name: "public", subnetType: SubnetType.PUBLIC, cidrMask: 24 }],
       });
 
     const cluster = new Cluster(this, "Cluster", { vpc, containerInsights: true });
@@ -93,7 +92,7 @@ export class RenderCompute extends Construct {
       allowAllOutbound: true,
     });
     this.securityGroupIds = [sg.securityGroupId];
-    this.subnetIds = vpc.selectSubnets({ subnetType: SubnetType.PRIVATE_WITH_EGRESS }).subnetIds;
+    this.subnetIds = vpc.selectSubnets({ subnetType: SubnetType.PUBLIC }).subnetIds;
 
     // ---- the render worker task definition ---------------------
     const logGroup = new LogGroup(this, "RenderLogs", { retention: RetentionDays.ONE_MONTH });

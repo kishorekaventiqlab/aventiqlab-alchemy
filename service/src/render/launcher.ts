@@ -62,7 +62,9 @@ export class EcsS3RenderLauncher implements RenderLauncher {
           awsvpcConfiguration: {
             subnets: this.#cfg.subnets,
             securityGroups: this.#cfg.securityGroups,
-            assignPublicIp: "DISABLED",
+            // Dev phase: task runs in a public subnet with no NAT Gateway,
+            // so it needs a public IP to reach the internet via the IGW.
+            assignPublicIp: "ENABLED",
           },
         },
         overrides: {
