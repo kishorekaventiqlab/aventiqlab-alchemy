@@ -87,6 +87,21 @@ export interface LearningContext {
   mental_model?: string[];
   core_concept?: string;
   learner_problem?: string;
+  /**
+   * The instructor-reviewed architecture diagram from astra's Context Review
+   * step (video artifact_type only — astra strips this for other types).
+   * Its mere presence on a real /v1/generate call is itself the approval
+   * signal: astra's PipelineRun can only reach GENERATING after the
+   * instructor's Context Review confirm action, so there is no
+   * proposed-but-unconfirmed state that could reach here. Shape mirrors
+   * video/v2's own `architecture` visual payload (entities/relationships)
+   * so no translation is needed before prompts.ts consumes it directly.
+   */
+  visual_plan?: {
+    entities: Array<{ id: string; category: string; label: string; sublabel?: string }>;
+    relationships: Array<{ from_id: string; to_id: string }>;
+    mechanism_summary?: string;
+  };
   [key: string]: unknown;
 }
 

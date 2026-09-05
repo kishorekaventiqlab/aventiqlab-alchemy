@@ -7,7 +7,7 @@ import type { Al3SupportedType, LearningContext } from "./types.js";
 import { renderContextBlock } from "./context.js";
 import { DELIVERABLE_SCHEMA } from "./schemas.js";
 
-export const PROMPT_VERSION = "al3-2026-09-05";
+export const PROMPT_VERSION = "al3-2026-09-05b";
 
 const COMMON_SYSTEM = [
   "You generate exactly one learning artifact for the AventiqLab AI/ML Platform Engineering curriculum.",
@@ -197,6 +197,30 @@ export function buildPrompt(
       `\n\nThe EXACT skills_evaluated values to use (copy these strings verbatim, not the capability names above): ` +
       ids.map((id) => `"${id}"`).join(", ") +
       `.`;
+  }
+
+  // visual_plan (video_v2 only): the instructor already reviewed and
+  // confirmed this exact diagram at Context Review — astra can only reach
+  // this call after that confirm, so presence alone means approved, no
+  // separate flag to check. This is an imperative constraint, not more
+  // scene-setting prose, so it's kept out of the generic context block and
+  // given its own forceful, unconditional framing here — matching the
+  // strength of the mobile-readability/decision-defaulting rules above,
+  // since a softer "consider reusing" phrasing already failed to change
+  // model behavior once today (see the decision/best_practice fix).
+  if (type === "video_v2" && ctx.visual_plan?.entities?.length) {
+    const vp = ctx.visual_plan;
+    const entitiesLine = vp.entities
+      .map((e) => `{id: "${e.id}", category: "${e.category}", label: "${e.label}"${e.sublabel ? `, sublabel: "${e.sublabel}"` : ""}}`)
+      .join(", ");
+    const relationshipsLine = vp.relationships.map((r) => `{from_id: "${r.from_id}", to_id: "${r.to_id}"}`).join(", ");
+    user +=
+      "\n\nTHE INSTRUCTOR HAS ALREADY REVIEWED AND APPROVED THIS EXACT DIAGRAM - THIS IS A HARD REQUIREMENT, NOT A SUGGESTION:\n" +
+      `entities: [${entitiesLine}]\n` +
+      `relationships: [${relationshipsLine}]\n` +
+      (vp.mechanism_summary ? `mechanism_summary: "${vp.mechanism_summary}"\n` : "") +
+      "Your FIRST architecture-kind beat (normally context_mental_model) MUST use these EXACT entity ids, categories, and labels verbatim - do not rename, merge, split, or invent substitute entities. Position them yourself (x/y) since the approved diagram doesn't specify layout, but the id/category/label/relationships must match exactly.\n" +
+      "EVERY LATER architecture-kind beat in this same video (decision, best_practice, or any other reuse per the RULE 1/2/3 guidance above) MUST ALSO reuse this SAME entity id set - do not invent a fresh, different set of entities for a later beat. Use `highlight_id` to show what changed or what the beat is about; only add a new entity beyond this approved set if the mechanism genuinely requires one, and if so keep every approved entity's id unchanged alongside it.";
   }
 
   if (priorError && priorError.trim()) {
