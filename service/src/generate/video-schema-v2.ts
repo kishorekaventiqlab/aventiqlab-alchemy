@@ -19,6 +19,10 @@
  * for every other visual kind. `entities`/`relationships` are id-referenced
  * (not positional-index-referenced like v1's nodes/edges) — more robust for
  * a generalized entity set the model itself chooses the size of.
+ * `architecture` MAY ALSO carry an OPTIONAL `events[]` timeline (the exact
+ * same semantic vocabulary `investigation` uses — see below) describing what
+ * changes about the diagram as the beat plays; omitting it renders exactly
+ * as a static topology diagram, unchanged from before this addition.
  *
  * `investigation` (v2): the K8s-telemetry-shaped keyframe fields are gone.
  * Instead: a set of `entities` (same `category` enum) whose state changes
@@ -124,6 +128,11 @@ const VISUAL_V2 = {
       },
     },
     highlight_id: { type: ["string", "null"] },
+    // architecture, OPTIONAL: the same semantic events[] timeline investigation
+    // uses (video/v2 temporal mechanism proposal, Phase B) — when present, it
+    // describes what changes about entities/relationships as the beat plays
+    // (a node failing, traffic rerouting), reusing the `events` property
+    // already defined below rather than a second, duplicate field.
     // optionsCompare
     options: {
       type: "array",

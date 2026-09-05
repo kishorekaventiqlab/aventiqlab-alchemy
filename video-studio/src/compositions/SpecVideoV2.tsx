@@ -20,7 +20,7 @@ import { EditorMock } from '../components/EditorMock';
 import { CaptionBar } from '../components/CaptionBar';
 import { RecapCard } from '../components/RecapCard';
 import { BackgroundMusic } from '../components/BackgroundMusic';
-import type { LoadedVideoV2, RendererBeatV2, RendererInvestigationSegmentV2 } from '../spec/loadVideoSpecV2';
+import type { LoadedVideoV2, RendererBeatV2, RendererInvestigationSegmentV2, RendererCameraKeyframe } from '../spec/loadVideoSpecV2';
 
 export interface SpecVideoV2Props {
   loaded: LoadedVideoV2;
@@ -33,7 +33,8 @@ const InvestigationV2WithHighlight: React.FC<{
   events: InvestigationEvent[];
   segments: RendererInvestigationSegmentV2[];
   fps: number;
-}> = ({ entities, events, segments, fps }) => {
+  cameraKeyframes?: RendererCameraKeyframe[];
+}> = ({ entities, events, segments, fps, cameraKeyframes }) => {
   const frame = useCurrentFrame();
   const tSec = frame / fps;
   let highlightId: string | undefined;
@@ -41,7 +42,10 @@ const InvestigationV2WithHighlight: React.FC<{
     if (seg.t <= tSec) highlightId = seg.highlightId;
     else break;
   }
-  return <InvestigationSceneV2 fps={fps} entities={entities} events={events} highlightId={highlightId} />;
+  const cameraKeyframesForScene = cameraKeyframes?.map((k) => ({ t: k.t, focal_x: k.focalX, focal_y: k.focalY, scale: k.scale }));
+  return (
+    <InvestigationSceneV2 fps={fps} entities={entities} events={events} highlightId={highlightId} cameraKeyframes={cameraKeyframesForScene} />
+  );
 };
 
 const InvestigationV2CaptionsAndAudio: React.FC<{
@@ -112,14 +116,19 @@ const BeatViewV2: React.FC<{ beat: RendererBeatV2; durationInFrames: number; fps
       return (
         <AbsoluteFill>
           {audio}
-          <ArchitectureDiagramV2 entities={beat.entities} relationships={beat.relationships.map((r) => ({ fromId: r.fromId, toId: r.toId, flowing: r.flowing }))} highlightId={beat.highlightId} />
+          <ArchitectureDiagramV2
+            entities={beat.entities}
+            relationships={beat.relationships.map((r) => ({ fromId: r.fromId, toId: r.toId, flowing: r.flowing }))}
+            highlightId={beat.highlightId}
+            events={beat.events}
+          />
           <CaptionBar text={beat.caption} durationInFrames={durationInFrames} shortCaption />
         </AbsoluteFill>
       );
     case 'investigation':
       return (
         <AbsoluteFill>
-          <InvestigationV2WithHighlight entities={beat.entities} events={beat.events} segments={beat.segments} fps={fps} />
+          <InvestigationV2WithHighlight entities={beat.entities} events={beat.events} segments={beat.segments} fps={fps} cameraKeyframes={beat.cameraKeyframes} />
           <InvestigationV2CaptionsAndAudio
             segments={beat.segments}
             sceneDuration={beat.duration}

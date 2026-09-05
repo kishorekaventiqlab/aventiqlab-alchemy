@@ -128,6 +128,42 @@ test("investigation event target pointing at an undeclared entity id -> generati
   await app.close();
 });
 
+// ---- architecture's OPTIONAL events[] (video/v2 temporal mechanism proposal, Phase B) ----
+
+test("BACKWARD COMPATIBILITY: an architecture beat with no events[] passes self-check exactly as before this field existed", async () => {
+  const spec = structuredClone(VALID_CONTENT.video_v2) as Record<string, unknown>;
+  const arch = (spec.beats as Array<Record<string, unknown>>).find((b) => (b.visual as { kind?: string }).kind === "architecture")!;
+  assert.equal((arch.visual as Record<string, unknown>).events, undefined, "fixture must not already carry events for this to be a real backward-compatibility check");
+  const { app } = await appReturning(spec);
+  const res = await authedPost(app, videoV2Body());
+  assert.equal(res.statusCode, 200, res.body);
+  await app.close();
+});
+
+test("an architecture beat WITH events[] whose targets all resolve to declared entities passes self-check", async () => {
+  const spec = structuredClone(VALID_CONTENT.video_v2) as Record<string, unknown>;
+  const arch = (spec.beats as Array<Record<string, unknown>>).find((b) => (b.visual as { kind?: string }).kind === "architecture")!;
+  const entities = (arch.visual as { entities: Array<Record<string, unknown>> }).entities;
+  (arch.visual as Record<string, unknown>).events = [
+    { t: 2, type: "state_change", target: String(entities[0]!.id), from: "healthy", to: "under load" },
+  ];
+  const { app } = await appReturning(spec);
+  const res = await authedPost(app, videoV2Body());
+  assert.equal(res.statusCode, 200, res.body);
+  await app.close();
+});
+
+test("architecture event target pointing at an undeclared entity id -> generation_failed (same rule as investigation's)", async () => {
+  const bad = structuredClone(VALID_CONTENT.video_v2) as Record<string, unknown>;
+  const arch = (bad.beats as Array<Record<string, unknown>>).find((b) => (b.visual as { kind?: string }).kind === "architecture")!;
+  (arch.visual as Record<string, unknown>).events = [{ t: 2, type: "fail", target: "no-such-entity" }];
+  const { app } = await appReturning(bad);
+  const res = await authedPost(app, videoV2Body());
+  assert.equal(res.statusCode, 502);
+  assert.match(res.json().error.message, /architecture beat .* event target .* not a declared entity/);
+  await app.close();
+});
+
 test("investigation container beat with non-empty narration -> generation_failed", async () => {
   const bad = structuredClone(VALID_CONTENT.video_v2) as Record<string, unknown>;
   const container = (bad.beats as Array<Record<string, unknown>>).find((b) => (b.visual as { kind?: string }).kind === "investigation")!;

@@ -1,7 +1,9 @@
 import React from 'react';
+import { useCurrentFrame, useVideoConfig } from 'remotion';
 import { ArchitectureNodeV2, type EntityShapeCategory } from './ArchitectureNode';
 import { FlowArrow } from './FlowArrow';
 import { layoutRow, clampToSafeFrame } from './layoutGrid';
+import { deriveRelationships, deriveCreateFrames, type TimelineEvent } from './eventTimeline';
 
 export interface DiagramEntity {
   id: string;
@@ -41,8 +43,45 @@ export const ArchitectureDiagramV2: React.FC<{
   relationships: DiagramRelationship[];
   highlightId?: string;
   top?: number;
-}> = ({ entities, relationships, highlightId, top = 0 }) => {
+  /**
+   * OPTIONAL (video/v2 temporal mechanism proposal, Phase B): the same
+   * semantic events[] timeline InvestigationSceneV2 uses. When present, the
+   * entrance frames + relationships are RE-DERIVED from the timeline (same
+   * eventTimeline.ts functions investigation uses) instead of coming
+   * directly from `relationships`/a static entrance — the diagram then
+   * changes over the beat's duration instead of being fully present from
+   * frame 0. When absent (the default), this renders BYTE-IDENTICAL to
+   * before this prop existed: no useCurrentFrame-driven derivation runs at
+   * all, `entities`/`relationships`/`highlightId` are used exactly as given.
+   */
+  events?: TimelineEvent[];
+}> = ({ entities, relationships, highlightId, top = 0, events }) => {
   const laidOut = autoLayout(entities);
+
+  // The static path (no events): identical to this component's behavior
+  // before Phase B. No frame-dependent hook is even called in this branch.
+  if (!events || events.length === 0) {
+    return (
+      <StaticArchitectureDiagram laidOut={laidOut} relationships={relationships} highlightId={highlightId} top={top} />
+    );
+  }
+
+  return (
+    <TimelineArchitectureDiagram
+      laidOut={laidOut}
+      events={events}
+      highlightId={highlightId}
+      top={top}
+    />
+  );
+};
+
+const StaticArchitectureDiagram: React.FC<{
+  laidOut: LaidOutEntity[];
+  relationships: DiagramRelationship[];
+  highlightId?: string;
+  top: number;
+}> = ({ laidOut, relationships, highlightId, top }) => {
   const byId = new Map(laidOut.map((e) => [e.id, e]));
   return (
     <div style={{ position: 'absolute', inset: 0, top }}>
@@ -80,6 +119,59 @@ export const ArchitectureDiagramV2: React.FC<{
         />
       ))}
     </div>
+  );
+};
+
+/**
+ * The events-driven path (Phase B): re-derives RELATIONSHIPS from the
+ * timeline every frame (same function InvestigationSceneV2 uses — reused,
+ * not reimplemented), so a relationship whose connecting event hasn't fired
+ * yet is simply not drawn.
+ *
+ * Deliberately DOES NOT reuse deriveAppearFrames for architecture's own
+ * entities the way investigation does. Investigation's entities have no
+ * model-given x/y at all — "first referenced by an event" is genuinely when
+ * that entity first exists in the scene. Architecture's entities carry
+ * model-placed x/y BY DEFINITION (video-schema-v2.ts's own comment: "the
+ * model places them") — they ARE the beat's starting topology, meant to be
+ * visible from frame 0, with events describing what CHANGES about that
+ * already-visible diagram, not which parts of it exist yet. Applying
+ * deriveAppearFrames here would make every entity referenced by an event
+ * (which is most of them, in practice) pop into existence mid-beat instead
+ * of grounding the learner in the starting state before anything happens —
+ * exactly the wrong direction for a "context_mental_model" or "decision"
+ * beat, whose whole job is showing a state the learner should already
+ * recognize. An entity legitimately created mid-beat by its OWN `create`
+ * event (rare for architecture, common for investigation) is the one case
+ * that should still animate in — handled by only deriving an appearFrame
+ * for entities with a `create` event naming them, not every referenced one.
+ */
+const TimelineArchitectureDiagram: React.FC<{
+  laidOut: LaidOutEntity[];
+  events: TimelineEvent[];
+  highlightId?: string;
+  top: number;
+}> = ({ laidOut, events, highlightId, top }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const entityIds = new Set(laidOut.map((e) => e.id));
+  const createFrames = deriveCreateFrames(events, fps);
+  const timedEntities: LaidOutEntity[] = laidOut.map((e) => ({ ...e, appearFrame: createFrames.get(e.id) ?? 0 }));
+
+  const allRelationships = deriveRelationships(events, entityIds, fps);
+  // Only draw relationships whose connecting event has already fired — same
+  // rule InvestigationSceneV2 applies, so a relationship never "exists"
+  // before the event that creates it.
+  const relationships = allRelationships.filter((r) => (r.appearFrame ?? 0) <= frame);
+
+  const tSec = frame / fps;
+  const fired = events.filter((e) => e.t <= tSec).sort((a, b) => a.t - b.t);
+  const activeEvent = fired[fired.length - 1];
+  const activeTarget = activeEvent?.target ?? highlightId;
+
+  return (
+    <StaticArchitectureDiagram laidOut={timedEntities} relationships={relationships} highlightId={activeTarget} top={top} />
   );
 };
 

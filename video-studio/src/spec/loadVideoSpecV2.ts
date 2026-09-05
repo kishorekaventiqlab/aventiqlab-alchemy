@@ -49,10 +49,14 @@ export type RendererBeatV2 =
       type: 'architecture';
       start: number;
       duration: number;
+      /** The provisional (pre-audio-synthesis) duration events[].t was authored against — see retimeBeatsV2. Only meaningful when `events` is present. */
+      provisionalDuration: number;
       caption: string;
       entities: RendererEntity[];
       relationships: RendererRelationship[];
       highlightId?: string;
+      /** OPTIONAL (video/v2 temporal mechanism proposal, Phase B) — same semantic timeline investigation uses. Absent renders as a static diagram, unchanged from before. */
+      events?: RendererEvent[];
       audioFile?: string;
     }
   | {
@@ -64,6 +68,8 @@ export type RendererBeatV2 =
       entities: RendererEntity[];
       events: RendererEvent[];
       segments: RendererInvestigationSegmentV2[];
+      /** OPTIONAL (video/v2 temporal mechanism proposal, Phase A) — a continuous camera push/pan over the beat's duration. Absent renders with the same static, centered camera as before. */
+      cameraKeyframes?: RendererCameraKeyframe[];
     }
   | {
       type: 'dashboard';
@@ -119,6 +125,13 @@ export interface RendererEvent {
   from?: string;
   to?: string;
   detail?: string;
+}
+
+export interface RendererCameraKeyframe {
+  t: number;
+  focalX: number;
+  focalY: number;
+  scale: number;
 }
 
 export interface RendererInvestigationSegmentV2 {
@@ -237,6 +250,7 @@ export function loadVideoSpecV2(spec: VideoSpecV2): LoadedVideoV2 {
         entities: b.visual.entities.map(mapEntity),
         events: b.visual.events.map(mapEvent),
         segments: rSegments.map((s) => ({ ...s, t: round2(s.t) })),
+        cameraKeyframes: b.visual.camera_keyframes?.map(mapCameraKeyframe),
       });
       cursor += duration;
       continue;
@@ -295,7 +309,12 @@ export function retimeBeatsV2(loaded: LoadedVideoV2, measured: MeasuredAudio): L
       // timeline the way a live render does).
       const scale = beat.provisionalDuration > 0 ? duration / beat.provisionalDuration : 1;
       const events = beat.events.map((e) => ({ ...e, t: round2(e.t * scale) }));
-      beats.push({ ...beat, start: round2(cursor), duration, segments, events });
+      // cameraKeyframes[].t is authored against the same provisional
+      // estimate — same rescale, same reason (video/v2 temporal mechanism
+      // proposal, Phase A): a push-in timed near the end of the original
+      // estimate must not fall past the real, retimed scene duration.
+      const cameraKeyframes = beat.cameraKeyframes?.map((k) => ({ ...k, t: round2(k.t * scale) }));
+      beats.push({ ...beat, start: round2(cursor), duration, segments, events, cameraKeyframes });
       cursor += duration;
       continue;
     }
@@ -306,6 +325,21 @@ export function retimeBeatsV2(loaded: LoadedVideoV2, measured: MeasuredAudio): L
       measuredSec !== undefined
         ? round2(measuredSec + LEAD_IN_SECONDS + TAIL_BUFFER_SECONDS)
         : beat.duration;
+
+    // architecture's OPTIONAL events[] (Phase B) is authored against the same
+    // provisional-duration estimate investigation's events[] is — rescale it
+    // by the same real-audio-vs-estimate ratio, or an event timed near the
+    // end of the original estimate could fall past the real (usually
+    // shorter) beat duration and never fire, the same real bug retimeBeatsV2
+    // already guards against for investigation.
+    if (beat.type === 'architecture' && beat.events) {
+      const scale = beat.provisionalDuration > 0 ? duration / beat.provisionalDuration : 1;
+      const events = beat.events.map((e) => ({ ...e, t: round2(e.t * scale) }));
+      beats.push({ ...beat, start: round2(cursor), duration, events });
+      cursor += duration;
+      continue;
+    }
+
     beats.push({ ...beat, start: round2(cursor), duration });
     cursor += duration;
   }
@@ -375,6 +409,10 @@ function mapEntity(e: SpecEntity): RendererEntity {
 
 function mapRelationship(r: SpecRelationship): RendererRelationship {
   return { fromId: r.from_id, toId: r.to_id, flowing: r.flowing };
+}
+
+function mapCameraKeyframe(k: { t: number; focal_x: number; focal_y: number; scale: number }): RendererCameraKeyframe {
+  return { t: k.t, focalX: k.focal_x, focalY: k.focal_y, scale: k.scale };
 }
 
 function mapEvent(e: SpecEvent): RendererEvent {
@@ -450,10 +488,12 @@ function mapVisualToBeat(
         type: 'architecture',
         start,
         duration,
+        provisionalDuration: duration,
         caption: displayCaptionFor(b),
         entities: v.entities.map(mapEntity),
         relationships: v.relationships.map(mapRelationship),
         highlightId: v.highlight_id ?? undefined,
+        events: v.events ? v.events.map(mapEvent) : undefined,
         audioFile,
       };
     case 'dashboard':

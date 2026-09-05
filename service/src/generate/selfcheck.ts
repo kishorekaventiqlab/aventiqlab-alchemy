@@ -255,6 +255,18 @@ function checkVideoV2(c: Record<string, unknown>): string[] {
       if (typeof highlight === "string" && highlight && !entityIds.has(highlight)) {
         errs.push(`architecture beat "${String(b.id)}" highlight_id "${highlight}" is not a declared entity`);
       }
+      // OPTIONAL events[] timeline (video/v2 temporal mechanism proposal,
+      // Phase B) — same target-must-be-a-declared-entity rule as
+      // investigation's events[] below. Absent entirely on an architecture
+      // beat that has none, same as today.
+      if (Array.isArray(v.events)) {
+        for (const ev of v.events as Array<Record<string, unknown>>) {
+          const target = ev.target;
+          if (typeof target === "string" && target && !entityIds.has(target)) {
+            errs.push(`architecture beat "${String(b.id)}" event target "${target}" is not a declared entity`);
+          }
+        }
+      }
     }
 
     if (kind === "investigation") {

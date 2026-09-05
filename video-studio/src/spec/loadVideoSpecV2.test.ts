@@ -265,6 +265,117 @@ test('retimeBeatsV2 rescales events[].t when real audio compresses the beat far 
   assert.ok(Math.abs(invAfter.events[1]!.t - originalEventTimes[1]! * scale) < 0.02);
 });
 
+// ---- Phase B: architecture's OPTIONAL events[] (video/v2 temporal mechanism proposal) ----
+
+test('BACKWARD COMPATIBILITY: an architecture beat with no events[] loads exactly as before this feature existed', () => {
+  const loaded = loadVideoSpecV2(makeSpec());
+  const arch = loaded.beats.find((b) => b.type === 'architecture');
+  assert.ok(arch && arch.type === 'architecture');
+  assert.equal(arch.events, undefined, 'a spec with no events on this beat must produce undefined, not an empty array — the two are not the same thing to ArchitectureDiagramV2\'s static/timeline branch');
+  assert.equal(arch.entities.length, 2);
+  assert.equal(arch.relationships.length, 1);
+  assert.equal(arch.highlightId, undefined);
+});
+
+test('BACKWARD COMPATIBILITY: retiming an architecture beat with no events[] does not add one', () => {
+  const loaded = loadVideoSpecV2(makeSpec());
+  const retimed = retimeBeatsV2(loaded, {});
+  const arch = retimed.beats.find((b) => b.type === 'architecture');
+  assert.ok(arch && arch.type === 'architecture');
+  assert.equal(arch.events, undefined);
+});
+
+test('an architecture beat WITH events[] carries them through, mapped id-for-id like investigation\'s', () => {
+  const spec = makeSpec();
+  const archBeat = spec.beats.find((b) => b.id === 'beat-03-arch')!;
+  if (archBeat.visual.kind === 'architecture') {
+    archBeat.visual.events = [
+      { t: 2, type: 'state_change', target: 'commit-b', from: 'healthy', to: 'under load' },
+    ];
+  }
+  const loaded = loadVideoSpecV2(spec);
+  const arch = loaded.beats.find((b) => b.type === 'architecture');
+  assert.ok(arch && arch.type === 'architecture');
+  assert.ok(arch.events);
+  assert.equal(arch.events!.length, 1);
+  assert.equal(arch.events![0]!.type, 'state_change');
+  assert.equal(arch.events![0]!.target, 'commit-b');
+  assert.equal(arch.events![0]!.from, 'healthy');
+  assert.equal(arch.events![0]!.to, 'under load');
+});
+
+test('retimeBeatsV2 rescales an architecture beat\'s events[].t the same way it rescales investigation\'s', () => {
+  const spec = makeSpec();
+  const archBeat = spec.beats.find((b) => b.id === 'beat-03-arch')!;
+  if (archBeat.visual.kind === 'architecture') {
+    archBeat.visual.events = [{ t: 6, type: 'state_change', target: 'commit-b', from: 'healthy', to: 'under load' }];
+  }
+  const loaded = loadVideoSpecV2(spec);
+  const archBefore = loaded.beats.find((b) => b.type === 'architecture');
+  assert.ok(archBefore && archBefore.type === 'architecture');
+  assert.equal(archBefore.provisionalDuration, archBefore.duration);
+
+  // Real audio much shorter than the 12s target_duration_sec estimate for beat-03-arch.
+  const retimed = retimeBeatsV2(loaded, { 'beat-03-arch.wav': 2 });
+  const archAfter = retimed.beats.find((b) => b.type === 'architecture');
+  assert.ok(archAfter && archAfter.type === 'architecture');
+  assert.ok(archAfter.duration < archBefore.duration, 'the real duration must have actually compressed for this test to be meaningful');
+
+  const scale = archAfter.duration / archBefore.provisionalDuration;
+  assert.ok(Math.abs(archAfter.events![0]!.t - 6 * scale) < 0.02);
+  assert.ok(archAfter.events![0]!.t <= archAfter.duration + 0.01, 'a rescaled event must not fall past the real, retimed beat duration');
+});
+
+// ---- Phase A: investigation's OPTIONAL camera_keyframes (video/v2 temporal mechanism proposal) ----
+
+test('BACKWARD COMPATIBILITY: an investigation beat with no camera_keyframes loads exactly as before this feature existed', () => {
+  const loaded = loadVideoSpecV2(makeSpec());
+  const inv = loaded.beats.find((b) => b.type === 'investigation');
+  assert.ok(inv && inv.type === 'investigation');
+  assert.equal(inv.cameraKeyframes, undefined);
+});
+
+test('an investigation beat WITH camera_keyframes carries them through, mapped from snake_case to camelCase', () => {
+  const spec = makeSpec();
+  const invBeat = spec.beats.find((b) => b.id === 'beat-04-inv')!;
+  if (invBeat.visual.kind === 'investigation') {
+    invBeat.visual.camera_keyframes = [
+      { t: 0, focal_x: 0.5, focal_y: 0.5, scale: 1 },
+      { t: 12, focal_x: 0.7, focal_y: 0.3, scale: 1.4 },
+    ];
+  }
+  const loaded = loadVideoSpecV2(spec);
+  const inv = loaded.beats.find((b) => b.type === 'investigation');
+  assert.ok(inv && inv.type === 'investigation');
+  assert.ok(inv.cameraKeyframes);
+  assert.equal(inv.cameraKeyframes!.length, 2);
+  assert.equal(inv.cameraKeyframes![1]!.focalX, 0.7);
+  assert.equal(inv.cameraKeyframes![1]!.focalY, 0.3);
+  assert.equal(inv.cameraKeyframes![1]!.scale, 1.4);
+});
+
+test('retimeBeatsV2 rescales camera_keyframes[].t the same way it rescales events[].t', () => {
+  const spec = makeSpec();
+  const invBeat = spec.beats.find((b) => b.id === 'beat-04-inv')!;
+  if (invBeat.visual.kind === 'investigation') {
+    invBeat.visual.camera_keyframes = [
+      { t: 0, focal_x: 0.5, focal_y: 0.5, scale: 1 },
+      { t: 12, focal_x: 0.7, focal_y: 0.3, scale: 1.4 },
+    ];
+  }
+  const loaded = loadVideoSpecV2(spec);
+  const invBefore = loaded.beats.find((b) => b.type === 'investigation');
+  assert.ok(invBefore && invBefore.type === 'investigation');
+
+  const retimed = retimeBeatsV2(loaded, { 'beat-04a-seg.wav': 1.5, 'beat-04b-seg.wav': 1.5 });
+  const invAfter = retimed.beats.find((b) => b.type === 'investigation');
+  assert.ok(invAfter && invAfter.type === 'investigation');
+  assert.ok(invAfter.duration < invBefore.duration, 'the real duration must have actually compressed for this test to be meaningful');
+
+  const scale = invAfter.duration / invBefore.provisionalDuration;
+  assert.ok(Math.abs(invAfter.cameraKeyframes![1]!.t - 12 * scale) < 0.02);
+});
+
 // ---- validation ------------------------------------------------------
 
 test('rejects a non-video/v2 schema_version', () => {

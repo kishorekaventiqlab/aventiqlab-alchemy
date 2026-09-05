@@ -115,6 +115,11 @@ export type SpecVisualV2 =
       entities: SpecEntity[];
       relationships: SpecRelationship[];
       highlight_id?: string | null;
+      /** OPTIONAL (video/v2 temporal mechanism proposal, Phase B): the same
+       * semantic events[] timeline `investigation` uses — describes what
+       * changes about the diagram as the beat plays. Absent entirely renders
+       * exactly as a static topology diagram, unchanged from before. */
+      events?: SpecEvent[];
     }
   | { kind: 'optionsCompare'; options: SpecCompareOption[] }
   | {

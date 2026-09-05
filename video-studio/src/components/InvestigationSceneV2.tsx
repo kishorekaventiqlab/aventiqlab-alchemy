@@ -3,6 +3,7 @@ import { interpolate, useCurrentFrame } from 'remotion';
 import { theme } from './theme';
 import { ArchitectureDiagramV2, type DiagramEntity, type DiagramRelationship } from './ArchitectureDiagramV2';
 import { CameraFrame } from './CameraFocus';
+import { deriveAppearFrames, deriveRelationships, deriveCameraFrame, type TimelineCameraKeyframe } from './eventTimeline';
 import type { EntityShapeCategory } from './ArchitectureNode';
 
 /**
@@ -115,67 +116,22 @@ function eventLine(e: InvestigationEvent, byId: Map<string, InvestigationEntity>
   return targetLabel ? `${targetLabel} ${EVENT_VERB[e.type]}` : EVENT_VERB[e.type];
 }
 
-/**
- * Which pairs of entities are "connected" and since when, derived from the
- * events themselves rather than requiring the model to also declare a
- * separate static relationships array. A `connect`/`send`/`receive`/
- * `evaluate` event whose `target` and `to` both resolve to real entity ids
- * is treated as "these two entities are linked, starting at this event's
- * time" — the edge fades in at that event's frame (FlowArrow's own
- * appearFrame animation) and animates a traveling dot (`flowing: true`)
- * for `send`/`receive`/`connect`/`evaluate`, the event types that represent
- * something actually moving or being checked between two entities. A later
- * `disconnect` event for the same pair removes the edge again.
- */
-export function deriveRelationships(events: InvestigationEvent[], entityIds: Set<string>, fps: number): DiagramRelationship[] {
-  const FLOWING_TYPES = new Set<InvestigationEvent['type']>(['connect', 'send', 'receive', 'evaluate']);
-  const byPair = new Map<string, DiagramRelationship>();
-  const sorted = [...events].sort((a, b) => a.t - b.t);
-  for (const e of sorted) {
-    if (!e.target || !e.to || !entityIds.has(e.target) || !entityIds.has(e.to)) continue;
-    const key = [e.target, e.to].sort().join('::');
-    if (e.type === 'disconnect') {
-      byPair.delete(key);
-      continue;
-    }
-    if (!FLOWING_TYPES.has(e.type) && e.type !== 'move') continue;
-    byPair.set(key, {
-      fromId: e.target,
-      toId: e.to,
-      flowing: FLOWING_TYPES.has(e.type),
-      highlighted: true,
-      appearFrame: Math.round(e.t * fps),
-    });
-  }
-  return [...byPair.values()];
-}
-
-/** Each entity's entrance frame = the earliest event that references it (as target, from, or to); an entity never referenced by an event is present from the start. */
-export function deriveAppearFrames(entities: InvestigationEntity[], events: InvestigationEvent[], fps: number): Map<string, number> {
-  const earliest = new Map<string, number>();
-  for (const e of events) {
-    for (const id of [e.target, e.from, e.to]) {
-      if (!id) continue;
-      const existing = earliest.get(id);
-      if (existing === undefined || e.t < existing) earliest.set(id, e.t);
-    }
-  }
-  const frames = new Map<string, number>();
-  for (const entity of entities) {
-    const t = earliest.get(entity.id);
-    frames.set(entity.id, t !== undefined ? Math.round(t * fps) : 0);
-  }
-  return frames;
-}
+// deriveRelationships/deriveAppearFrames moved to eventTimeline.ts (Phase B
+// of the video/v2 temporal mechanism proposal) so ArchitectureDiagramV2 can
+// reuse the exact same timeline math off an architecture beat's own optional
+// events[] — re-exported here so existing imports of this module keep working.
+export { deriveRelationships, deriveAppearFrames } from './eventTimeline';
 
 export const InvestigationSceneV2: React.FC<{
   fps: number;
   entities: InvestigationEntity[];
   events: InvestigationEvent[];
   highlightId?: string;
-}> = ({ fps, entities, events, highlightId }) => {
+  cameraKeyframes?: TimelineCameraKeyframe[];
+}> = ({ fps, entities, events, highlightId, cameraKeyframes }) => {
   const frame = useCurrentFrame();
   const tSec = frame / fps;
+  const camera = deriveCameraFrame(cameraKeyframes, tSec);
 
   const byId = new Map(entities.map((e) => [e.id, e]));
   const fired = events.filter((e) => e.t <= tSec).sort((a, b) => a.t - b.t);
@@ -204,7 +160,7 @@ export const InvestigationSceneV2: React.FC<{
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      <CameraFrame focalX={0.5} focalY={0.42} scale={1}>
+      <CameraFrame focalX={cameraKeyframes ? camera.focalX : 0.5} focalY={cameraKeyframes ? camera.focalY : 0.42} scale={camera.scale}>
         <ArchitectureDiagramV2
           entities={diagramEntities}
           relationships={relationships}
