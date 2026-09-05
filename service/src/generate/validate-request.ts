@@ -17,7 +17,33 @@ const SUPPORTED_LEARNING_IR_VERSIONS = new Set(["learning-ir/v1"]);
 
 export interface ValidatedRequest {
   req: GenerateRequest;
+  /**
+   * The literal artifact_type astra sent — echoed back in the response's
+   * own `artifact_type` field and used for the S3 storage path segment.
+   * Astra has zero concept of video/v1 vs video/v2 (confirmed: it always
+   * sends "video", never "video_v2"), so everything it can observe must
+   * stay byte-identical to today regardless of which schema was actually
+   * used internally.
+   */
   type: Al3SupportedType;
+  /**
+   * The resolved dispatch key actually used for schema/prompt/self-check
+   * lookup and the emitted `schema_version`. Identity to `type` for every
+   * artifact type except a plain "video" request, which resolves to
+   * "video_v2" — routing new video generations to the topic-neutral,
+   * mobile-readable schema instead of the frozen (and Kubernetes-shaped)
+   * video/v1 one. An explicit "video_v2" request still resolves to itself
+   * (no remapping needed — it already means v2). video/v1's own schema/
+   * prompt/self-check stay fully reachable: by already-generated content
+   * (schema_version is baked in at generation time) and by anything that
+   * explicitly asks for the frozen contract type in the future.
+   */
+  internalType: Al3SupportedType;
+}
+
+/** "video" -> "video_v2" for new generations; identity for every other type (including an explicit "video_v2" request). */
+function resolveInternalType(type: Al3SupportedType): Al3SupportedType {
+  return type === "video" ? "video_v2" : type;
 }
 
 export function validateGenerateRequest(body: unknown): ValidatedRequest {
@@ -80,5 +106,6 @@ export function validateGenerateRequest(body: unknown): ValidatedRequest {
       prior_error: (b.prior_error as string | undefined) ?? null,
     },
     type: at,
+    internalType: resolveInternalType(at),
   };
 }

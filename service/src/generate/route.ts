@@ -24,7 +24,7 @@ export interface GenerateRouteOptions {
 export function generateRoute(opts: GenerateRouteOptions): FastifyPluginAsync {
   return async (app) => {
     app.post("/v1/generate", { preHandler: [app.requireServiceAuth] }, async (request, reply) => {
-      const { req, type } = validateGenerateRequest(request.body);
+      const { req, type, internalType } = validateGenerateRequest(request.body);
 
       let deps = opts.depsOverride;
       if (!deps) {
@@ -46,7 +46,7 @@ export function generateRoute(opts: GenerateRouteOptions): FastifyPluginAsync {
         };
       }
 
-      const result = await generateArtifact(req, type, { ...deps, log: request.log });
+      const result = await generateArtifact(req, type, internalType, { ...deps, log: request.log });
       reply.status(200).send(result);
     });
   };

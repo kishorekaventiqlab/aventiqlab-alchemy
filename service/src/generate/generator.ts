@@ -24,12 +24,29 @@ export interface GeneratorDeps {
 
 export async function generateArtifact(
   req: GenerateRequest,
-  type: Al3SupportedType,
+  /**
+   * The literal artifact_type the caller sent — echoed in the response's own
+   * `artifact_type` and used for the S3 storage path. Kept separate from
+   * `internalType` so a request whose internal dispatch got remapped (e.g.
+   * "video" -> "video_v2") is still invisible to the caller: same type in,
+   * same type out, same storage path, only the schema/prompt used to
+   * actually produce the content differs.
+   */
+  externalType: Al3SupportedType,
+  /**
+   * The resolved dispatch key: which schema/prompt/self-check table this
+   * generation actually uses. Equal to `externalType` for every artifact
+   * type except a plain "video" request (see validate-request.ts's
+   * resolveInternalType) — new video generations are routed to the
+   * topic-neutral video/v2 schema even though the caller only ever asked
+   * for (and only ever sees) "video".
+   */
+  internalType: Al3SupportedType,
   deps: GeneratorDeps,
 ): Promise<GenerateResponse> {
-  const model = deps.modelByType[type] ?? deps.defaultModel;
-  const prompt = buildPrompt(type, req.learning_context, req.prior_error);
-  const key = { experienceId: req.experience_id, artifactType: type, attempt: req.attempt };
+  const model = deps.modelByType[internalType] ?? deps.defaultModel;
+  const prompt = buildPrompt(internalType, req.learning_context, req.prior_error);
+  const key = { experienceId: req.experience_id, artifactType: externalType, attempt: req.attempt };
 
   let result;
   try {
@@ -37,8 +54,8 @@ export async function generateArtifact(
       system: prompt.system,
       user: prompt.user,
       model,
-      responseSchema: DELIVERABLE_SCHEMA[type] as object,
-      schemaName: type,
+      responseSchema: DELIVERABLE_SCHEMA[internalType] as object,
+      schemaName: internalType,
     });
   } catch (err) {
     // Model-layer errors (timeout/quota/unavailable/malformed) are already
@@ -69,27 +86,27 @@ export async function generateArtifact(
   // fillVideoEstimatedDuration). Done BEFORE self-check so the schema's
   // `narration_hash`/`spec_hash` patterns and the duration-sum check
   // validate against real, alchemy-computed values, not model guesses.
-  if (type === "video" || type === "video_v2") {
+  if (internalType === "video" || internalType === "video_v2") {
     fillVideoHashes(working);
     fillVideoEstimatedDuration(working);
   }
 
-  const check = selfCheck(type, working);
+  const check = selfCheck(internalType, working);
   if (!check.ok) {
     const e = new ServiceError(
       "generation_failed",
-      `Generated ${type} failed self-check: ${check.errors.join("; ")}`,
+      `Generated ${internalType} failed self-check: ${check.errors.join("; ")}`,
     );
     await safeWriteError(deps, key, req, model, prompt.promptVersion, e, result.raw);
     throw e;
   }
 
   const contentObj = working;
-  const preview = derivePreview(type, contentObj);
+  const preview = derivePreview(internalType, contentObj);
 
   const envelope = {
-    artifact_type: type,
-    schema_version: SCHEMA_VERSION[type],
+    artifact_type: externalType,
+    schema_version: SCHEMA_VERSION[internalType],
     content: contentObj,
     preview,
     s3_pointer: "", // filled after the write
@@ -111,8 +128,8 @@ export async function generateArtifact(
   }
 
   return {
-    artifact_type: type,
-    schema_version: SCHEMA_VERSION[type],
+    artifact_type: externalType,
+    schema_version: SCHEMA_VERSION[internalType],
     content: contentObj,
     preview,
     s3_pointer: s3Pointer,
