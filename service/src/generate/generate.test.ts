@@ -240,7 +240,14 @@ test("the video prompt explicitly requires a `stage` field per beat and explains
 // (AL3 plan doc §4.2). Confirms the prompt actually states each kind's
 // requirement — selfCheck's own acceptance/rejection is covered separately.
 test("the video prompt requires a fixed anchor word in on_screen for every visual.kind except investigation_segment", async () => {
-  const { app, model } = await appWith(VALID_CONTENT.video);
+  // artifact_type "video" resolves internally to video_v2 (the routing fix) —
+  // this test exercises video_v2's prompt, whose anchor-word phrasing moved
+  // from "MUST contain the word X" inline per-kind to a lighter "Anchor
+  // word: X" tag (mechanism-first prompt rework) plus one shared, general
+  // instruction paragraph explaining HOW to place that word (never as the
+  // sentence's grammatical subject) — same underlying mechanical requirement,
+  // different phrasing.
+  const { app, model } = await appWith(VALID_CONTENT.video_v2);
   await authedPost(app, body("video"));
   const call = model.calls[0]!;
   const anchors: Record<string, string> = {
@@ -256,8 +263,8 @@ test("the video prompt requires a fixed anchor word in on_screen for every visua
   };
   for (const [kind, anchor] of Object.entries(anchors)) {
     assert.ok(
-      call.user.includes(kind) && call.user.toLowerCase().includes(`must contain the word "${anchor}"`),
-      `the prompt states ${kind}'s on_screen must contain "${anchor}"`,
+      call.user.includes(kind) && call.user.toLowerCase().includes(`anchor word: "${anchor}"`),
+      `the prompt states ${kind}'s anchor word is "${anchor}"`,
     );
   }
   assert.ok(
