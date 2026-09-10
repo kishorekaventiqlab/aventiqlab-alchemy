@@ -1,6 +1,0 @@
-node_modules/
-dist/
-cdk.out/
-*.log
-.env
-.env.local

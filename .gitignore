@@ -1,8 +1,0 @@
-node_modules/
-dist/
-cdk.out/
-*.log
-.env
-.env.local
-.DS_Store
-video-studio/.DS_Store
