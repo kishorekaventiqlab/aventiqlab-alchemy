@@ -1,0 +1,15 @@
+{
+  "skillId": "edge-locations",
+  "name": "Edge Locations",
+  "domain": "aws",
+  "description": "What edge locations are, which services use them (CloudFront, Route 53, Global Accelerator), and the difference between reducing latency at the edge and running compute in a Region.",
+  "parentSkill": "aws-global-infrastructure",
+  "aliases": ["points of presence", "pops", "cdn edge"],
+  "competencyLevels": [
+    { "level": "exposure", "descriptor": "Can name CloudFront as an edge service and say edges are near users." },
+    { "level": "knowledge", "descriptor": "Can explain which problems edge locations solve and which they do not, and name the services that use them." },
+    { "level": "hands_on", "descriptor": "Has configured a CloudFront distribution or Route 53 latency routing for a real application." }
+  ],
+  "assessmentDimensions": ["KNOW", "UNDERSTAND"],
+  "tags": ["aws", "foundations", "networking"]
+}

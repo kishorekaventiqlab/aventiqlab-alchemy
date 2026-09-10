@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://alchemy.aventiqlab.com/schemas/arena-definition.schema.json",
+  "title": "Alchemy Arena Definition (opaque pointer)",
+  "description": "Alchemy stores the Arena DEFINITION only and never provisions infrastructure. Beyond the identity fields below the document is opaque to Alchemy: the battle runtime contract is modelled in the aventiqlab-platform repo (docs/battle-runtime-architecture-v1.md, docs/battle-infra-spec.md) and executed by Arena.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["arenaDefinitionId", "schemaVersion", "runtime"],
+  "properties": {
+    "arenaDefinitionId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "schemaVersion": { "type": "string", "const": "1" },
+    "title": { "type": "string", "maxLength": 160 },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["provider", "contractVersion"],
+      "properties": {
+        "provider": { "type": "string", "enum": ["arena"] },
+        "contractVersion": { "type": "string", "description": "Version of the battle runtime contract the embedded spec targets." },
+        "specRef": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Reference to the runtime spec (inline `spec`, or a `path` inside this package's arena/ folder).",
+          "properties": {
+            "path": { "type": "string" },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "spec": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "estimatedMinutes": { "type": "integer", "minimum": 1 },
+    "skillIds": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://alchemy.aventiqlab.com/schemas/evaluator.schema.json",
+  "title": "Alchemy Skill Evaluator Definition",
+  "description": "A conversational skill evaluator: the prompts ASTRA asks and the rubric it scores against. Alchemy stores this verbatim; ASTRA runs it.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["evaluatorId", "schemaVersion", "title", "skillIds", "prompts"],
+  "properties": {
+    "evaluatorId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "schemaVersion": { "type": "string", "const": "1" },
+    "title": { "type": "string", "maxLength": 160 },
+    "format": { "type": "string", "enum": ["conversational"], "default": "conversational" },
+    "skillIds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" } },
+    "prompts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["id", "question", "rubric"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^p[0-9]+$" },
+          "question": { "type": "string", "minLength": 10, "maxLength": 2000 },
+          "dimension": { "type": "string", "enum": ["KNOW", "UNDERSTAND", "BUILD", "OPERATE", "TROUBLESHOOT", "DESIGN", "EXPLAIN"] },
+          "skillIds": { "type": "array", "items": { "type": "string" } },
+          "rubric": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["level", "indicators"],
+              "properties": {
+                "level": { "type": "string", "enum": ["exposure", "knowledge", "hands_on", "production", "architecture"] },
+                "indicators": { "type": "array", "minItems": 1, "items": { "type": "string", "maxLength": 400 } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

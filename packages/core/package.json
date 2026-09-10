@@ -1,0 +1,19 @@
+{
+  "name": "@aventiqlab/alchemy-core",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared contracts for Alchemy: manifest/skill schemas + validation, semver, S3 key layout, DynamoDB item mapping, lifecycle state machine.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package-validator": "./src/package-validator.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test $(find src -name '*.test.ts')"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

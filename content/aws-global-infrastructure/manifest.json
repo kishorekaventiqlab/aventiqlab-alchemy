@@ -1,0 +1,78 @@
+{
+  "manifestVersion": "1",
+  "experienceId": "aws-global-infrastructure",
+  "version": "1.0.0",
+  "title": "AWS Global Infrastructure",
+  "summary": "How AWS is physically and logically laid out: Regions, Availability Zones, edge locations and accounts, and why those choices shape every architecture you will build.",
+  "description": "The first experience in the AWS Transformation foundation track. It builds the mental model every later AWS experience assumes: where resources actually live, what isolates them from each other, and how an account scopes them. Nothing here requires a console login.",
+  "domain": "aws",
+  "category": "cloud-foundations",
+  "level": "FOUNDATION",
+  "difficulty": 1,
+  "estimatedMinutes": 45,
+  "tags": ["aws", "foundations", "regions", "availability-zones"],
+  "placement": {
+    "program": "aws-transformation",
+    "track": "foundation",
+    "module": "introduction-to-aws",
+    "order": 1
+  },
+  "skills": {
+    "taught": [
+      { "skillId": "aws-regions", "targetLevel": "knowledge", "primary": true },
+      { "skillId": "availability-zones", "targetLevel": "knowledge", "primary": true },
+      { "skillId": "edge-locations", "targetLevel": "exposure" },
+      { "skillId": "aws-accounts", "targetLevel": "exposure" }
+    ],
+    "assessed": [
+      { "skillId": "aws-regions", "level": "knowledge", "evidence": ["quiz", "evaluator"] },
+      { "skillId": "availability-zones", "level": "knowledge", "evidence": ["quiz", "evaluator", "arena"] },
+      { "skillId": "edge-locations", "level": "exposure", "evidence": ["quiz"] },
+      { "skillId": "aws-accounts", "level": "exposure", "evidence": ["quiz"] }
+    ],
+    "required": [
+      { "skillId": "cloud-computing-basics", "minimumLevel": "exposure" }
+    ]
+  },
+  "prerequisites": [
+    { "experienceId": "cloud-computing-basics", "optional": true, "reason": "Assumes the learner knows what 'the cloud' means at the level of on-demand, pay-as-you-go compute." }
+  ],
+  "targetAudience": {
+    "profiles": ["career-switcher", "cloud-beginner", "developer-new-to-aws"],
+    "experienceYears": { "min": 0, "max": 15 },
+    "notes": "Experienced engineers who already hold aws-regions and availability-zones at knowledge level should be routed past this experience by ASTRA."
+  },
+  "learningObjectives": [
+    { "id": "lo-1", "statement": "Explain what an AWS Region is, and choose one for a workload using latency, compliance, service availability and cost.", "skillIds": ["aws-regions"], "dimension": "UNDERSTAND" },
+    { "id": "lo-2", "statement": "Describe how Availability Zones isolate failure and why a production workload spans at least two.", "skillIds": ["availability-zones"], "dimension": "UNDERSTAND" },
+    { "id": "lo-3", "statement": "Recognise what edge locations are for and which services use them.", "skillIds": ["edge-locations"], "dimension": "KNOW" },
+    { "id": "lo-4", "statement": "State what an AWS account scopes and why organisations use more than one.", "skillIds": ["aws-accounts"], "dimension": "KNOW" }
+  ],
+  "artifacts": [
+    { "artifactId": "video-main", "kind": "video", "path": "video/aws-global-infrastructure.mp4", "contentType": "video/mp4", "title": "AWS Global Infrastructure in 12 minutes", "durationSeconds": 720, "language": "en", "skillIds": ["aws-regions", "availability-zones", "edge-locations"] },
+    { "artifactId": "reading-main", "kind": "reading", "path": "reading/aws-global-infrastructure.md", "contentType": "text/markdown", "title": "Reading: AWS Global Infrastructure", "skillIds": ["aws-regions", "availability-zones", "edge-locations", "aws-accounts"] },
+    { "artifactId": "quiz-main", "kind": "quiz", "path": "quiz/quiz.json", "contentType": "application/json", "title": "Knowledge check" },
+    { "artifactId": "arena-az-failure", "kind": "arena", "path": "arena/arena-definition.json", "contentType": "application/json", "title": "Arena: survive an Availability Zone failure", "skillIds": ["availability-zones"] },
+    { "artifactId": "evaluator-main", "kind": "skill-evaluator", "path": "evaluator/evaluator.json", "contentType": "application/json", "title": "Skill evaluator: reasoning about placement" },
+    { "artifactId": "asset-architecture", "kind": "asset", "path": "assets/architecture.svg", "contentType": "image/svg+xml", "title": "Region / AZ / edge diagram" },
+    { "artifactId": "asset-aws-map", "kind": "asset", "path": "assets/aws-map.svg", "contentType": "image/svg+xml", "title": "Simplified Region map" }
+  ],
+  "completionCriteria": {
+    "requiredArtifactIds": ["video-main", "reading-main", "quiz-main"],
+    "quiz": { "artifactId": "quiz-main", "passingScorePercent": 70 }
+  },
+  "masteryCriteria": {
+    "evaluator": { "artifactId": "evaluator-main", "minimumLevel": "knowledge" },
+    "arena": {
+      "artifactId": "arena-az-failure",
+      "successConditions": [
+        "The application stays reachable while one Availability Zone is unavailable.",
+        "The learner can explain which component was single-AZ and what they changed."
+      ]
+    },
+    "evidenceRequired": ["quiz", "evaluator"]
+  },
+  "participation": "mandatory",
+  "authors": [{ "name": "AventiqLab Content" }],
+  "changelog": "Initial release."
+}

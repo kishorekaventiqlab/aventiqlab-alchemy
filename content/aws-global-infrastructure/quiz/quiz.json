@@ -1,0 +1,96 @@
+{
+  "quizId": "aws-global-infrastructure-quiz",
+  "title": "AWS Global Infrastructure knowledge check",
+  "passingScorePercent": 70,
+  "shuffleQuestions": true,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "prompt": "A regulator requires that customer data never leave India. Which concept decides where the data lives?",
+      "options": [
+        { "id": "a", "text": "Availability Zone" },
+        { "id": "b", "text": "Region" },
+        { "id": "c", "text": "Edge location" },
+        { "id": "d", "text": "Account" }
+      ],
+      "correctOptionIds": ["b"],
+      "explanation": "Data residency is a Region choice. AZs are inside a Region; edge locations only cache; the account is a global container.",
+      "skillIds": ["aws-regions"],
+      "dimension": "UNDERSTAND"
+    },
+    {
+      "id": "q2",
+      "type": "single",
+      "prompt": "What is the minimum number of Availability Zones a production workload should span?",
+      "options": [
+        { "id": "a", "text": "One" },
+        { "id": "b", "text": "Two" },
+        { "id": "c", "text": "Three" },
+        { "id": "d", "text": "As many as the Region has" }
+      ],
+      "correctOptionIds": ["b"],
+      "explanation": "Two is the rule; three is common for quorum-based systems, but two already survives a single-AZ failure.",
+      "skillIds": ["availability-zones"],
+      "dimension": "KNOW"
+    },
+    {
+      "id": "q3",
+      "type": "multiple",
+      "prompt": "Which of these services operate from edge locations? Select all that apply.",
+      "options": [
+        { "id": "a", "text": "Amazon CloudFront" },
+        { "id": "b", "text": "Amazon RDS" },
+        { "id": "c", "text": "Amazon Route 53" },
+        { "id": "d", "text": "Amazon EC2" }
+      ],
+      "correctOptionIds": ["a", "c"],
+      "explanation": "CloudFront and Route 53 answer from the edge. RDS and EC2 run inside a Region's AZs.",
+      "skillIds": ["edge-locations"],
+      "dimension": "KNOW"
+    },
+    {
+      "id": "q4",
+      "type": "true_false",
+      "prompt": "The AZ named ap-south-1a always refers to the same physical site in every AWS account.",
+      "options": [
+        { "id": "a", "text": "True" },
+        { "id": "b", "text": "False" }
+      ],
+      "correctOptionIds": ["b"],
+      "explanation": "AZ names are mapped per account. Use the AZ ID (e.g. aps1-az1) to coordinate across accounts.",
+      "skillIds": ["availability-zones"],
+      "dimension": "UNDERSTAND"
+    },
+    {
+      "id": "q5",
+      "type": "single",
+      "prompt": "Why do organisations run separate AWS accounts for dev and prod?",
+      "options": [
+        { "id": "a", "text": "Because a Region can only hold one environment" },
+        { "id": "b", "text": "To limit the blast radius of mistakes and to separate billing and permissions" },
+        { "id": "c", "text": "Because IAM does not work across Availability Zones" },
+        { "id": "d", "text": "Because edge locations require it" }
+      ],
+      "correctOptionIds": ["b"],
+      "explanation": "An account is the top-level boundary for identity, billing and blast radius.",
+      "skillIds": ["aws-accounts"],
+      "dimension": "UNDERSTAND"
+    },
+    {
+      "id": "q6",
+      "type": "single",
+      "prompt": "Users in Mumbai see slow page loads from an application running in us-east-1. The static assets are already on CloudFront. What most directly reduces latency for the dynamic API calls?",
+      "options": [
+        { "id": "a", "text": "Add a second Availability Zone in us-east-1" },
+        { "id": "b", "text": "Deploy the API in ap-south-1" },
+        { "id": "c", "text": "Create a new AWS account in India" },
+        { "id": "d", "text": "Add more edge locations" }
+      ],
+      "correctOptionIds": ["b"],
+      "explanation": "Latency to a Region is fixed by geography. Extra AZs help availability, not distance; accounts are not geographic; edge locations do not run the API.",
+      "skillIds": ["aws-regions", "edge-locations"],
+      "dimension": "UNDERSTAND"
+    }
+  ]
+}

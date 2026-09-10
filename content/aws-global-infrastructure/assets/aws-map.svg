@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="360" viewBox="0 0 720 360" font-family="system-ui, sans-serif" font-size="13">
+  <rect width="720" height="360" fill="#f1f5f9"/>
+  <text x="20" y="30" font-weight="700" font-size="16" fill="#0f172a">Simplified Region map (not to scale)</text>
+  <g fill="#1d4ed8">
+    <circle cx="150" cy="150" r="7"/><text x="162" y="146" fill="#0f172a">us-east-1 N. Virginia</text>
+    <circle cx="90" cy="140" r="7"/><text x="102" y="130" fill="#0f172a">us-west-2 Oregon</text>
+    <circle cx="380" cy="120" r="7"/><text x="392" y="116" fill="#0f172a">eu-west-2 London</text>
+    <circle cx="410" cy="140" r="7"/><text x="422" y="150" fill="#0f172a">eu-central-1 Frankfurt</text>
+    <circle cx="520" cy="200" r="7"/><text x="532" y="196" fill="#0f172a">ap-south-1 Mumbai</text>
+    <circle cx="600" cy="230" r="7"/><text x="612" y="226" fill="#0f172a">ap-southeast-1 Singapore</text>
+    <circle cx="660" cy="150" r="7"/><text x="600" y="130" fill="#0f172a">ap-northeast-1 Tokyo</text>
+    <circle cx="640" cy="300" r="7"/><text x="560" y="320" fill="#0f172a">ap-southeast-2 Sydney</text>
+    <circle cx="230" cy="290" r="7"/><text x="242" y="286" fill="#0f172a">sa-east-1 São Paulo</text>
+  </g>
+  <text x="20" y="345" fill="#64748b" font-size="12">Each dot is an independent Region with two or more Availability Zones. Edge locations (not shown) number in the hundreds.</text>
+</svg>

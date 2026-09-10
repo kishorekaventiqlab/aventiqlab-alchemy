@@ -1,0 +1,319 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://alchemy.aventiqlab.com/schemas/manifest.schema.json",
+  "title": "Alchemy Learning Experience Manifest",
+  "description": "The contract between local content creation and Alchemy. One manifest.json per Learning Experience package. Validated by `alchemy validate` before publish and again by the API on version registration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifestVersion",
+    "experienceId",
+    "version",
+    "title",
+    "summary",
+    "domain",
+    "category",
+    "level",
+    "difficulty",
+    "skills",
+    "prerequisites",
+    "targetAudience",
+    "learningObjectives",
+    "artifacts",
+    "completionCriteria",
+    "masteryCriteria"
+  ],
+  "properties": {
+    "manifestVersion": {
+      "type": "string",
+      "const": "1",
+      "description": "Manifest schema major version. Bumped only on a breaking change to this schema."
+    },
+    "experienceId": {
+      "$ref": "#/definitions/slug",
+      "description": "Stable identity of the experience across all versions. Lowercase kebab-case. Never changes once published."
+    },
+    "version": {
+      "$ref": "#/definitions/semver",
+      "description": "Semantic version of this package. Published versions are immutable."
+    },
+    "title": { "type": "string", "minLength": 3, "maxLength": 160 },
+    "summary": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 600,
+      "description": "One or two sentences shown in catalog listings."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "Longer free-text description (Markdown allowed)."
+    },
+    "domain": {
+      "$ref": "#/definitions/slug",
+      "description": "Top-level knowledge domain, e.g. `aws`. Also the first S3 prefix segment."
+    },
+    "category": {
+      "$ref": "#/definitions/slug",
+      "description": "Sub-area within the domain, e.g. `cloud-foundations`."
+    },
+    "level": { "$ref": "#/definitions/level" },
+    "difficulty": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Relative effort within the level. 1 = lightest."
+    },
+    "estimatedMinutes": { "type": "integer", "minimum": 1, "maximum": 10080 },
+    "tags": { "type": "array", "items": { "$ref": "#/definitions/slug" }, "uniqueItems": true, "maxItems": 30 },
+    "placement": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Where the experience sits in the authored curriculum tree (e.g. AWS Transformation > Foundation > Introduction to AWS). Informational; ASTRA decides the learner's actual path from skills, not from this.",
+      "properties": {
+        "program": { "$ref": "#/definitions/slug" },
+        "track": { "$ref": "#/definitions/slug" },
+        "module": { "$ref": "#/definitions/slug" },
+        "order": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "skills": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["taught", "assessed", "required"],
+      "description": "The skill-based metadata ASTRA uses. This, not years of experience, is the primary personalization mechanism.",
+      "properties": {
+        "taught": {
+          "type": "array",
+          "description": "Skills a learner is expected to reach `targetLevel` in by completing the experience.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["skillId", "targetLevel"],
+            "properties": {
+              "skillId": { "$ref": "#/definitions/slug" },
+              "targetLevel": { "$ref": "#/definitions/competencyLevel" },
+              "primary": { "type": "boolean", "default": false, "description": "True for the one or two skills the experience is really about." }
+            }
+          }
+        },
+        "assessed": {
+          "type": "array",
+          "description": "Skills for which this experience produces evidence, and which artifacts produce it.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["skillId", "level", "evidence"],
+            "properties": {
+              "skillId": { "$ref": "#/definitions/slug" },
+              "level": { "$ref": "#/definitions/competencyLevel" },
+              "evidence": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": { "$ref": "#/definitions/evidenceKind" }
+              }
+            }
+          }
+        },
+        "required": {
+          "type": "array",
+          "description": "Skills a learner should already hold at `minimumLevel` before starting. ASTRA may skip the experience for learners who already exceed the taught levels.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["skillId", "minimumLevel"],
+            "properties": {
+              "skillId": { "$ref": "#/definitions/slug" },
+              "minimumLevel": { "$ref": "#/definitions/competencyLevel" }
+            }
+          }
+        }
+      }
+    },
+    "prerequisites": {
+      "type": "array",
+      "description": "Other experiences that should normally come first. Skill-level requirements live in `skills.required`; this is the authored ordering hint.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["experienceId"],
+        "properties": {
+          "experienceId": { "$ref": "#/definitions/slug" },
+          "optional": { "type": "boolean", "default": false },
+          "reason": { "type": "string", "maxLength": 300 }
+        }
+      }
+    },
+    "targetAudience": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profiles"],
+      "properties": {
+        "profiles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/slug" },
+          "description": "Suggested learner profiles, e.g. `career-switcher`, `cloud-beginner`, `senior-devops`. Informational for ASTRA; free vocabulary for now."
+        },
+        "experienceYears": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max"],
+          "description": "A hint only. Never the primary personalization key.",
+          "properties": {
+            "min": { "type": "integer", "minimum": 0, "maximum": 50 },
+            "max": { "type": "integer", "minimum": 0, "maximum": 50 }
+          }
+        },
+        "notes": { "type": "string", "maxLength": 600 }
+      }
+    },
+    "learningObjectives": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "statement"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^lo-[a-z0-9-]+$" },
+          "statement": { "type": "string", "minLength": 10, "maxLength": 400 },
+          "skillIds": { "type": "array", "items": { "$ref": "#/definitions/slug" }, "uniqueItems": true },
+          "dimension": { "$ref": "#/definitions/assessmentDimension" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Every file the package ships, other than manifest.json itself. Paths are relative to the package root and become S3 keys under the version prefix verbatim.",
+      "items": { "$ref": "#/definitions/artifact" }
+    },
+    "completionCriteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requiredArtifactIds"],
+      "description": "What counts as having *completed* the experience. Consumed by AventiqLab.",
+      "properties": {
+        "requiredArtifactIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/artifactId" }
+        },
+        "quiz": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["artifactId", "passingScorePercent"],
+          "properties": {
+            "artifactId": { "$ref": "#/definitions/artifactId" },
+            "passingScorePercent": { "type": "integer", "minimum": 1, "maximum": 100 }
+          }
+        }
+      }
+    },
+    "masteryCriteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What counts as having *mastered* the taught skills. Consumed by ASTRA when it records observed capability.",
+      "properties": {
+        "evaluator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["artifactId", "minimumLevel"],
+          "properties": {
+            "artifactId": { "$ref": "#/definitions/artifactId" },
+            "minimumLevel": { "$ref": "#/definitions/competencyLevel" }
+          }
+        },
+        "arena": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["artifactId"],
+          "properties": {
+            "artifactId": { "$ref": "#/definitions/artifactId" },
+            "successConditions": { "type": "array", "items": { "type": "string", "maxLength": 400 } }
+          }
+        },
+        "evidenceRequired": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/evidenceKind" },
+          "description": "Evidence kinds that must all be present before mastery can be claimed."
+        }
+      }
+    },
+    "participation": {
+      "type": "string",
+      "enum": ["mandatory", "optional"],
+      "default": "mandatory",
+      "description": "Default participation status when this experience appears in a path. ASTRA may override per learner."
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 120 },
+          "email": { "type": "string", "format": "email" }
+        }
+      }
+    },
+    "changelog": { "type": "string", "maxLength": 2000, "description": "What changed in this version." },
+    "extensions": {
+      "type": "object",
+      "description": "Escape hatch for tooling-specific data. Alchemy stores it verbatim and never interprets it.",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "maxLength": 80 },
+    "semver": { "type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$" },
+    "artifactId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "maxLength": 80 },
+    "level": {
+      "type": "string",
+      "enum": ["FOUNDATION", "INTERMEDIATE", "ADVANCED", "EXPERT"]
+    },
+    "competencyLevel": {
+      "type": "string",
+      "enum": ["exposure", "knowledge", "hands_on", "production", "architecture"],
+      "description": "Mirrors the AventiqLab platform's DepthLevel scale (minus `none`) so ASTRA sees one vocabulary."
+    },
+    "assessmentDimension": {
+      "type": "string",
+      "enum": ["KNOW", "UNDERSTAND", "BUILD", "OPERATE", "TROUBLESHOOT", "DESIGN", "EXPLAIN"]
+    },
+    "evidenceKind": {
+      "type": "string",
+      "enum": ["quiz", "evaluator", "arena", "reading", "video"]
+    },
+    "artifactKind": {
+      "type": "string",
+      "enum": ["video", "reading", "quiz", "arena", "skill-evaluator", "asset"]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifactId", "kind", "path", "contentType"],
+      "properties": {
+        "artifactId": { "$ref": "#/definitions/artifactId" },
+        "kind": { "$ref": "#/definitions/artifactKind" },
+        "path": {
+          "type": "string",
+          "pattern": "^(video|reading|quiz|arena|evaluator|assets)/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$",
+          "maxLength": 200,
+          "description": "Relative path inside the package. Must start with the folder matching the artifact kind (assets/ for kind=asset, evaluator/ for kind=skill-evaluator)."
+        },
+        "contentType": { "type": "string", "pattern": "^[a-z]+/[a-z0-9.+-]+$" },
+        "title": { "type": "string", "maxLength": 160 },
+        "required": { "type": "boolean", "default": true, "description": "Whether the file must exist for the package to validate." },
+        "durationSeconds": { "type": "integer", "minimum": 1 },
+        "language": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$", "default": "en" },
+        "skillIds": { "type": "array", "items": { "$ref": "#/definitions/slug" }, "uniqueItems": true }
+      }
+    }
+  }
+}

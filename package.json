@@ -1,0 +1,27 @@
+{
+  "name": "aventiqlab-alchemy",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Alchemy — where AventiqLab learning experiences live. Content repository, metadata, packaging, versioning, publishing and delivery API.",
+  "workspaces": [
+    "packages/core",
+    "packages/api",
+    "packages/cli",
+    "packages/infra"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm test --workspaces --if-present",
+    "synth": "npm run synth --workspace packages/infra",
+    "alchemy": "tsx packages/cli/src/cli.ts",
+    "validate:sample": "tsx packages/cli/src/cli.ts validate content/aws-global-infrastructure"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.23.12",
+    "typescript": "^5.7.2"
+  }
+}

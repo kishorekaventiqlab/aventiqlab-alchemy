@@ -1,0 +1,22 @@
+{
+  "name": "@aventiqlab/alchemy-infra",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "AWS CDK (TypeScript) for Alchemy: content bucket, single DynamoDB table, REST API + Lambdas, service-token secrets.",
+  "scripts": {
+    "synth": "cdk synth",
+    "diff": "cdk diff --profile alchemy-developer",
+    "deploy": "cdk deploy --profile alchemy-developer",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test $(find test -name '*.test.ts')"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.170.0",
+    "constructs": "^10.4.2"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.170.0",
+    "esbuild": "^0.24.0"
+  }
+}
