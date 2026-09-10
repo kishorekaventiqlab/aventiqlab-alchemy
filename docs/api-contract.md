@@ -18,8 +18,9 @@ token in **its own** Secrets Manager (same shape as its existing labs-orchestrat
 Amplify Lambda. The gateway's Lambda authorizer scopes READ tokens to `GET/*`; the service re-checks scope on
 every mutation. Authorizer results are cached 5 minutes per token.
 
-Read-scope callers only ever see **PUBLISHED** versions and experiences that have one. Publish-scope callers
-can preview drafts.
+Read-scope callers see **immutable** versions only: PUBLISHED, and ARCHIVED when asked for explicitly by
+`?version=` (so a learner pinned to a version keeps resolving it after it is retired). Listings, "latest"
+and skill lookups never return ARCHIVED. Drafts and review states are publish-scope only.
 
 ## Conventions
 
@@ -49,7 +50,7 @@ can preview drafts.
 ```json
 { "items": [ ExperienceSummary ], "nextCursor": "…" | null }
 ```
-`ExperienceSummary = { experienceId, title, summary, domain, category, level, difficulty, tags[], status: DRAFT|PUBLISHED|ARCHIVED, latestVersion, latestPublishedVersion, createdAt, updatedAt }`
+`ExperienceSummary = { experienceId, title, summary, domain, category, level, difficulty, tags[], status: DRAFT|PUBLISHED|ARCHIVED, latestVersion, latestPublishedVersion, latestPublishedAt, createdAt, updatedAt }`
 
 ### `GET /experiences/{experienceId}?version=`
 The self-describing document the platform builds on. Returns the latest published version unless `?version=` names another.
@@ -59,6 +60,7 @@ The self-describing document the platform builds on. Returns the latest publishe
   "version": {
     "experienceId": "aws-global-infrastructure", "version": "1.0.0", "status": "PUBLISHED",
     "s3Prefix": "aws/foundation/aws-global-infrastructure/1.0.0/",
+    "contentHash": "03f4…2020c",            // sha256 over manifest + artifact digests; stable per version, acts as an ETag
     "createdAt": "…", "updatedAt": "…", "publishedAt": "…", "changelog": "Initial release.",
     "manifest": { …the full manifest: skills, prerequisites, learningObjectives, completion/mastery criteria… },
     "artifacts": [
@@ -72,8 +74,12 @@ The self-describing document the platform builds on. Returns the latest publishe
 }
 ```
 
+**Detecting a newer version for a pinned learner:** compare `experience.latestPublishedVersion` /
+`experience.latestPublishedAt` with the pinned `version` — no manifest diffing needed. `version.contentHash`
+identifies the exact bytes a learner was served.
+
 ### `GET /experiences/{experienceId}/versions`
-`{ experienceId, items: [ VersionSummary ] }` — published only for read scope.
+`{ experienceId, items: [ VersionSummary ] }` — PUBLISHED and ARCHIVED only for read scope.
 
 ### `GET /experiences/{experienceId}/versions/{version}`
 `VersionDetail` (the `version` object above).
@@ -93,7 +99,7 @@ Everything the learner-facing app needs to render the experience, with a **presi
 `{ items: [ Skill & { updatedAt } ], nextCursor }` · `{ skill, updatedAt }`
 
 ### `GET /skills/{skillId}/experiences?relation=TAUGHT|ASSESSED|REQUIRED`
-`{ skillId, items: [ { experienceId, version, relation, level, versionStatus } ] }` — published only for read scope. This is the query ASTRA will use.
+`{ skillId, items: [ { experienceId, version, relation, level, versionStatus } ] }` — PUBLISHED only for read scope (never ARCHIVED: nobody should be routed *to* a retired version). This is the query ASTRA will use.
 
 ## Publishing endpoints (publish scope)
 

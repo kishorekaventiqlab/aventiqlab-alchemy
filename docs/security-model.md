@@ -43,6 +43,9 @@ platform actually crosses.
 Presigned GETs: 15 min default, hard-capped by `ALCHEMY_SIGNED_URL_TTL_SEC` (≤ 1 h). Presigned PUTs: 1 h,
 Content-Type pinned in the signature. Both are scoped to a single object key.
 
+Bucket CORS allows `GET, HEAD` only from `alchemy:allowedOrigins` (default: the aventiqlab.com apex + www +
+localhost:3000). Add the platform's `*.amplifyapp.com` origin in `packages/infra/cdk.json` before deploy.
+
 ## Logging and audit
 
 - CloudWatch Logs for both Lambdas and API Gateway access logs (JSON standard fields), 30-day retention.

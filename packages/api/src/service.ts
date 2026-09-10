@@ -127,9 +127,12 @@ export class AlchemyService {
     };
   }
 
-  /** Readers only ever see published versions; publishers may preview drafts. */
+  /**
+   * Readers see immutable versions only: PUBLISHED, and ARCHIVED (so a learner pinned to a
+   * version keeps resolving it after it is retired). Drafts/review states are publisher-only.
+   */
   private assertVisible(v: VersionItem, caller: Caller): void {
-    if (v.status !== "PUBLISHED" && caller.scope !== "publish") throw notFound(`version ${v.experienceId}@${v.version}`);
+    if (!isImmutable(v.status) && caller.scope !== "publish") throw notFound(`version ${v.experienceId}@${v.version}`);
   }
 
   private expiresAt(ttlSec: number): string {
@@ -157,7 +160,8 @@ export class AlchemyService {
     this.assertSlug(experienceId, "experienceId");
     const meta = await this.meta(experienceId);
     if (!meta) throw notFound(`experience ${experienceId}`);
-    if (caller.scope !== "publish" && !meta.latestPublishedVersion) throw notFound(`experience ${experienceId}`);
+    // Readers need something published, unless they ask for a specific (possibly archived) version.
+    if (caller.scope !== "publish" && !meta.latestPublishedVersion && !requestedVersion) throw notFound(`experience ${experienceId}`);
 
     let version: VersionDetail | null = null;
     const target = requestedVersion ?? meta.latestPublishedVersion ?? undefined;
@@ -180,7 +184,7 @@ export class AlchemyService {
     if (!meta) throw notFound(`experience ${experienceId}`);
     const rows = await this.store.query<BaseItem>(ddb.experiencePk(experienceId), "VER#");
     let versions = rows.filter((r) => r.entityType === "EXPERIENCE_VERSION") as VersionItem[];
-    if (caller.scope !== "publish") versions = versions.filter((v) => v.status === "PUBLISHED");
+    if (caller.scope !== "publish") versions = versions.filter((v) => isImmutable(v.status));
     if (caller.scope !== "publish" && versions.length === 0) throw notFound(`experience ${experienceId}`);
     return { experienceId, items: versions.map(toVersionSummary) };
   }
@@ -305,6 +309,7 @@ export class AlchemyService {
         status: existing?.status ?? "DRAFT",
         latestVersion: existing?.latestVersion ?? null,
         latestPublishedVersion: existing?.latestPublishedVersion ?? null,
+        latestPublishedAt: existing?.latestPublishedAt ?? null,
         createdAt: existing?.createdAt ?? now,
         updatedAt: now,
       },
@@ -363,6 +368,7 @@ export class AlchemyService {
       s3Prefix: prefix,
       manifestSha256: md!.sha256,
       manifestSizeBytes: md!.sizeBytes,
+      digests,
       now,
       actor: caller.actor,
       existing: existing?.version,
@@ -379,6 +385,7 @@ export class AlchemyService {
       status: meta?.status ?? "DRAFT",
       latestVersion: !meta?.latestVersion || compareSemver(m.version, meta.latestVersion) > 0 ? m.version : meta.latestVersion,
       latestPublishedVersion: meta?.latestPublishedVersion ?? null,
+      latestPublishedAt: meta?.latestPublishedAt ?? null,
       createdAt: meta?.createdAt ?? now,
       updatedAt: now,
     });
@@ -467,6 +474,7 @@ export class AlchemyService {
       status: "PUBLISHED",
       latestVersion: !meta?.latestVersion || compareSemver(v.version, meta.latestVersion) > 0 ? v.version : meta.latestVersion,
       latestPublishedVersion: v.version,
+      latestPublishedAt: now,
       createdAt: meta?.createdAt ?? now,
       updatedAt: now,
     });
@@ -542,7 +550,13 @@ export class AlchemyService {
           .filter((x) => x.status === "PUBLISHED" && x.version !== version)
           .sort((x, y) => compareSemver(y.version, x.version));
         const next = remaining[0]?.version ?? null;
-        const rolled: ExperienceMetaItem = { ...meta, latestPublishedVersion: next, status: next ? "PUBLISHED" : "ARCHIVED", updatedAt: now };
+        const rolled: ExperienceMetaItem = {
+          ...meta,
+          latestPublishedVersion: next,
+          latestPublishedAt: remaining[0]?.publishedAt ?? null,
+          status: next ? "PUBLISHED" : "ARCHIVED",
+          updatedAt: now,
+        };
         items.push(rolled);
       }
     }

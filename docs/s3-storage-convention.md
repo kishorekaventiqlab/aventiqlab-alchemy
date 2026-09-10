@@ -53,7 +53,7 @@ different prefix; the exact prefix is recorded on the `EXPERIENCE_VERSION` row (
 - Versioning **on**. Published objects are never overwritten by the API (the version is immutable), so noncurrent versions only arise from re-uploaded *drafts*; they expire after 90 days. Incomplete multipart uploads abort after 7 days.
 - `RemovalPolicy.RETAIN`: deleting the stack never deletes content.
 - Object ownership `BucketOwnerEnforced` (no ACLs).
-- CORS: `GET, HEAD` from `alchemy:allowedOrigins` (context, default `*`) so a browser can play a presigned video. Presigned URLs are the authorisation; CORS only tells the browser it may read the response. Tighten to the platform's origin(s) once known.
+- CORS: `GET, HEAD` from `alchemy:allowedOrigins` (cdk.json context; default `https://aventiqlab.com`, `https://www.aventiqlab.com`, `http://localhost:3000`) so a browser can play a presigned video. Presigned URLs are the authorisation; CORS only tells the browser it may read the response. **The platform's Amplify Hosting `*.amplifyapp.com` origin is not recorded in either repo and must be added by the operator before deploy.** Only browser-side artifact fetches need CORS; every metadata call is Lambda-to-API.
 
 ## Immutability
 

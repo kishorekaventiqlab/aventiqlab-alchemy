@@ -121,6 +121,8 @@ After deploy, read the two token values from Secrets Manager (outputs `ReadToken
 ## Assumptions and decisions
 
 - **Assumption:** region `ap-south-1`, matching the previous stack and the `alchemy-developer` profile. Change via `cdk.json` context.
+- **Assumption:** browser origins for presigned video playback are `https://aventiqlab.com`, `https://www.aventiqlab.com`, `http://localhost:3000` (from the platform session). The Amplify Hosting `*.amplifyapp.com` origin must be added to `alchemy:allowedOrigins` by the operator.
+- **Decision (with the platform session):** learner→version pinning is the platform's job; Alchemy keeps every PUBLISHED and ARCHIVED version resolvable by `?version=` and exposes `contentHash` + `latestPublishedAt` so the platform can detect newer versions without diffing manifests.
 - **Decision:** CDK TypeScript, not Amplify. Amplify is a platform-side choice and drags in Cognito/AppSync.
 - **Decision:** REST API (v1) rather than HTTP API, because the brief asked for REST and the REQUEST authorizer + usage/throttle settings are simplest there. Migration to HTTP API later is a CDK-only change; the router is transport-agnostic.
 - **Decision:** the CLI holds **no AWS credentials**. All writes go through the API + presigned PUTs. A "publishing IAM role" therefore exists only as the API Lambda's role; see [security model](./security-model.md).

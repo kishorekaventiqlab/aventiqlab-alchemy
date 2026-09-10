@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validManifest } from "./__fixtures__/manifest.js";
-import { artifactItems, publicationItem, skillEdgeItems, skillItem, toArtifactRef, versionItem } from "./ddb-items.js";
+import { artifactItems, contentHash, publicationItem, skillEdgeItems, skillItem, toArtifactRef, versionItem } from "./ddb-items.js";
 import { versionPrefix } from "./keys.js";
 
 const now = "2026-09-10T12:00:00.000Z";
@@ -9,17 +9,16 @@ const now = "2026-09-10T12:00:00.000Z";
 test("version + artifact + edge items share the experience partition and the version SK prefix", () => {
   const m = validManifest();
   const prefix = versionPrefix(m.domain, m.level, m.experienceId, m.version);
-  const v = versionItem(m, { s3Prefix: prefix, manifestSha256: "ab", manifestSizeBytes: 2, now, actor: "publisher" });
+  const digests = m.artifacts.map((a) => ({ artifactId: a.artifactId, sha256: "0".repeat(64), sizeBytes: 10 }));
+  const v = versionItem(m, { s3Prefix: prefix, manifestSha256: "ab", manifestSizeBytes: 2, digests, now, actor: "publisher" });
   assert.equal(v.status, "DRAFT");
+  assert.match(v.contentHash, /^[a-f0-9]{64}$/);
+  assert.equal(contentHash("ab", [...digests].reverse()), v.contentHash, "content hash is order-independent");
+  assert.notEqual(contentHash("ac", digests), v.contentHash);
   assert.equal(v.statusHistory[0]?.to, "DRAFT");
   assert.deepEqual(v.skillIds, ["availability-zones", "aws-regions", "cloud-computing-basics"]);
 
-  const arts = artifactItems(
-    m,
-    m.artifacts.map((a) => ({ artifactId: a.artifactId, sha256: "0".repeat(64), sizeBytes: 10 })),
-    prefix,
-    now,
-  );
+  const arts = artifactItems(m, digests, prefix, now);
   assert.equal(arts.length, 3);
   for (const a of arts) {
     assert.equal(a.PK, v.PK);

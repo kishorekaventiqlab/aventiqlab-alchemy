@@ -38,6 +38,8 @@ export interface ExperienceSummary {
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   latestVersion: string | null;
   latestPublishedVersion: string | null;
+  /** publishedAt of latestPublishedVersion. Lets a consumer holding a pinned version detect a newer one. */
+  latestPublishedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -62,6 +64,11 @@ export interface VersionSummary {
   version: string;
   status: VersionStatus;
   s3Prefix: string;
+  /**
+   * Stable identity of this version's bytes: sha256 over the manifest digest and every
+   * artifact digest. Same content => same hash; acts as an ETag for the version.
+   */
+  contentHash: string;
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;

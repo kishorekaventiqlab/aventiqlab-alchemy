@@ -8,6 +8,6 @@
     "alchemy:account": "880636108741",
     "alchemy:region": "ap-south-1",
     "alchemy:stage": "prod",
-    "alchemy:allowedOrigins": ["*"]
+    "alchemy:allowedOrigins": ["https://aventiqlab.com", "https://www.aventiqlab.com", "http://localhost:3000"]
   }
 }

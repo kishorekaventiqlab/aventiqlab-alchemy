@@ -3,6 +3,7 @@
  * marshals them). Keeping them here means the item shape is testable without
  * AWS and documented in one place — see docs/dynamodb-data-model.md.
  */
+import { createHash } from "node:crypto";
 import type { ArtifactRef, ExperienceSummary, VersionSummary } from "./api-contract.js";
 import { ddb, ENTITY } from "./keys.js";
 import { referencedSkillIds } from "./validate.js";
@@ -33,6 +34,7 @@ export interface ExperienceMetaItem extends BaseItem {
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   latestVersion: string | null;
   latestPublishedVersion: string | null;
+  latestPublishedAt: string | null;
 }
 
 export interface VersionItem extends BaseItem {
@@ -44,6 +46,7 @@ export interface VersionItem extends BaseItem {
   manifest: Manifest;
   manifestSha256: string;
   manifestSizeBytes: number;
+  contentHash: string;
   artifactCount: number;
   skillIds: string[];
   prerequisiteIds: string[];
@@ -102,7 +105,14 @@ export interface PublicationItem extends BaseItem {
 
 export function experienceMetaItem(
   m: Pick<Manifest, "experienceId" | "title" | "summary" | "domain" | "category" | "level" | "difficulty" | "tags">,
-  state: { status: ExperienceMetaItem["status"]; latestVersion: string | null; latestPublishedVersion: string | null; createdAt: string; updatedAt: string },
+  state: {
+    status: ExperienceMetaItem["status"];
+    latestVersion: string | null;
+    latestPublishedVersion: string | null;
+    latestPublishedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+  },
 ): ExperienceMetaItem {
   return {
     PK: ddb.experiencePk(m.experienceId),
@@ -122,9 +132,17 @@ export function experienceMetaItem(
   };
 }
 
+/** Stable identity of a version's bytes. Order-independent over artifacts. */
+export function contentHash(manifestSha256: string, digests: ArtifactDigest[]): string {
+  const h = createHash("sha256");
+  h.update(`manifest:${manifestSha256}\n`);
+  for (const d of [...digests].sort((a, b) => a.artifactId.localeCompare(b.artifactId))) h.update(`${d.artifactId}:${d.sha256}\n`);
+  return h.digest("hex");
+}
+
 export function versionItem(
   m: Manifest,
-  args: { s3Prefix: string; manifestSha256: string; manifestSizeBytes: number; now: string; actor: string; existing?: VersionItem },
+  args: { s3Prefix: string; manifestSha256: string; manifestSizeBytes: number; digests: ArtifactDigest[]; now: string; actor: string; existing?: VersionItem },
 ): VersionItem {
   const status: VersionStatus = args.existing?.status ?? "DRAFT";
   const history = args.existing?.statusHistory ?? [{ from: null, to: "DRAFT" as const, at: args.now, actor: args.actor }];
@@ -139,6 +157,7 @@ export function versionItem(
     manifest: m,
     manifestSha256: args.manifestSha256,
     manifestSizeBytes: args.manifestSizeBytes,
+    contentHash: contentHash(args.manifestSha256, args.digests),
     artifactCount: m.artifacts.length,
     skillIds: referencedSkillIds(m),
     prerequisiteIds: m.prerequisites.map((p) => p.experienceId),
@@ -264,6 +283,7 @@ export function toExperienceSummary(i: ExperienceMetaItem): ExperienceSummary {
     status: i.status,
     latestVersion: i.latestVersion,
     latestPublishedVersion: i.latestPublishedVersion,
+    latestPublishedAt: i.latestPublishedAt ?? null,
     createdAt: i.createdAt,
     updatedAt: i.updatedAt,
   };
@@ -275,6 +295,7 @@ export function toVersionSummary(i: VersionItem): VersionSummary {
     version: i.version,
     status: i.status,
     s3Prefix: i.s3Prefix,
+    contentHash: i.contentHash,
     createdAt: i.createdAt,
     updatedAt: i.updatedAt,
   };

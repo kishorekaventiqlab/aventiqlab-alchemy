@@ -93,7 +93,10 @@ describe("desktop -> package -> validate -> publish -> deliver", () => {
     const exp = await svc.getExperience(id, undefined, reader);
     assert.equal(exp.experience.status, "PUBLISHED");
     assert.equal(exp.experience.latestPublishedVersion, "1.0.0");
+    assert.equal(exp.experience.latestPublishedAt, pub.publishedAt);
     assert.equal(exp.version?.version, "1.0.0");
+    assert.match(exp.version?.contentHash ?? "", /^[a-f0-9]{64}$/);
+    assert.equal(exp.version?.publishedAt, pub.publishedAt);
     assert.deepEqual(exp.version?.manifest.skills.taught.map((s) => s.skillId), ["aws-regions", "availability-zones", "edge-locations", "aws-accounts"]);
     assert.equal(exp.version?.manifest.prerequisites[0]?.experienceId, "cloud-computing-basics");
     assert.equal(exp.version?.manifest.learningObjectives.length, 4);
@@ -141,15 +144,28 @@ describe("desktop -> package -> validate -> publish -> deliver", () => {
     await svc.setVersionStatus(id, "1.1.0", { status: "APPROVED", note: "LGTM" }, publisher);
     const pub2 = await svc.publish({ experienceId: id, version: "1.1.0" }, publisher);
     assert.equal(pub2.previousPublishedVersion, "1.0.0");
-    assert.equal((await svc.getExperience(id, undefined, reader)).version?.version, "1.1.0");
+    const latest = await svc.getExperience(id, undefined, reader);
+    assert.equal(latest.version?.version, "1.1.0");
+    assert.equal(latest.experience.latestPublishedAt, pub2.publishedAt);
+    // a learner pinned to 1.0.0 can detect the newer version from the catalog row alone
+    const pinned = await svc.getExperience(id, "1.0.0", reader);
+    assert.equal(pinned.version?.version, "1.0.0");
+    assert.equal(pinned.version?.contentHash, (await svc.getVersion(id, "1.0.0", reader)).contentHash, "contentHash is stable across reads");
+    assert.ok(pinned.experience.latestPublishedVersion !== pinned.version?.version);
     assert.deepEqual((await svc.getVersion(id, "1.1.0", reader)).statusHistory.map((h) => h.to), ["DRAFT", "SUBMITTED", "APPROVED", "PUBLISHED"]);
 
-    // archiving the latest rolls the pointer back
+    // archiving the latest rolls the pointer back, but a pinned reader can still resolve the archived version
     await svc.setVersionStatus(id, "1.1.0", { status: "ARCHIVED" }, publisher);
     const after = await svc.getExperience(id, undefined, reader);
     assert.equal(after.experience.latestPublishedVersion, "1.0.0");
-    await rejects(svc.getVersion(id, "1.1.0", reader), 404, "not_found");
-    assert.equal((await svc.getVersion(id, "1.1.0", publisher)).status, "ARCHIVED");
+    assert.equal(after.experience.latestPublishedAt, pub.publishedAt);
+    assert.equal((await svc.getVersion(id, "1.1.0", reader)).status, "ARCHIVED");
+    assert.equal((await svc.getExperience(id, "1.1.0", reader)).version?.status, "ARCHIVED");
+    assert.equal((await svc.getContent(id, "1.1.0", undefined, reader)).status, "ARCHIVED");
+    assert.deepEqual((await svc.listVersions(id, reader)).items.map((v) => v.status), ["PUBLISHED", "ARCHIVED"]);
+    // ...but archived versions are never routed to as "latest" or via skill lookups
+    assert.deepEqual((await svc.skillExperiences("aws-regions", "TAUGHT", reader)).items.map((i) => i.version), ["1.0.0"]);
+    await rejects(svc.getVersion(id, "1.1.0", { scope: "read", actor: "x" }).then(() => svc.getExperience("no-such", undefined, reader)), 404, "not_found");
   });
 
   test("publish refuses when uploads are missing or tampered", async () => {

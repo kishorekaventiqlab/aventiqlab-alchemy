@@ -42,9 +42,15 @@ version's `statusHistory` and writes a `PUBLICATION` row.
 **Decision (MVP):** `/publish` accepts DRAFT, SUBMITTED or APPROVED because there is no reviewer role yet.
 When one exists, tighten `TRANSITIONS` so only APPROVED → PUBLISHED is allowed; no data changes.
 
-**Decision:** archiving the latest published version rolls `latestPublishedVersion` back to the newest remaining
-published version (or marks the experience ARCHIVED if none remain). Archived versions stay fetchable by
-publishers for audit but are invisible to readers.
+**Decision:** archiving the latest published version rolls `latestPublishedVersion` / `latestPublishedAt` back
+to the newest remaining published version (or marks the experience ARCHIVED if none remain).
+
+**Decision (agreed with the platform session, 2026-09-10):** ARCHIVED versions remain readable by
+`?version=` for read-scope callers, because the platform pins in-flight learners to the version they enrolled
+on and must honour that pin after retirement. ARCHIVED is excluded from listings, from "latest", and from
+`GET /skills/{id}/experiences`, so nobody is ever routed *to* a retired version. The platform detects "a newer
+version exists" from `experience.latestPublishedVersion` / `latestPublishedAt`, and `version.contentHash` is
+the stable identity of the bytes a learner was served.
 
 ## Known limitation
 
