@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://alchemy.aventiqlab.com/schemas/skill.schema.json",
+  "title": "Alchemy Skill",
+  "description": "A node in the skill graph. Alchemy stores and serves skills; ASTRA reasons over them. See docs/skill-metadata-schema.md and docs/future-astra-integration-contract.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["skillId", "name", "domain", "description", "competencyLevels", "assessmentDimensions"],
+  "properties": {
+    "skillId": { "$ref": "#/definitions/slug" },
+    "name": { "type": "string", "minLength": 2, "maxLength": 120 },
+    "domain": { "$ref": "#/definitions/slug" },
+    "description": { "type": "string", "minLength": 10, "maxLength": 1500 },
+    "parentSkill": { "$ref": "#/definitions/slug" },
+    "childSkills": { "type": "array", "items": { "$ref": "#/definitions/slug" }, "uniqueItems": true },
+    "aliases": { "type": "array", "items": { "type": "string", "maxLength": 80 }, "uniqueItems": true },
+    "competencyLevels": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Which levels are meaningful for this skill and what each looks like. A descriptor per level lets ASTRA phrase probes and score evidence consistently.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["level", "descriptor"],
+        "properties": {
+          "level": { "$ref": "#/definitions/competencyLevel" },
+          "descriptor": { "type": "string", "minLength": 10, "maxLength": 400 },
+          "indicators": { "type": "array", "items": { "type": "string", "maxLength": 300 } }
+        }
+      }
+    },
+    "assessmentDimensions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/definitions/assessmentDimension" }
+    },
+    "tags": { "type": "array", "items": { "$ref": "#/definitions/slug" }, "uniqueItems": true },
+    "status": { "type": "string", "enum": ["ACTIVE", "DEPRECATED"], "default": "ACTIVE" },
+    "replacedBy": { "$ref": "#/definitions/slug" },
+    "externalRefs": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "maxLength": 200 },
+      "description": "Cross-references into other taxonomies (e.g. AventiqLab capability-catalog ids, SFIA codes)."
+    }
+  },
+  "definitions": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "maxLength": 80 },
+    "competencyLevel": {
+      "type": "string",
+      "enum": ["exposure", "knowledge", "hands_on", "production", "architecture"]
+    },
+    "assessmentDimension": {
+      "type": "string",
+      "enum": ["KNOW", "UNDERSTAND", "BUILD", "OPERATE", "TROUBLESHOOT", "DESIGN", "EXPLAIN"]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "evaluatorId": "aws-global-infrastructure-evaluator",
+  "schemaVersion": "1",
+  "title": "Reasoning about placement",
+  "format": "conversational",
+  "skillIds": ["aws-regions", "availability-zones"],
+  "prompts": [
+    {
+      "id": "p1",
+      "question": "You are asked to pick a Region for a new customer-facing app whose users are 80% in Germany and whose data is subject to GDPR. Walk me through how you would decide, and what you would check before committing.",
+      "dimension": "UNDERSTAND",
+      "skillIds": ["aws-regions"],
+      "rubric": [
+        { "level": "exposure", "indicators": ["Names a Region in Europe.", "Mentions latency or data location in passing."] },
+        { "level": "knowledge", "indicators": ["Orders compliance before latency before service availability and cost.", "Says they would confirm the needed services exist in the candidate Region.", "Notes that Frankfurt (eu-central-1) is the obvious first candidate and why."] },
+        { "level": "hands_on", "indicators": ["Describes having actually compared service availability or pricing across Regions for a real decision.", "Mentions a concrete gotcha they hit, such as a service or instance type missing in a Region."] }
+      ]
+    },
+    {
+      "id": "p2",
+      "question": "A colleague says their app is 'highly available because it runs in ap-south-1, which has three Availability Zones'. What would you ask them, and what would convince you they are right?",
+      "dimension": "EXPLAIN",
+      "skillIds": ["availability-zones"],
+      "rubric": [
+        { "level": "exposure", "indicators": ["Knows an AZ is a separate data centre site."] },
+        { "level": "knowledge", "indicators": ["Asks whether the workload's components are actually deployed across more than one AZ, not just whether the Region has them.", "Distinguishes the Region having AZs from the workload using them.", "Mentions load balancer subnets, database Multi-AZ, or instance placement as the things to check."] },
+        { "level": "production", "indicators": ["Describes having tested an AZ failure or run a game day.", "Mentions AZ-ID mapping or cross-account AZ coordination unprompted."] }
+      ]
+    }
+  ]
+}

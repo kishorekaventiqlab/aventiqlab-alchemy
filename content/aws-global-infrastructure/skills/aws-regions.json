@@ -1,0 +1,16 @@
+{
+  "skillId": "aws-regions",
+  "name": "AWS Regions",
+  "domain": "aws",
+  "description": "What an AWS Region is, how Regions are isolated from each other, which services are regional versus global, and how to choose a Region on compliance, latency, service availability and cost.",
+  "parentSkill": "aws-global-infrastructure",
+  "aliases": ["regions", "region selection"],
+  "competencyLevels": [
+    { "level": "exposure", "descriptor": "Can say that a Region is a geographic cluster of data centres with a code like ap-south-1." },
+    { "level": "knowledge", "descriptor": "Can pick a Region for a workload and justify it on compliance, latency, service availability and cost, in that order.", "indicators": ["Distinguishes regional from global services.", "Knows Regions are independent of each other."] },
+    { "level": "hands_on", "descriptor": "Has deployed to more than one Region and dealt with a service or quota missing in one of them." },
+    { "level": "architecture", "descriptor": "Designs multi-Region active/active or DR topologies with explicit RTO/RPO reasoning." }
+  ],
+  "assessmentDimensions": ["KNOW", "UNDERSTAND", "DESIGN"],
+  "tags": ["aws", "foundations"]
+}

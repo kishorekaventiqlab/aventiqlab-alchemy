@@ -1,0 +1,9 @@
+node_modules/
+dist/
+cdk.out/
+*.log
+.env
+.env.local
+.DS_Store
+# Publish-time scratch written by the CLI
+.alchemy-publish/

@@ -1,0 +1,16 @@
+{
+  "skillId": "availability-zones",
+  "name": "Availability Zones",
+  "domain": "aws",
+  "description": "What an Availability Zone is, how AZs isolate failure within a Region, why production workloads span at least two, and how per-account AZ name mapping affects cross-account coordination.",
+  "parentSkill": "aws-global-infrastructure",
+  "aliases": ["azs", "multi-az"],
+  "competencyLevels": [
+    { "level": "exposure", "descriptor": "Can say an AZ is an isolated site inside a Region." },
+    { "level": "knowledge", "descriptor": "Can explain why a workload must span two AZs and check whether a given design actually does.", "indicators": ["Checks load balancer subnets, database Multi-AZ, and instance spread.", "Knows AZ names map differently per account."] },
+    { "level": "hands_on", "descriptor": "Has built a multi-AZ deployment and verified it survives stopping one AZ's instances." },
+    { "level": "production", "descriptor": "Has run or responded to an AZ failure or game day in production." }
+  ],
+  "assessmentDimensions": ["KNOW", "UNDERSTAND", "BUILD", "OPERATE"],
+  "tags": ["aws", "foundations", "resilience"]
+}

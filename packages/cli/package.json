@@ -1,0 +1,20 @@
+{
+  "name": "@aventiqlab/alchemy-cli",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "`alchemy validate` and `alchemy publish` \u2014 local desktop -> Alchemy API. Holds no AWS credentials.",
+  "bin": {
+    "alchemy": "./src/cli.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test $(find src -name '*.test.ts')"
+  },
+  "dependencies": {
+    "@aventiqlab/alchemy-core": "0.2.0"
+  },
+  "devDependencies": {
+    "@aventiqlab/alchemy-api": "0.2.0"
+  }
+}

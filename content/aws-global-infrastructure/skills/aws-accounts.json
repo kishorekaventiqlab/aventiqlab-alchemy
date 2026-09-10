@@ -1,0 +1,16 @@
+{
+  "skillId": "aws-accounts",
+  "name": "AWS Accounts",
+  "domain": "aws",
+  "description": "What an AWS account scopes (resources, identity, billing), why organisations run many accounts to limit blast radius, and how AWS Organizations groups them.",
+  "parentSkill": "aws-global-infrastructure",
+  "aliases": ["multi-account", "aws organizations"],
+  "competencyLevels": [
+    { "level": "exposure", "descriptor": "Can say an account is the container for resources and the bill." },
+    { "level": "knowledge", "descriptor": "Can explain why dev and prod live in separate accounts and what AWS Organizations adds." },
+    { "level": "hands_on", "descriptor": "Has worked across multiple accounts using roles rather than shared credentials." },
+    { "level": "architecture", "descriptor": "Designs an account structure (OUs, SCPs, landing zone) for an organisation." }
+  ],
+  "assessmentDimensions": ["KNOW", "UNDERSTAND", "DESIGN"],
+  "tags": ["aws", "foundations", "governance"]
+}

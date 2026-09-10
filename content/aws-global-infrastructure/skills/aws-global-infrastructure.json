@@ -1,0 +1,18 @@
+{
+  "skillId": "aws-global-infrastructure",
+  "name": "AWS Global Infrastructure",
+  "domain": "aws",
+  "description": "Understanding how AWS is physically and logically organised: Regions, Availability Zones, edge locations and accounts, and how those boundaries shape placement, resilience and compliance decisions.",
+  "parentSkill": "cloud-foundations",
+  "childSkills": ["aws-regions", "availability-zones", "edge-locations", "aws-accounts"],
+  "aliases": ["aws infrastructure", "aws global footprint"],
+  "competencyLevels": [
+    { "level": "exposure", "descriptor": "Can name Regions, AZs and edge locations and say roughly what each is for." },
+    { "level": "knowledge", "descriptor": "Can explain how the four concepts relate and choose placement for a simple workload with justification." },
+    { "level": "hands_on", "descriptor": "Has deployed a workload across multiple AZs and picked a Region for a real constraint." },
+    { "level": "production", "descriptor": "Has operated multi-AZ or multi-Region systems and handled an AZ or Region event." },
+    { "level": "architecture", "descriptor": "Designs multi-account, multi-Region topologies balancing isolation, latency, compliance and cost." }
+  ],
+  "assessmentDimensions": ["KNOW", "UNDERSTAND", "DESIGN"],
+  "tags": ["aws", "foundations"]
+}

@@ -1,0 +1,24 @@
+{
+  "arenaDefinitionId": "aws-global-infrastructure-az-failure",
+  "schemaVersion": "1",
+  "title": "Survive an Availability Zone failure",
+  "estimatedMinutes": 40,
+  "skillIds": ["availability-zones"],
+  "runtime": {
+    "provider": "arena",
+    "contractVersion": "battle-runtime-v1",
+    "specRef": {
+      "path": "arena/battle-spec.json",
+      "note": "Not shipped in this package. Alchemy stores the definition only; the battle-runtime spec is authored with the platform's battle-infra generator and executed by Arena in its own account."
+    },
+    "scenario": {
+      "startingState": "A two-tier web app runs on one EC2 instance in a single subnet behind an Application Load Balancer that only has one subnet attached.",
+      "mission": "Make the application survive the loss of its Availability Zone without changing the application code.",
+      "successConditions": [
+        "The ALB has subnets in at least two Availability Zones.",
+        "At least one healthy target exists in each of two Availability Zones.",
+        "The app answers HTTP 200 while the original AZ's instances are stopped."
+      ]
+    }
+  }
+}
