@@ -13,7 +13,9 @@ desktop ── alchemy publish ./pkg ──▶ API Gateway + Lambda ──▶ S3
 AventiqLab ── GET /experiences/{id}/content ──▶ presigned URLs ──▶ learner's browser
 ```
 
-AWS account `880636108741` (aventiqlab-alchemy-prod), region `ap-south-1`. **Not yet deployed.**
+AWS account `880636108741` (aventiqlab-alchemy-prod), region `ap-south-1`. **Deployed 2026-09-11** as stack
+`AlchemyFoundation-prod`: `https://d88yfid0i9.execute-api.ap-south-1.amazonaws.com/v1/`. Tokens live in Secrets
+Manager `alchemy/prod/read-token` and `alchemy/prod/publish-token` in that account.
 
 ## Status
 
@@ -22,11 +24,11 @@ AWS account `880636108741` (aventiqlab-alchemy-prod), region `ap-south-1`. **Not
 | 1 Inspect repository | done |
 | 2 Schemas + contracts | done — `schemas/`, `docs/` |
 | 3 DynamoDB access patterns + model | done — [docs/dynamodb-data-model.md](docs/dynamodb-data-model.md) |
-| 4–6 S3, DynamoDB, Lambda + API Gateway (CDK) | built, `cdk synth` clean, **not deployed** |
+| 4–6 S3, DynamoDB, Lambda + API Gateway (CDK) | **deployed** 2026-09-11, stack `AlchemyFoundation-prod` |
 | 7 Package validator | done — `alchemy validate` |
 | 8 Publishing CLI | done — `alchemy publish` |
 | 9 Sample experience | done — [`content/aws-global-infrastructure/`](content/aws-global-infrastructure/) |
-| 10 End-to-end test | done offline (`packages/cli/src/publish.test.ts`); live run pending deploy |
+| 10 End-to-end test | done offline (`packages/cli/src/publish.test.ts`) **and live**: `aws-global-infrastructure@1.0.0` is published and served |
 
 ## Documentation
 
