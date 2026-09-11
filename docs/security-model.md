@@ -61,7 +61,7 @@ per-consumer limits are needed.
 ## Resource inventory
 
 `cdk synth` for stage `prod` produces **36 resources** in account `880636108741`, region `ap-south-1`.
-Nothing is deployed until explicitly confirmed.
+Deployed 2026-09-11 as stack `AlchemyFoundation-prod` after explicit confirmation. Re-deploys (e.g. to add a CORS origin) follow the same rule.
 
 | Type | Count | Names |
 |---|---|---|

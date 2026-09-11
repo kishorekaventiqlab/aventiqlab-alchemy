@@ -10,7 +10,7 @@ Verbs: **store, index, version, validate, publish, deliver.** Read `docs/adr/000
 - **No learner data.** No accounts, progress, paths, payments, recommendations.
 - **Allowed AWS services:** S3, DynamoDB, API Gateway REST, Lambda, Secrets Manager, IAM, CloudWatch Logs. `packages/infra/test` fails if ECS/EKS/RDS/OpenSearch/Step Functions/EventBridge/AppSync/CloudFront/Bedrock/SageMaker/Cognito appear.
 - **Own account only:** `880636108741` ap-south-1, via `--profile alchemy-developer`. This machine's default profile is the *platform* account (`071564566254`) — never deploy with it.
-- **Never deploy without listing the resources and getting explicit confirmation.** `archive/pre-cleanup` must stay intact.
+- **Never deploy without listing the resources and getting explicit confirmation.** Stack `AlchemyFoundation-prod` exists since 2026-09-11; `cdk diff` first. `archive/pre-cleanup` must stay intact.
 
 ## Layout and conventions
 

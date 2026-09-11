@@ -102,7 +102,8 @@ instead of AWS mocking libraries, CDK v2 in TypeScript with account/region pinne
 
 ## Deploying
 
-**Nothing has been deployed.** Deploying creates the 36 CloudFormation resources listed in
+**Deployed 2026-09-11** as `AlchemyFoundation-prod` (API `https://d88yfid0i9.execute-api.ap-south-1.amazonaws.com/v1/`).
+A deploy creates or updates the 36 CloudFormation resources listed in
 [the security model, §"Resource inventory"](./security-model.md#resource-inventory) in account `880636108741`.
 Requires the `alchemy-developer` AWS profile (the machine's default profile is the *platform* account).
 
